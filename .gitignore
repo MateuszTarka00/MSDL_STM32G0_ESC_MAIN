@@ -1,0 +1,17 @@
+# Ignore build output and binaries
+/build/
+/Debug/
+/Release/
+*.o
+*.elf
+*.bin
+*.hex
+
+# STM32CubeIDE workspace files
+.settings/
+*.launch
+*.ioc
+
+# OS junk
+.DS_Store
+Thumbs.db
