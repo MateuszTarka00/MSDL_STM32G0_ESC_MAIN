@@ -58,12 +58,30 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
-#define BUZZER_OUT_Pin GPIO_PIN_9
-#define BUZZER_OUT_GPIO_Port GPIOB
+#define SAFETY_C4_Pin GPIO_PIN_9
+#define SAFETY_C4_GPIO_Port GPIOB
+#define SAFETY_C5_Pin GPIO_PIN_10
+#define SAFETY_C5_GPIO_Port GPIOC
+#define SAFETY_C6_Pin GPIO_PIN_11
+#define SAFETY_C6_GPIO_Port GPIOC
+#define SAFETY_C7_Pin GPIO_PIN_4
+#define SAFETY_C7_GPIO_Port GPIOE
+#define SAFETY_C8_Pin GPIO_PIN_5
+#define SAFETY_C8_GPIO_Port GPIOE
 #define CAN_FAULT_Pin GPIO_PIN_4
 #define CAN_FAULT_GPIO_Port GPIOA
 #define CAN_OK_Pin GPIO_PIN_5
 #define CAN_OK_GPIO_Port GPIOA
+#define SAFETY_END_Pin GPIO_PIN_12
+#define SAFETY_END_GPIO_Port GPIOD
+#define IN_FREQ_Pin GPIO_PIN_9
+#define IN_FREQ_GPIO_Port GPIOC
+#define IN_THERMAL_Pin GPIO_PIN_4
+#define IN_THERMAL_GPIO_Port GPIOD
+#define CHECK_UP_Pin GPIO_PIN_10
+#define CHECK_UP_GPIO_Port GPIOF
+#define CHECK_DOWN_Pin GPIO_PIN_11
+#define CHECK_DOWN_GPIO_Port GPIOF
 #define INSPECTION_MODE_Pin GPIO_PIN_12
 #define INSPECTION_MODE_GPIO_Port GPIOF
 #define INVERTER_FWD_Pin GPIO_PIN_13
@@ -82,6 +100,12 @@ void Error_Handler(void);
 #define SIGNAL_RED_GPIO_Port GPIOE
 #define SIGNAL_GREEN_Pin GPIO_PIN_3
 #define SIGNAL_GREEN_GPIO_Port GPIOE
+#define SAFETY_C1_Pin GPIO_PIN_6
+#define SAFETY_C1_GPIO_Port GPIOB
+#define SAFETY_C2_Pin GPIO_PIN_7
+#define SAFETY_C2_GPIO_Port GPIOB
+#define SAFETY_C3_Pin GPIO_PIN_8
+#define SAFETY_C3_GPIO_Port GPIOB
 /* USER CODE BEGIN Private defines */
 
 /* USER CODE END Private defines */
