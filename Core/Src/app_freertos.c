@@ -48,19 +48,33 @@
 /* USER CODE BEGIN Variables */
 
 /* USER CODE END Variables */
-/* Definitions for InputCheckT */
-osThreadId_t InputCheckTHandle;
-const osThreadAttr_t InputCheckT_attributes = {
-  .name = "InputCheckT",
+/* Definitions for safetyCheckT */
+osThreadId_t safetyCheckTHandle;
+const osThreadAttr_t safetyCheckT_attributes = {
+  .name = "safetyCheckT",
   .priority = (osPriority_t) osPriorityNormal2,
   .stack_size = 512 * 4
 };
-/* Definitions for CanMenagerT */
-osThreadId_t CanMenagerTHandle;
-const osThreadAttr_t CanMenagerT_attributes = {
-  .name = "CanMenagerT",
+/* Definitions for canMenagerT */
+osThreadId_t canMenagerTHandle;
+const osThreadAttr_t canMenagerT_attributes = {
+  .name = "canMenagerT",
   .priority = (osPriority_t) osPriorityNormal3,
   .stack_size = 1024 * 4
+};
+/* Definitions for displayTaskT */
+osThreadId_t displayTaskTHandle;
+const osThreadAttr_t displayTaskT_attributes = {
+  .name = "displayTaskT",
+  .priority = (osPriority_t) osPriorityNormal,
+  .stack_size = 512 * 4
+};
+/* Definitions for engineControlT */
+osThreadId_t engineControlTHandle;
+const osThreadAttr_t engineControlT_attributes = {
+  .name = "engineControlT",
+  .priority = (osPriority_t) osPriorityNormal1,
+  .stack_size = 128 * 4
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -68,8 +82,10 @@ const osThreadAttr_t CanMenagerT_attributes = {
 
 /* USER CODE END FunctionPrototypes */
 
-void InputCheck(void *argument);
-void CanMenager(void *argument);
+void safetyCheck(void *argument);
+void canMenager(void *argument);
+void displayTask(void *argument);
+void engineControl(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -164,11 +180,17 @@ void MX_FREERTOS_Init(void) {
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of InputCheckT */
-  InputCheckTHandle = osThreadNew(InputCheck, NULL, &InputCheckT_attributes);
+  /* creation of safetyCheckT */
+  safetyCheckTHandle = osThreadNew(safetyCheck, NULL, &safetyCheckT_attributes);
 
-  /* creation of CanMenagerT */
-  CanMenagerTHandle = osThreadNew(CanMenager, NULL, &CanMenagerT_attributes);
+  /* creation of canMenagerT */
+  canMenagerTHandle = osThreadNew(canMenager, NULL, &canMenagerT_attributes);
+
+  /* creation of displayTaskT */
+  displayTaskTHandle = osThreadNew(displayTask, NULL, &displayTaskT_attributes);
+
+  /* creation of engineControlT */
+  engineControlTHandle = osThreadNew(engineControl, NULL, &engineControlT_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -180,40 +202,76 @@ void MX_FREERTOS_Init(void) {
 
 }
 
-/* USER CODE BEGIN Header_InputCheck */
+/* USER CODE BEGIN Header_safetyCheck */
 /**
-  * @brief  Function implementing the InputCheckT thread.
+  * @brief  Function implementing the safetyCheckT thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_InputCheck */
-void InputCheck(void *argument)
+/* USER CODE END Header_safetyCheck */
+void safetyCheck(void *argument)
 {
-  /* USER CODE BEGIN InputCheck */
+  /* USER CODE BEGIN safetyCheck */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END InputCheck */
+  /* USER CODE END safetyCheck */
 }
 
-/* USER CODE BEGIN Header_CanMenager */
+/* USER CODE BEGIN Header_canMenager */
 /**
-* @brief Function implementing the CanMenagerT thread.
+* @brief Function implementing the canMenagerT thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_CanMenager */
-void CanMenager(void *argument)
+/* USER CODE END Header_canMenager */
+void canMenager(void *argument)
 {
-  /* USER CODE BEGIN CanMenager */
+  /* USER CODE BEGIN canMenager */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END CanMenager */
+  /* USER CODE END canMenager */
+}
+
+/* USER CODE BEGIN Header_displayTask */
+/**
+* @brief Function implementing the displayTaskT thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_displayTask */
+void displayTask(void *argument)
+{
+  /* USER CODE BEGIN displayTask */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END displayTask */
+}
+
+/* USER CODE BEGIN Header_engineControl */
+/**
+* @brief Function implementing the engineControlT thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_engineControl */
+void engineControl(void *argument)
+{
+  /* USER CODE BEGIN engineControl */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END engineControl */
 }
 
 /* Private application code --------------------------------------------------*/
