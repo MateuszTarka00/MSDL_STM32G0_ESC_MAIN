@@ -7,23 +7,6 @@
 
 #include "safetyCircuit.h"
 
-#define SAFETY_C1_Pin GPIO_PIN_6
-#define SAFETY_C1_GPIO_Port GPIOB
-#define SAFETY_C2_Pin GPIO_PIN_7
-#define SAFETY_C2_GPIO_Port GPIOB
-#define SAFETY_C3_Pin GPIO_PIN_8
-#define SAFETY_C3_GPIO_Port GPIOB
-#define SAFETY_C4_Pin GPIO_PIN_9
-#define SAFETY_C4_GPIO_Port GPIOB
-#define SAFETY_C5_Pin GPIO_PIN_10
-#define SAFETY_C5_GPIO_Port GPIOC
-#define SAFETY_C6_Pin GPIO_PIN_11
-#define SAFETY_C6_GPIO_Port GPIOC
-#define SAFETY_C7_Pin GPIO_PIN_4
-#define SAFETY_C7_GPIO_Port GPIOE
-#define SAFETY_C8_Pin GPIO_PIN_5
-#define SAFETY_C8_GPIO_Port GPIOE
-
 SafetyCircuitPoint safetyCircuitPoint = 0;
 
 const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =
@@ -50,7 +33,7 @@ SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
 {
 	for(uint8_t i = 0; i < NUMBER_OF_CIRCUITS_POINTS; ++i)
 	{
-		if(HAL_GPIO_ReadPin(safetyCircuitPoints[i].port, safetyCircuitPoints[i].port) == BROKEN_CIRCUIT_POINT)
+		if(HAL_GPIO_ReadPin(safetyCircuitPoints[i].port, safetyCircuitPoints[i].pin) == BROKEN_CIRCUIT_POINT)
 		{
 			return i;
 		}
