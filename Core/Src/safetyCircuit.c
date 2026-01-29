@@ -8,6 +8,7 @@
 #include "safetyCircuit.h"
 
 SafetyCircuitPoint safetyCircuitPoint = 0;
+static volatile bool safetyCircuitState = FALSE;
 
 const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =
 {
@@ -26,7 +27,8 @@ const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =
 
 bool checkSafetyCircuitState(void)
 {
-	return HAL_GPIO_ReadPin(SAFETY_END_GPIO_Port, SAFETY_END_Pin);
+	safetyCircuitState = HAL_GPIO_ReadPin(SAFETY_END_GPIO_Port, SAFETY_END_Pin);
+	return safetyCircuitState;
 }
 
 SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
@@ -39,4 +41,9 @@ SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
 		}
 	}
 	return SAFETY_CIRCUIT_ERROR;
+}
+
+void setSafetyCircuitStateOutput(void)
+{
+	HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, safetyCircuitState);
 }

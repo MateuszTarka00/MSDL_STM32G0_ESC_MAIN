@@ -30,7 +30,8 @@ typedef enum
 	LEFT_HANDRAIL_INLET,
 	STEP_DECLINE,
 	RESERVE,
-	SAFETY_CIRCUIT_ERROR
+	SAFETY_CIRCUIT_ERROR,
+	SAFETY_CIRCUIT_UNBROKEN
 }SafetyCircuitPoint;
 
 extern const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS];
@@ -38,5 +39,6 @@ extern SafetyCircuitPoint safetyCircuitPoint;
 
 bool checkSafetyCircuitState(void);
 SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void);
+void setSafetyCircuitStateOutput(void);
 
 #endif /* INC_SAFETYCIRCUIT_H_ */

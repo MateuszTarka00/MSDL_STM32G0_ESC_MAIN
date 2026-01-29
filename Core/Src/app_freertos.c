@@ -26,7 +26,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "safetyCircuit.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -215,7 +215,17 @@ void safetyCheck(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+	  if(checkSafetyCircuitState())
+	  {
+		  safetyCircuitPoint = checkBrokenSafetyCircuitPoint();
+	  }
+	  else
+	  {
+		  safetyCircuitPoint = SAFETY_CIRCUIT_UNBROKEN;
+	  }
+
+	  setSafetyCircuitStateOutput();
+	  osDelay(1);
   }
   /* USER CODE END safetyCheck */
 }
