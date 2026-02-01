@@ -9,6 +9,10 @@
 #define INC_ENGINEFUNCTIONS_H_
 
 #include "main.h"
+#include "softwareTimer_ms.h"
+
+#define FREQUENCY_ERROR_RANGE 	1
+#define FAST_SPEED_TIME_MS		60000
 
 extern volatile uint32_t engineRotationTemporary;
 extern volatile uint32_t handrailRotationTemporary;
@@ -31,7 +35,13 @@ extern RotationsPerMinute rotationsPerMinuteReal;
 extern RotationsPerMinute rotationsPerMinuteGiven;
 
 void initEngineTimers(void);
-void saveMeasuredRotationsValueTimerCallback(void);
+void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMinute);
 void incrementRotationsNumber(uint16_t GPIO_Pin);
+void enableFastSpeed(void);
+bool checkTargetFrequencyReached(void);
+bool checkSetFrequency(void);
+bool checkErrorRange(uint32_t real, uint32_t given);
+bool checkIsHumanOnStairs(void);
+
 
 #endif /* INC_ENGINEFUNCTIONS_H_ */

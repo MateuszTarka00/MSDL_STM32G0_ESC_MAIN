@@ -47,7 +47,11 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
+#define __HAL_GPIO_EXTI_DISABLE_IT(__EXTI_LINE__) \
+  (EXTI->IMR1 &= ~(__EXTI_LINE__))
 
+#define __HAL_GPIO_EXTI_ENABLE_IT(__EXTI_LINE__) \
+  (EXTI->IMR1 |= (__EXTI_LINE__))
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

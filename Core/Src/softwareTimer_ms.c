@@ -119,7 +119,6 @@ void timersHandler(void)
 
 			if(temp->timerHandler->ticks == temp->timerHandler->period)
 			{
-//				((void (*)(void))temp->timerHandler->callback)(temp->timerHandler->param);
 				temp->timerHandler->callback(temp->timerHandler->param);
 
 				if(!temp->timerHandler->repeat)
