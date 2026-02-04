@@ -11,8 +11,10 @@
 #include "main.h"
 #include "softwareTimer_ms.h"
 
-#define FREQUENCY_ERROR_RANGE 	1
-#define FAST_SPEED_TIME_MS		60000
+#define FREQUENCY_ERROR_RANGE 			1
+#define FAST_SPEED_TIME_MS				60000
+#define SPEED_CHANGE_TIMEOUT_MS			10000
+#define CHAIN_MOTOR_ERROR_TIMEOUT_MS 	1000
 
 extern volatile uint32_t engineRotationTemporary;
 extern volatile uint32_t handrailRotationTemporary;
@@ -38,6 +40,7 @@ void initEngineTimers(void);
 void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMinute);
 void incrementRotationsNumber(uint16_t GPIO_Pin);
 void enableFastSpeed(void);
+void enableSlowSpeed(void);
 bool checkTargetFrequencyReached(void);
 bool checkSetFrequency(void);
 bool checkErrorRange(uint32_t real, uint32_t given);

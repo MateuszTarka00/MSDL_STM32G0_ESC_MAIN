@@ -15,6 +15,8 @@ volatile uint32_t stepRotationTemporary = 0;
 static volatile bool highSpeedSet = FALSE;
 
 static SoftwareTimerHandler fastSpeedTimer;
+static SoftwareTimerHandler speedChangeTimer;
+static SoftwareTimerHandler chainMotorErrorTimer;
 
 RotationsPerMinute rotationsPerMinuteReal =
 {
@@ -30,15 +32,43 @@ RotationsPerMinute rotationsPerMinuteGiven =
 		{0, 0}
 };
 
+static bool getChainMotorState(void);
+
 static void fastSpeedTimerCallback(void * Param)
 {
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, TRUE);
 }
 
+static void speedChangeTimeoutCallback(void)
+{
+	if(!checkTargetFrequencyReached())
+	{
+		highSpeedSet = FALSE;
+		HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
+		HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
+	}
+}
+
+static void chainMotorErrorCallback(void)
+{
+	if(!getChainMotorState())
+	{
+		highSpeedSet = FALSE;
+		HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
+		HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
+	}
+}
+
 void initEngineTimers(void)
 {
+	deInitSoftwareTimer(&fastSpeedTimer);
+	deInitSoftwareTimer(&speedChangeTimer);
+	deInitSoftwareTimer(&chainMotorErrorTimer);
+
 	initSoftwareTimer(&fastSpeedTimer, FAST_SPEED_TIME_MS, fastSpeedTimerCallback, FALSE, 0);
+	initSoftwareTimer(&speedChangeTimer, SPEED_CHANGE_TIMEOUT_MS, fastSpeedTimerCallback, FALSE, 0);
+	initSoftwareTimer(&chainMotorErrorTimer, CHAIN_MOTOR_ERROR_TIMEOUT_MS, fastSpeedTimerCallback, FALSE, 0);
 }
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
@@ -143,11 +173,37 @@ bool checkIsHumanOnStairs(void)
 void enableFastSpeed(void)
 {
 	highSpeedSet = TRUE;
-	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
+	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 
 	startSoftwareTimer(&fastSpeedTimer);
+	startSoftwareTimer(&speedChangeTimer);
 }
 
+void enableSlowSpeed(void)
+{
+	highSpeedSet = TRUE;
+	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
+	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, TRUE);
+
+	startSoftwareTimer(&speedChangeTimer);
+}
+
+void checkChainMotorOK(void)
+{
+	if(!getChainMotorState())
+	{
+		startSoftwareTimer(&chainMotorErrorTimer);
+	}
+	else
+	{
+		stopSoftwareTimer(&chainMotorErrorTimer);
+	}
+}
+
+static bool getChainMotorState(void)
+{
+	return(HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin));
+}
 
 
