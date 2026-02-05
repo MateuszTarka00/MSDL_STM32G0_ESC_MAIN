@@ -57,9 +57,9 @@ bool getInverterControl(void)
 	return HAL_GPIO_ReadPin(INVERTER_CONTROL_GPIO_Port, INVERTER_CONTROL_Pin);
 }
 
-bool getStandControl(void)
+bool getReleaseControl(void)
 {
-	return HAL_GPIO_ReadPin(STAND_CONTROL_GPIO_Port, STAND_CONTROL_Pin);
+	return HAL_GPIO_ReadPin(RELEASE_CONTROL_GPIO_Port, RELEASE_CONTROL_Pin);
 }
 
 bool getStarTriangleControl(void)

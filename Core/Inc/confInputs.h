@@ -18,9 +18,8 @@ bool getContractorsControl(void);
 bool getStopTimeControl(bool number);
 bool getAutoStopControl(void);
 bool getInverterControl(void);
-bool getStandControl(void);
+bool getReleaseControl(void);
 bool getStarTriangleControl(void);
 bool getLockerControl(void);
-
 
 #endif /* INC_CONFINPUTS_H_ */
