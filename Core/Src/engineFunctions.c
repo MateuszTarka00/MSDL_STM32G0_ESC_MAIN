@@ -7,6 +7,7 @@
 
 
 #include "engineFunctions.h"
+#include "confInputs.h"
 
 volatile uint32_t engineRotationTemporary = 0;
 volatile uint32_t handrailRotationTemporary = 0;
@@ -67,8 +68,8 @@ void initEngineTimers(void)
 	deInitSoftwareTimer(&chainMotorErrorTimer);
 
 	initSoftwareTimer(&fastSpeedTimer, FAST_SPEED_TIME_MS, fastSpeedTimerCallback, FALSE, 0);
-	initSoftwareTimer(&speedChangeTimer, SPEED_CHANGE_TIMEOUT_MS, fastSpeedTimerCallback, FALSE, 0);
-	initSoftwareTimer(&chainMotorErrorTimer, CHAIN_MOTOR_ERROR_TIMEOUT_MS, fastSpeedTimerCallback, FALSE, 0);
+	initSoftwareTimer(&speedChangeTimer, SPEED_CHANGE_TIMEOUT_MS, speedChangeTimeoutCallback, FALSE, 0);
+	initSoftwareTimer(&chainMotorErrorTimer, CHAIN_MOTOR_ERROR_TIMEOUT_MS, chainMotorErrorCallback, FALSE, 0);
 }
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
@@ -133,12 +134,11 @@ bool checkTargetFrequencyReached(void)
 
 bool checkSetFrequency(void)
 {
-
 	if(highSpeedSet)
 	{
-		if(	checkErrorRange(rotationsPerMinuteReal.engine.fastTime,  rotationsPerMinuteGiven.engine.fastTime) &&
-			checkErrorRange(rotationsPerMinuteReal.handrail.fastTime, rotationsPerMinuteGiven.handrail.fastTime) &&
-			checkErrorRange(rotationsPerMinuteReal.step.fastTime, rotationsPerMinuteGiven.step.fastTime))
+		if(	(checkErrorRange(rotationsPerMinuteReal.engine.fastTime,  rotationsPerMinuteGiven.engine.fastTime) || getRotationControl()) &&
+			(checkErrorRange(rotationsPerMinuteReal.handrail.fastTime, rotationsPerMinuteGiven.handrail.fastTime) || getHandrailControl()) &&
+			(checkErrorRange(rotationsPerMinuteReal.step.fastTime, rotationsPerMinuteGiven.step.fastTime) || getStandControl()))
 		{
 			return TRUE;
 		}
