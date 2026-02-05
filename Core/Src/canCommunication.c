@@ -12,6 +12,7 @@
 static volatile uint16_t myID = MASTER_ID;
 
 static uint32_t FDCAN_BytesToDLC(uint8_t len);
+static uint8_t devicesNumber = 0;
 
 void FDCAN_Send(uint16_t id, uint8_t *data, uint8_t len)
 {
@@ -33,17 +34,6 @@ void FDCAN_Send(uint16_t id, uint8_t *data, uint8_t len)
     HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader, data);
 }
 
-void recognitionActionTX(void)
-{
-	RecognitionActionTX recognitionActionTX;
-
-	recognitionActionTX.actionID = RECOGNITION_ACTION;
-	memset(recognitionActionTX.data, 0, sizeof(recognitionActionTX.data));
-
-	FDCAN_Send(myID, recognitionActionTX.data, RECOGNITION_ACTION_SIZE);
-
-}
-
 static uint32_t FDCAN_BytesToDLC(uint8_t len)
 {
     switch (len)
@@ -59,4 +49,106 @@ static uint32_t FDCAN_BytesToDLC(uint8_t len)
         case 8: return FDCAN_DLC_BYTES_8;
         default: return FDCAN_DLC_BYTES_8; // safety fallback
     }
+}
+
+static uint8_t FDCAN_DLCToBytes(uint32_t dlc)
+{
+    switch (dlc)
+    {
+        case FDCAN_DLC_BYTES_0: return 0;
+        case FDCAN_DLC_BYTES_1: return 1;
+        case FDCAN_DLC_BYTES_2: return 2;
+        case FDCAN_DLC_BYTES_3: return 3;
+        case FDCAN_DLC_BYTES_4: return 4;
+        case FDCAN_DLC_BYTES_5: return 5;
+        case FDCAN_DLC_BYTES_6: return 6;
+        case FDCAN_DLC_BYTES_7: return 7;
+        case FDCAN_DLC_BYTES_8: return 8;
+        default: return 8; // safety fallback
+    }
+}
+
+//Send message to all modules to get acknowlage connected modules
+void recognitionActionTx(void)
+{
+	RecognitionActionStructureTx message;
+	message.actionID = RECOGNITION_ACTION;
+
+	FDCAN_Send(myID, (uint8_t *)&message, RECOGNITION_ACTION_SIZE);
+}
+
+void recognitionActionRx(uint16_t id, RecognitionActionStructureRx *data)
+{
+	for(uint8_t i = 0; i < devicesNumber; i++)
+	{
+		if(canDevices[0].deviceID == id)
+		{
+			//TODO write two devices error excepction
+		}
+	}
+
+	canDevices[devicesNumber].deviceID = id;
+	canDevices[devicesNumber].deviceConnected = TRUE;
+	canDevices[devicesNumber].deviceAlive = TRUE;
+}
+
+void heartBitEmergencyActionTx(void)
+{
+	HeartBitEmergencyActionStructureTx message;
+	message.actionID = HEART_BIT_ACTION;
+
+	for(uint8_t i = 0; i < devicesNumber; i++)
+	{
+		if(canDevices[i].deviceAlive == FALSE)
+		{
+			message.deviceID = canDevices[i].deviceID;
+			FDCAN_Send(myID, (uint8_t *) &message, HEARTBIT_ACTION_STRUCTURE_LEN);
+		}
+	}
+}
+
+void heartBitActionRx(uint16_t id, HeartBitActionStructureRx *data, uint8_t len)
+{
+	for(uint8_t i = 0; i < devicesNumber; i++)
+	{
+		if(canDevices[i].deviceID == id)
+		{
+			canDevices[i].deviceConnected = TRUE;
+			canDevices[i].deviceAlive = TRUE;
+			//TODO add heartbit emergency timer restart
+			return;
+		}
+	}
+}
+
+void parameterSetActionTx(uint16_t parameterID, uint16_t deviceID, uint16_t value)
+{
+	ParameterActionSetStructureTx message;
+	message.actionID = PARAMETR_SET_ACTION;
+	message.deviceID = deviceID;
+	message.parameterID = parameterID;
+	message.value = value;
+
+	FDCAN_Send(myID, (uint8_t *) &message, PARAMETER_ACTION_SET_TX_LEN);
+}
+
+void parameterSetActionRx(uint16_t id, ParameterActionSetStructureRx *data, uint8_t len)
+{
+	//todo add parameter ack set callback
+}
+
+void parameterGetActionTx(uint16_t parameterID, uint16_t deviceID)
+{
+	ParameterActionGetStructureTx message;
+	message.actionID = PARAMETR_GET_ACTION;
+	message.deviceID = deviceID;
+	message.parameterID = parameterID;
+
+	FDCAN_Send(myID, (uint8_t *) &message, PARAMETER_ACTION_GET_TX_LEN);
+
+}
+
+void parameterGetActionRx(uint16_t id, ParameterActionGetStructureRx *data, uint8_t len)
+{
+	//TODO add parameter set value
 }
