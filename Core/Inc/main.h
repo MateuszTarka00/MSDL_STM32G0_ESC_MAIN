@@ -132,6 +132,10 @@ void Error_Handler(void);
 #define LCD_DC_GPIO_Port GPIOA
 #define SAFETY_END_Pin GPIO_PIN_12
 #define SAFETY_END_GPIO_Port GPIOD
+#define LCD_RST_Pin GPIO_PIN_10
+#define LCD_RST_GPIO_Port GPIOA
+#define LCD_BKL_Pin GPIO_PIN_8
+#define LCD_BKL_GPIO_Port GPIOF
 #define HUMAN_UP_Pin GPIO_PIN_8
 #define HUMAN_UP_GPIO_Port GPIOC
 #define IN_FREQ_Pin GPIO_PIN_9

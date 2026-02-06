@@ -30,6 +30,8 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "softwareTimer_ms.h"
+#include "externalWatchdog.h"
+#include "st7789.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,7 +101,7 @@ int main(void)
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-
+  initWatchdogTimerInit();
   /* USER CODE END 2 */
 
   /* Init scheduler */

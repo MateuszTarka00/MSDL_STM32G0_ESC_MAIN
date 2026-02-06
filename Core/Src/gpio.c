@@ -53,13 +53,13 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, K1_EN_Pin|CAN_FAULT_Pin|CAN_OK_Pin|TEACH_OUTPUT_Pin
-                          |LCD_CS_Pin|LCD_DC_Pin, GPIO_PIN_RESET);
+                          |LCD_CS_Pin|LCD_DC_Pin|LCD_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(WATCHDOG_OUT_GPIO_Port, WATCHDOG_OUT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(INVERTER_FWD_GPIO_Port, INVERTER_FWD_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOF, LCD_BKL_Pin|INVERTER_FWD_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOB, INVERTER_REV_Pin|LOW_SPEED_Pin|HIGH_SPEED_Pin, GPIO_PIN_RESET);
@@ -100,9 +100,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin PAPin PAPin
-                           PAPin PAPin */
+                           PAPin PAPin PAPin */
   GPIO_InitStruct.Pin = K1_EN_Pin|CAN_FAULT_Pin|CAN_OK_Pin|TEACH_OUTPUT_Pin
-                          |LCD_CS_Pin|LCD_DC_Pin;
+                          |LCD_CS_Pin|LCD_DC_Pin|LCD_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -139,6 +139,13 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PFPin PFPin */
+  GPIO_InitStruct.Pin = LCD_BKL_Pin|INVERTER_FWD_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PDPin PDPin PDPin */
   GPIO_InitStruct.Pin = BUTTON_UP_Pin|BUTTON_DOWN_Pin|BUTTON_ESC_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
@@ -150,13 +157,6 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(BUTTON_OK_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : PtPin */
-  GPIO_InitStruct.Pin = INVERTER_FWD_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(INVERTER_FWD_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PBPin PBPin PBPin */
   GPIO_InitStruct.Pin = INVERTER_REV_Pin|LOW_SPEED_Pin|HIGH_SPEED_Pin;
