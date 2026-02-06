@@ -22,5 +22,6 @@ void whatchdogTimerHandler(void *param)
 void initWatchdogTimerInit(void)
 {
 	initSoftwareTimer(&externalWatchdogTimer, WHATCHDOG_TIME_MS, whatchdogTimerHandler, TRUE, 0);
+	startSoftwareTimer(&externalWatchdogTimer);
 }
 
