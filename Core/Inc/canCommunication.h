@@ -24,11 +24,13 @@
 #define DEVICES_MAX_NUMBER				16
 
 #define HEARTBIT_ACTION_STRUCTURE_LEN 	4
-
 #define PARAMETER_ACTION_GET_TX_LEN		6
 #define PARAMETER_ACTION_GET_RX_LEN		8
 #define PARAMETER_ACTION_SET_TX_LEN		8
 #define PARAMETER_ACTION_SET_RX_LEN		8
+
+#define REQEST_QUEUE_SIZE  				8
+#define PARAMETER_TIMEOUT_MS 			100
 
 typedef struct{
 	uint16_t deviceID;
@@ -83,6 +85,13 @@ typedef struct{
 	uint16_t value;
 }ParameterActionGetStructureRx;
 
+typedef struct
+{
+    uint8_t  nodeId;
+    uint16_t parameterId;
+    uint32_t timestamp;
+} CanRequestStructure; //todo create parameters structures
+
 void FDCAN_Send(uint16_t id, uint8_t *data, uint8_t len);
 void recognitionActionTx(void);
 void recognitionActionRx(uint16_t id, RecognitionActionStructureRx *data);
@@ -92,6 +101,7 @@ void parameterSetActionTx(uint16_t parameterID, uint16_t deviceID, uint16_t valu
 void parameterSetActionRx(uint16_t id, ParameterActionSetStructureRx *data, uint8_t len);
 void parameterGetActionTx(uint16_t parameterID, uint16_t deviceID);
 void parameterGetActionRx(uint16_t id, ParameterActionGetStructureRx *data, uint8_t len);
+void initHeartBitTimers(void);
 
 
 #endif /* INC_CANCOMMUNICATION_H_ */

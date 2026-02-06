@@ -8,11 +8,21 @@
 #include "canCommunication.h"
 #include "fdcan.h"
 #include "string.h"
+#include "softwareTimer_ms.h"
+
+#define HEARTBIT_TIMER_LOST_TIME_MS			2000
+#define HEARTBIT_TIMER_EMERGANCY_TIME_MS	100
 
 static volatile uint16_t myID = MASTER_ID;
 
 static uint32_t FDCAN_BytesToDLC(uint8_t len);
 static uint8_t devicesNumber = 0;
+
+static SoftwareTimerHandler canDevicesHeartBitLostTimer[DEVICES_MAX_NUMBER];
+static SoftwareTimerHandler sendEmergencyHeartBitTimer;
+
+static void canDevicesHeartBitLostTimerHandler(void *param);
+static void sendEmergencyHeartBitTimerHandler(void *param);
 
 void FDCAN_Send(uint16_t id, uint8_t *data, uint8_t len)
 {
@@ -152,3 +162,62 @@ void parameterGetActionRx(uint16_t id, ParameterActionGetStructureRx *data, uint
 {
 	//TODO add parameter set value
 }
+
+static void canDevicesHeartBitLostTimerHandler(void *param)
+{
+	uint16_t *deviceID = (uint16_t *)param;
+
+	for(uint8_t i = 0; i < devicesNumber; i++)
+	{
+		if(canDevices[i].deviceID == *deviceID)
+		{
+			if(canDevices[i].deviceAlive == FALSE)
+			{
+				canDevices[i].deviceConnected = FALSE;
+			}
+			else
+			{
+				canDevices[i].deviceAlive = FALSE;
+			}
+			return;
+		}
+	}
+}
+
+static void sendEmergencyHeartBitTimerHandler(void *param)
+{
+	HeartBitEmergencyActionStructureTx message;
+
+	for(uint8_t i = 0; i < devicesNumber; i++)
+	{
+		if(canDevices[i].deviceAlive == FALSE)
+		{
+			message.actionID = HEART_BIT_ACTION;
+			message.deviceID = canDevices[i].deviceID;
+
+			FDCAN_Send(myID, (uint8_t *) &message, HEARTBIT_ACTION_STRUCTURE_LEN);
+		}
+	}
+}
+
+void initHeartBitTimers(void)
+{
+	if(devicesNumber == 0)
+		return;
+
+	initSoftwareTimer(&sendEmergencyHeartBitTimer, HEARTBIT_TIMER_EMERGANCY_TIME_MS, sendEmergencyHeartBitTimerHandler, TRUE, 0);
+
+	for(uint8_t i = 0; i < devicesNumber; i++)
+	{
+		initSoftwareTimer(&canDevicesHeartBitLostTimer, HEARTBIT_TIMER_LOST_TIME_MS, canDevicesHeartBitLostTimerHandler, TRUE, &canDevices[i].deviceID);
+	}
+}
+
+
+
+
+
+
+
+
+
