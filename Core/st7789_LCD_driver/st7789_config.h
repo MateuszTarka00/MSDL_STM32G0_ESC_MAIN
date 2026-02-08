@@ -9,7 +9,7 @@
 #define ST7789_LCD_DRIVER_ST7789_CONFIG_H_
 
 /* choose display dimensions */
-#define USING_320X240
+#define USING_480X240
 
 /* choose display rotation */
 #define ST7789_ROTATION 0

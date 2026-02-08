@@ -124,6 +124,8 @@ void Error_Handler(void);
 #define ROTATION_S1_GPIO_Port GPIOE
 #define LCD_SCK_Pin GPIO_PIN_13
 #define LCD_SCK_GPIO_Port GPIOB
+#define LCD_MISO_Pin GPIO_PIN_14
+#define LCD_MISO_GPIO_Port GPIOB
 #define LCD_MOSI_Pin GPIO_PIN_15
 #define LCD_MOSI_GPIO_Port GPIOB
 #define LCD_CS_Pin GPIO_PIN_8

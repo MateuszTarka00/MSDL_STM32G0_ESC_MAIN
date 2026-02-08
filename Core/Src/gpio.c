@@ -53,16 +53,19 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOA, K1_EN_Pin|CAN_FAULT_Pin|CAN_OK_Pin|TEACH_OUTPUT_Pin
-                          |LCD_CS_Pin|LCD_DC_Pin|LCD_RST_Pin, GPIO_PIN_RESET);
+                          |LCD_DC_Pin|LCD_RST_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(WATCHDOG_OUT_GPIO_Port, WATCHDOG_OUT_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOF, LCD_BKL_Pin|INVERTER_FWD_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, LCD_MISO_Pin|INVERTER_REV_Pin|LOW_SPEED_Pin|HIGH_SPEED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, INVERTER_REV_Pin|LOW_SPEED_Pin|HIGH_SPEED_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(LCD_CS_GPIO_Port, LCD_CS_Pin, GPIO_PIN_SET);
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOF, LCD_BKL_Pin|INVERTER_FWD_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOE, CUSTOM_OUT_Pin|TOEBOARD_LIGHT_Pin|SIGNAL_RED_Pin|SIGNAL_GREEN_Pin, GPIO_PIN_RESET);
@@ -77,10 +80,10 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PCPin PCPin PCPin PCPin
                            PCPin PCPin PCPin PCPin
-                           PCPin PCPin */
+                           PCPin */
   GPIO_InitStruct.Pin = SAFETY_C5_Pin|SAFETY_C6_Pin|STOP_TIME2_CONTROL_Pin|STOP_TIME1_CONTROL_Pin
                           |CONTACTORS_CONTROL_Pin|AUTOSTOP_CONTROL_Pin|INVERTER_CONTROL_Pin|ACK_CONT_Pin
-                          |HUMAN_UP_Pin|IN_FREQ_Pin;
+                          |HUMAN_UP_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
@@ -100,9 +103,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PAPin PAPin PAPin PAPin
-                           PAPin PAPin PAPin */
+                           PAPin */
   GPIO_InitStruct.Pin = K1_EN_Pin|CAN_FAULT_Pin|CAN_OK_Pin|TEACH_OUTPUT_Pin
-                          |LCD_CS_Pin|LCD_DC_Pin|LCD_RST_Pin;
+                          |LCD_RST_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -133,6 +136,27 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = LCD_MISO_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(LCD_MISO_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = LCD_CS_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(LCD_CS_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = LCD_DC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_PULLDOWN;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(LCD_DC_GPIO_Port, &GPIO_InitStruct);
+
   /*Configure GPIO pins : PDPin PDPin */
   GPIO_InitStruct.Pin = SAFETY_END_Pin|IN_THERMAL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
@@ -145,6 +169,12 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PtPin */
+  GPIO_InitStruct.Pin = IN_FREQ_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(IN_FREQ_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PDPin PDPin PDPin */
   GPIO_InitStruct.Pin = BUTTON_UP_Pin|BUTTON_DOWN_Pin|BUTTON_ESC_Pin;

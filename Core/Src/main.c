@@ -97,11 +97,17 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN2_Init();
   MX_TIM14_Init();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-  initWatchdogTimerInit();
+  HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
+  ST7789_Init();
+  HAL_Delay(2000);
+  ST7789_Fill_Color(YELLOW);
+
+  HAL_TIM_Base_Start_IT(&htim17);
+  initWatchdogTimerInit(); //todo add tim17 start function
   /* USER CODE END 2 */
 
   /* Init scheduler */

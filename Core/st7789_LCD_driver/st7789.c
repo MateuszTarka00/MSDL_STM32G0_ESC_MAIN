@@ -9,6 +9,7 @@ uint16_t DMA_MIN_SIZE = 16;
  * Then you can specify the framebuffer size to the full resolution below.
  */
 #define HOR_LEN     5   //  Mind the resolution of your screen!
+__attribute__((aligned(4)))
 uint16_t disp_buf[ST7789_WIDTH * HOR_LEN];
 #endif
 
@@ -36,26 +37,21 @@ static void ST7789_WriteData(uint8_t *buff, size_t buff_size)
     ST7789_Select();
     ST7789_DC_Set();
 
-    // split data in small chunks because HAL can't send more than 64K at once
-
-    while (buff_size > 0) {
-        uint16_t chunk_size = buff_size > 65535 ? 65535 : buff_size;
 #ifdef USE_DMA
-        if (DMA_MIN_SIZE <= buff_size)
-                {
-            HAL_SPI_Transmit_DMA(&ST7789_SPI_PORT, buff, chunk_size);
-            while (ST7789_SPI_PORT.hdmatx->State != HAL_DMA_STATE_READY)
-            {
-            }
-        }
-        else
-            HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, chunk_size, HAL_MAX_DELAY);
-#else
-            HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, chunk_size, HAL_MAX_DELAY);
-        #endif
-        buff += chunk_size;
+    size_t offset = 0;
+    while (buff_size > 0)
+    {
+        uint16_t chunk_size = buff_size > 65535 ? 65535 : buff_size;
+
+        HAL_SPI_Transmit_DMA(&ST7789_SPI_PORT, buff + offset, chunk_size);
+        while (ST7789_SPI_PORT.hdmatx->State != HAL_DMA_STATE_READY) { }
+
         buff_size -= chunk_size;
+        offset += chunk_size;
     }
+#else
+    HAL_SPI_Transmit(&ST7789_SPI_PORT, buff, buff_size, HAL_MAX_DELAY);
+#endif
 
     ST7789_UnSelect();
 }
@@ -167,9 +163,9 @@ void ST7789_Init(void)
 #ifdef USE_DMA
     memset(disp_buf, 0, sizeof(disp_buf));
 #endif
-    HAL_Delay(50);
+    HAL_Delay(100);
     ST7789_RST_Clr();
-    HAL_Delay(50);
+    HAL_Delay(100);
     ST7789_RST_Set();
     HAL_Delay(200);
 
@@ -216,10 +212,12 @@ void ST7789_Init(void)
     ST7789_WriteCommand(ST7789_INVON);      //  Inversion ON
     ST7789_WriteCommand(ST7789_SLPOUT); //  Out of sleep mode
     ST7789_WriteCommand(ST7789_NORON);      //  Normal Display on
+
+    HAL_Delay(120);
+
     ST7789_WriteCommand(ST7789_DISPON); //  Main screen turned on
 
-    //HAL_Delay(50);
-    ST7789_Fill_Color(BLACK);               //  Fill with Black.
+    ST7789_Fill_Color(BRRED);               //  Fill with Black.
 }
 
 /**
@@ -243,6 +241,7 @@ void ST7789_Fill_Color(uint16_t color)
     // The LSB/MSB order here depends on what fixes the issue in step 1.
     // Let's assume you need to swap bytes:
     uint16_t swapped_color = (color << 8) | (color >> 8);
+//    rows = (i + HOR_LEN <= ST7789_HEIGHT) ? HOR_LEN : (ST7789_HEIGHT - i);
 
     for (i = 0; i < ST7789_HEIGHT / HOR_LEN; i++) {
         // Correctly fill the uint16_t buffer word-by-word
