@@ -103,8 +103,6 @@ int main(void)
   /* USER CODE BEGIN 2 */
   HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
   ST7789_Init();
-  HAL_Delay(2000);
-  ST7789_Fill_Color(YELLOW);
 
   HAL_TIM_Base_Start_IT(&htim17);
   initWatchdogTimerInit(); //todo add tim17 start function

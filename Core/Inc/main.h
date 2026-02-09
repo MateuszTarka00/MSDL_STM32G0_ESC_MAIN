@@ -29,6 +29,7 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g0xx_hal.h"
+#include "cmsis_os2.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -112,16 +113,20 @@ void Error_Handler(void);
 #define CHAIN_MOT_GPIO_Port GPIOB
 #define MIS_ST2_Pin GPIO_PIN_1
 #define MIS_ST2_GPIO_Port GPIOB
+#define MIS_ST2_EXTI_IRQn EXTI0_1_IRQn
 #define MIS_ST1_Pin GPIO_PIN_2
 #define MIS_ST1_GPIO_Port GPIOB
+#define MIS_ST1_EXTI_IRQn EXTI2_3_IRQn
 #define LOCKER_IN2_Pin GPIO_PIN_6
 #define LOCKER_IN2_GPIO_Port GPIOF
 #define LOCKER_IN1_Pin GPIO_PIN_7
 #define LOCKER_IN1_GPIO_Port GPIOF
 #define ROTATION_H1_Pin GPIO_PIN_8
 #define ROTATION_H1_GPIO_Port GPIOE
+#define ROTATION_H1_EXTI_IRQn EXTI4_15_IRQn
 #define ROTATION_S1_Pin GPIO_PIN_11
 #define ROTATION_S1_GPIO_Port GPIOE
+#define ROTATION_S1_EXTI_IRQn EXTI4_15_IRQn
 #define LCD_SCK_Pin GPIO_PIN_13
 #define LCD_SCK_GPIO_Port GPIOB
 #define LCD_MISO_Pin GPIO_PIN_14
@@ -146,12 +151,16 @@ void Error_Handler(void);
 #define IN_THERMAL_GPIO_Port GPIOD
 #define BUTTON_UP_Pin GPIO_PIN_5
 #define BUTTON_UP_GPIO_Port GPIOD
+#define BUTTON_UP_EXTI_IRQn EXTI4_15_IRQn
 #define BUTTON_DOWN_Pin GPIO_PIN_6
 #define BUTTON_DOWN_GPIO_Port GPIOD
+#define BUTTON_DOWN_EXTI_IRQn EXTI4_15_IRQn
 #define BUTTON_ESC_Pin GPIO_PIN_7
 #define BUTTON_ESC_GPIO_Port GPIOD
+#define BUTTON_ESC_EXTI_IRQn EXTI4_15_IRQn
 #define BUTTON_OK_Pin GPIO_PIN_9
 #define BUTTON_OK_GPIO_Port GPIOF
+#define BUTTON_OK_EXTI_IRQn EXTI4_15_IRQn
 #define CHECK_UP_Pin GPIO_PIN_10
 #define CHECK_UP_GPIO_Port GPIOF
 #define CHECK_DOWN_Pin GPIO_PIN_11
@@ -186,6 +195,8 @@ typedef enum
 	FALSE,
 	TRUE
 }bool;
+
+extern osThreadId_t displayTaskTHandle;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

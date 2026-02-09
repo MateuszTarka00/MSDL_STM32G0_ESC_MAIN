@@ -27,6 +27,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "safetyCircuit.h"
+#include "buttonsFunctions.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -261,6 +262,7 @@ void displayTask(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	buttonsSubTask();
     osDelay(1);
   }
   /* USER CODE END displayTask */
