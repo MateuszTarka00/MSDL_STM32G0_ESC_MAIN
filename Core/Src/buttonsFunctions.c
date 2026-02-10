@@ -6,6 +6,7 @@
  */
 
 #include "buttonsFunctions.h"
+#include "settingsForm.h"
 #include "st7789.h"
 #include "FreeRTOS.h"
 #include "task.h"
@@ -88,7 +89,6 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 	vTaskNotifyGiveFromISR(displayTaskTHandle, &hpw);
 }
 
-
 void buttonsSubTask(void)
 {
 	if(buttonsPressed)
@@ -112,7 +112,6 @@ void buttonsSubTask(void)
 		{
 			buttonsPressed &= ~BUTTON_ESC;
 		}
-		ST7789_Fill_Color(WHITE);
 	}
 
 	if(buttonsPulled)
@@ -120,11 +119,13 @@ void buttonsSubTask(void)
 		if(buttonsPulled & BUTTON_UP)
 		{
 			buttonsPulled &= ~BUTTON_UP;
+			goToPreviousItem();
 		}
 
 		if(buttonsPulled & BUTTON_DOWN)
 		{
 			buttonsPulled &= ~BUTTON_DOWN;
+			goToNextItem();
 		}
 
 		if(buttonsPulled & BUTTON_OK)
@@ -136,7 +137,6 @@ void buttonsSubTask(void)
 		{
 			buttonsPulled &= ~BUTTON_ESC;
 		}
-		ST7789_Fill_Color(GREEN);
 	}
 
 }

@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "safetyCircuit.h"
 #include "buttonsFunctions.h"
+#include "settingsForm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -260,6 +261,7 @@ void displayTask(void *argument)
 {
   /* USER CODE BEGIN displayTask */
   /* Infinite loop */
+ settingsEnterFunction();
   for(;;)
   {
 	buttonsSubTask();
