@@ -261,7 +261,7 @@ void displayTask(void *argument)
 {
   /* USER CODE BEGIN displayTask */
   /* Infinite loop */
- settingsEnterFunction();
+  menuEnterFunction();
   for(;;)
   {
 	buttonsSubTask();

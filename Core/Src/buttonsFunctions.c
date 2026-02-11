@@ -153,6 +153,26 @@ void buttonsSubTask(void)
         btnDown.pendingRelease = FALSE;
     }
 
+    if(btnOk.pendingRelease &&
+       (now - btnOk.lastTick) >= pdMS_TO_TICKS(DEBOUNCE_TIME_MS))
+    {
+        if(HAL_GPIO_ReadPin(BUTTON_OK_GPIO_Port, BUTTON_OK_Pin) == GPIO_PIN_RESET)
+        {
+        	callItemFunction();
+        }
+        btnOk.pendingRelease = FALSE;
+    }
+
+    if(btnEsc.pendingRelease &&
+       (now - btnEsc.lastTick) >= pdMS_TO_TICKS(DEBOUNCE_TIME_MS))
+    {
+        if(HAL_GPIO_ReadPin(BUTTON_ESC_GPIO_Port, BUTTON_ESC_Pin) == GPIO_PIN_RESET)
+        {
+        	backToParentMenu();
+        }
+        btnEsc.pendingRelease = FALSE;
+    }
+
 }
 
 

@@ -25,13 +25,17 @@ typedef struct
 	MenuItem *menuItems;
 	uint8_t itemsNumber;
 	uint8_t currentItem;
-}SettingsMenu;
+	void *parentMenu;
+}MenuFormat;
 
+extern MenuFormat *currentMenu;
+extern MenuFormat settingsMenu;
 
-void settingsMenuInit(void);
+void menuEnterFunction(void);
 void goToNextItem(void);
 void goToPreviousItem(void);
-
+void callItemFunction(void);
+void backToParentMenu(void);
 
 
 #endif /* MENUS_SETTINGSFORM_H_ */
