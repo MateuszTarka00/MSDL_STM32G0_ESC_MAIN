@@ -9,6 +9,16 @@
 #define INC_BUTTONSFUNCTIONS_H_
 
 #include "main.h"
+#include "FreeRTOS.h"
+
+#define DEBOUNCE_TIME_MS 20
+
+typedef struct
+{
+    TickType_t lastTick;
+    uint8_t pendingPress;
+    uint8_t pendingRelease;
+} ButtonDebounce_t;
 
 void buttonsSubTask(void);
 

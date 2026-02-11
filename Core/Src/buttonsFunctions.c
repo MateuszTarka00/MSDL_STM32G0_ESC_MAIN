@@ -8,7 +8,6 @@
 #include "buttonsFunctions.h"
 #include "settingsForm.h"
 #include "st7789.h"
-#include "FreeRTOS.h"
 #include "task.h"
 #include "cmsis_os.h"
 
@@ -17,38 +16,17 @@
 #define BUTTON_OK		0x04
 #define BUTTON_ESC		0x08
 
-//static uint32_t lastTick = 0;
-#define BUTTON_UP_Pin GPIO_PIN_5
-#define BUTTON_UP_GPIO_Port GPIOD
-#define BUTTON_UP_EXTI_IRQn EXTI4_15_IRQn
-#define BUTTON_DOWN_Pin GPIO_PIN_6
-#define BUTTON_DOWN_GPIO_Port GPIOD
-#define BUTTON_DOWN_EXTI_IRQn EXTI4_15_IRQn
-#define BUTTON_ESC_Pin GPIO_PIN_7
-#define BUTTON_ESC_GPIO_Port GPIOD
-#define BUTTON_ESC_EXTI_IRQn EXTI4_15_IRQn
-#define BUTTON_OK_Pin GPIO_PIN_9
-#define BUTTON_OK_GPIO_Port GPIOF
-#define BUTTON_OK_EXTI_IRQn EXTI4_15_IRQn
-
 static volatile uint8_t buttonsPressed = 0;
 static volatile uint8_t buttonsPulled = 0;
 
-//    uint32_t now = xTaskGetTickCountFromISR();
-//
-//    if (GPIO_Pin == BUTTON_Pin && (now - lastTick) > pdMS_TO_TICKS(50))
-//    {
-//        lastTick = now;
-//
-//        BaseType_t hpw = pdFALSE;
-//        vTaskNotifyGiveFromISR(displayTaskTHandle, &hpw);
-//        portYIELD_FROM_ISR(hpw);
-//    }
+ButtonDebounce_t btnUp     = { 0, 0, 0 };
+ButtonDebounce_t btnDown   = { 0, 0, 0 };
+ButtonDebounce_t btnOk     = { 0, 0, 0 };
+ButtonDebounce_t btnEsc    = { 0, 0, 0 };
 
 
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 {
-	//TODO debouncing needs to be done
 	BaseType_t hpw = pdFALSE;
 	switch(GPIO_Pin)
 	{
@@ -91,25 +69,35 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 
 void buttonsSubTask(void)
 {
+	TickType_t now = xTaskGetTickCount();
+
 	if(buttonsPressed)
 	{
 		if(buttonsPressed & BUTTON_UP)
 		{
+			btnUp.lastTick = now;
+			btnUp.pendingPress = TRUE;
 			buttonsPressed &= ~BUTTON_UP;
 		}
 
 		if(buttonsPressed & BUTTON_DOWN)
 		{
+			btnDown.lastTick = now;
+			btnDown.pendingPress = TRUE;
 			buttonsPressed &= ~BUTTON_DOWN;
 		}
 
 		if(buttonsPressed & BUTTON_OK)
 		{
+			btnOk.lastTick = now;
+			btnOk.pendingPress = TRUE;
 			buttonsPressed &= ~BUTTON_OK;
 		}
 
 		if(buttonsPressed & BUTTON_ESC)
 		{
+			btnEsc.lastTick = now;
+			btnEsc.pendingPress = TRUE;
 			buttonsPressed &= ~BUTTON_ESC;
 		}
 	}
@@ -118,26 +106,52 @@ void buttonsSubTask(void)
 	{
 		if(buttonsPulled & BUTTON_UP)
 		{
+			btnUp.lastTick = now;
+			btnUp.pendingRelease = TRUE;
 			buttonsPulled &= ~BUTTON_UP;
-			goToPreviousItem();
 		}
 
 		if(buttonsPulled & BUTTON_DOWN)
 		{
+			btnDown.lastTick = now;
+			btnDown.pendingRelease = TRUE;
 			buttonsPulled &= ~BUTTON_DOWN;
-			goToNextItem();
 		}
 
 		if(buttonsPulled & BUTTON_OK)
 		{
+			btnOk.lastTick = now;
+			btnOk.pendingRelease = TRUE;
 			buttonsPulled &= ~BUTTON_OK;
 		}
 
 		if(buttonsPulled & BUTTON_ESC)
 		{
+			btnEsc.lastTick = now;
+			btnEsc.pendingRelease = TRUE;
 			buttonsPulled &= ~BUTTON_ESC;
 		}
 	}
+
+    if(btnUp.pendingRelease &&
+       (now - btnUp.lastTick) >= pdMS_TO_TICKS(DEBOUNCE_TIME_MS))
+    {
+        if(HAL_GPIO_ReadPin(BUTTON_UP_GPIO_Port, BUTTON_UP_Pin) == GPIO_PIN_RESET)
+        {
+            goToPreviousItem();
+        }
+        btnUp.pendingRelease = FALSE;
+    }
+
+    if(btnDown.pendingRelease &&
+       (now - btnDown.lastTick) >= pdMS_TO_TICKS(DEBOUNCE_TIME_MS))
+    {
+        if(HAL_GPIO_ReadPin(BUTTON_DOWN_GPIO_Port, BUTTON_DOWN_Pin) == GPIO_PIN_RESET)
+        {
+            goToNextItem();
+        }
+        btnDown.pendingRelease = FALSE;
+    }
 
 }
 
