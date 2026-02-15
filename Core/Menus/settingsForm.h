@@ -9,8 +9,15 @@
 #define MENUS_SETTINGSFORM_H_
 
 #include "main.h"
+#include "parameters.h"
 
 #define NUMBER_OF_TIMERS	6
+
+typedef enum
+{
+	SCROLL_MENU,
+	PARAMETER_ADJUSTMENT,
+}MenuType;
 
 typedef struct
 {
@@ -26,16 +33,19 @@ typedef struct
 	uint8_t itemsNumber;
 	uint8_t currentItem;
 	void *parentMenu;
+	MenuType menuType;
 }MenuFormat;
 
 extern MenuFormat *currentMenu;
 extern MenuFormat settingsMenu;
+extern MenuFormat parametersAdjustmentMenu;
+extern Parameter *currentParameter;
 
-void menuEnterFunction(void);
-void goToNextItem(void);
-void goToPreviousItem(void);
-void callItemFunction(void);
-void backToParentMenu(void);
+void menuScrollEnterFunction(void);
+void downButtonFunction(void);
+void upButtonFunction(void);
+void okButtonFunction(void);
+void escButtonFunction(void);
 
 
 #endif /* MENUS_SETTINGSFORM_H_ */

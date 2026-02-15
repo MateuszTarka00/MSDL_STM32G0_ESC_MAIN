@@ -6,6 +6,8 @@
  */
 
 #include "parameters.h"
+#include "string.h"
+#include "stdio.h"
 
 Parameter parameterLooserTime = {
 		1000,
@@ -44,10 +46,10 @@ Parameter parameterFastTime = {
 };
 
 Parameter parameterSlowTime = {
-		10000,
-		10000,
-		100000,
-		10000,
+		60000,
+		60000,
+		600000,
+		60000,
 		10000,
 		TIME_MS,
 };
@@ -113,29 +115,37 @@ Parameter parameterLightning=
 };
 
 
-void getValueString(char *buffer, Parameter parameter)
+void paramGetValueString(char *buffer, Parameter *parameter)
 {
-	switch(parameter.type)
+	switch(parameter->type)
 	{
 		case ON_OFF:
-			if(parameter.value)
+			if(parameter->value)
 				sprintf(buffer, "TAK");
 			else
 				sprintf(buffer, "NIE");
 			break;
 
 		case TIME_MS:
-			if(parameter.step > 100)
+			if(parameter->step > 100)
 			{
-				uint32_t stringValue = parameter.value/1000;
-				sprintf(buffer, "%u", stringValue);
+				uint32_t stringValue = parameter->value/1000;
+
+				if(stringValue >= 100)
+				{
+					sprintf(buffer, "%u s", stringValue);
+				}
+				else
+				{
+					sprintf(buffer, " %u s ", stringValue);
+				}
 			}
 			else
 			{
-				uint32_t stringValueInteger = parameter.value/1000;
-				uint32_t stringValueFraction = (parameter.value%1000)/100;
+				uint32_t stringValueInteger = parameter->value/1000;
+				uint32_t stringValueFraction = (parameter->value%1000)/100;
 
-				sprintf(buffer, "%u.%u", stringValueInteger, stringValueFraction);
+				sprintf(buffer, "%u.%u s", stringValueInteger, stringValueFraction);
 			}
 	}
 }
@@ -144,16 +154,16 @@ void paramChangeValue(Parameter *parameter, bool increaseDecrease)
 {
 	if(increaseDecrease)
 	{
-		if(parameter->minValue < parameter->value)
+		if(parameter->maxValue > parameter->value)
 		{
-			parameter->value -= parameter->step;
+			parameter->value += parameter->step;
 		}
 	}
 	else
 	{
-		if(parameter->maxValue > parameter->value)
+		if(parameter->minValue < parameter->value)
 		{
-			parameter->value += parameter->step;
+			parameter->value -= parameter->step;
 		}
 	}
 }

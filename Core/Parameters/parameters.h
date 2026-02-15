@@ -26,7 +26,19 @@ typedef struct
 	ParamyterType type;
 }Parameter;
 
-void paramGetValueString(char *buffer, Parameter parameter);
+extern Parameter parameterLooserTime;
+extern Parameter parameterEngineTime;
+extern Parameter parameterContactorTime;
+extern Parameter parameterFastTime;
+extern Parameter parameterSlowTime;
+extern Parameter parameterStarTriangleTime;
+extern Parameter parameterEngineControl;
+extern Parameter parameterAutoStop;
+extern Parameter parameterReleasing;
+extern Parameter parameterTrafficDirectionSignals;
+extern Parameter parameterLightning;
+
+void paramGetValueString(char *buffer, Parameter *parameter);
 void paramChangeValue(Parameter *parameter, bool increaseDecrease);
 void paramSaveValue(Parameter *parameter);
 void paramCancelValue(Parameter *parameter);

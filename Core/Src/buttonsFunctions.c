@@ -138,7 +138,7 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_UP_GPIO_Port, BUTTON_UP_Pin) == GPIO_PIN_RESET)
         {
-            goToPreviousItem();
+            upButtonFunction();
         }
         btnUp.pendingRelease = FALSE;
     }
@@ -148,7 +148,7 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_DOWN_GPIO_Port, BUTTON_DOWN_Pin) == GPIO_PIN_RESET)
         {
-            goToNextItem();
+        	downButtonFunction();
         }
         btnDown.pendingRelease = FALSE;
     }
@@ -158,7 +158,7 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_OK_GPIO_Port, BUTTON_OK_Pin) == GPIO_PIN_RESET)
         {
-        	callItemFunction();
+        	okButtonFunction();
         }
         btnOk.pendingRelease = FALSE;
     }
@@ -168,7 +168,7 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_ESC_GPIO_Port, BUTTON_ESC_Pin) == GPIO_PIN_RESET)
         {
-        	backToParentMenu();
+        	escButtonFunction();
         }
         btnEsc.pendingRelease = FALSE;
     }
