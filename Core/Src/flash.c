@@ -6,6 +6,7 @@
  */
 
 #include "flash.h"
+#include "softwareReset.h"
 #include <string.h>
 
 #define FLASH_PAGE 			200
@@ -118,7 +119,7 @@ void flash_parametersSave(void)
 bool flash_loadParameters(void)
 {
 	Flash_parametersToSave *flash_ptr =
-	        (Flash_parametersToSave*)FLASH_PAGE;
+	        (Flash_parametersToSave*)Flash_GetPageAddress(FLASH_PAGE);
 
 	if (flash_ptr->magic != FLASH_MAGIC)
 	        return FALSE;
@@ -135,5 +136,11 @@ bool flash_loadParameters(void)
            sizeof(Flash_parametersToSave));
 
     return 1;
+}
+
+void flash_factoryReset(void)
+{
+	Flash_ErasePage(FLASH_PAGE);
+	softwareReset();
 }
 

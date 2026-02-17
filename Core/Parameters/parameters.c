@@ -8,6 +8,7 @@
 #include "parameters.h"
 #include "string.h"
 #include "stdio.h"
+#include "flash.h"
 
 Parameter parameterLooserTime = {
 		1000,
@@ -114,6 +115,18 @@ Parameter parameterLightning=
 		ON_OFF,
 };
 
+//Fake parameter, only for format purpose
+Parameter parameterFactoryReset=
+{
+		0,
+		0,
+		1,
+		0,
+		1,
+		ON_OFF,
+};
+
+
 
 void paramGetValueString(char *buffer, Parameter *parameter)
 {
@@ -171,6 +184,20 @@ void paramChangeValue(Parameter *parameter, bool increaseDecrease)
 void paramSaveValue(Parameter *parameter)
 {
 	parameter->lastValue = parameter->value;
+
+	flash_parametersToSave.flash_settingsValues.parameterLooserTime = parameterLooserTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterEngineTime = parameterEngineTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterContactorTime = parameterContactorTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterFastTime = parameterFastTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterSlowTime = parameterSlowTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterStarTriangleTime = parameterStarTriangleTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterEngineControl = parameterEngineControl.value;
+	flash_parametersToSave.flash_settingsValues.parameterAutoStop = parameterAutoStop.value;
+	flash_parametersToSave.flash_settingsValues.parameterReleasing = parameterReleasing.value;
+	flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals = parameterTrafficDirectionSignals.value;
+	flash_parametersToSave.flash_settingsValues.parameterLightning = parameterLightning.value;
+
+	flash_parametersSave();
 }
 
 void paramCancelValue(Parameter *parameter)
@@ -178,12 +205,29 @@ void paramCancelValue(Parameter *parameter)
 	parameter->value = parameter->lastValue;
 }
 
-void paramFactoryReset(void)
+void paramLoadParameters(void)
 {
+	parameterLooserTime.value = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
+	parameterEngineTime.value = flash_parametersToSave.flash_settingsValues.parameterEngineTime;
+	parameterContactorTime.value = flash_parametersToSave.flash_settingsValues.parameterContactorTime;
+	parameterFastTime.value = flash_parametersToSave.flash_settingsValues.parameterFastTime;
+	parameterSlowTime.value = flash_parametersToSave.flash_settingsValues.parameterSlowTime;
+	parameterStarTriangleTime.value = flash_parametersToSave.flash_settingsValues.parameterStarTriangleTime;
+	parameterEngineControl.value = flash_parametersToSave.flash_settingsValues.parameterEngineControl;
+	parameterAutoStop.value = flash_parametersToSave.flash_settingsValues.parameterAutoStop;
+	parameterReleasing.value = flash_parametersToSave.flash_settingsValues.parameterReleasing;
+	parameterTrafficDirectionSignals.value = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals;
+	parameterLightning.value = flash_parametersToSave.flash_settingsValues.parameterLightning;
 
-}
-
-void flashLoadSavedParameters(void)
-{
-
+	parameterLooserTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
+	parameterEngineTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterEngineTime;
+	parameterContactorTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterContactorTime;
+	parameterFastTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterFastTime;
+	parameterSlowTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterSlowTime;
+	parameterStarTriangleTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterStarTriangleTime;
+	parameterEngineControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterEngineControl;
+	parameterAutoStop.lastValue = flash_parametersToSave.flash_settingsValues.parameterAutoStop;
+	parameterReleasing.lastValue = flash_parametersToSave.flash_settingsValues.parameterReleasing;
+	parameterTrafficDirectionSignals.lastValue = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals;
+	parameterLightning.lastValue = flash_parametersToSave.flash_settingsValues.parameterLightning;
 }

@@ -30,6 +30,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "softwareTimer_ms.h"
+#include "systemStartup.h"
 #include "externalWatchdog.h"
 #include "st7789.h"
 /* USER CODE END Includes */
@@ -101,6 +102,7 @@ int main(void)
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+  startupFunction();
   HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
   ST7789_Init();
 

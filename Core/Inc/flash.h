@@ -51,5 +51,6 @@ uint8_t checkStructEmpty(const Flash_parametersToSave *data);
 uint32_t crc32_compute(const uint8_t *data, uint32_t length);
 void flash_parametersSave(void);
 bool flash_loadParameters(void);
+void flash_factoryReset(void);
 
 #endif /* INC_FLASH_H_ */

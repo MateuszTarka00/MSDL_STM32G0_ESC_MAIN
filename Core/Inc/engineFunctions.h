@@ -11,7 +11,7 @@
 #include "main.h"
 #include "softwareTimer_ms.h"
 
-#define FREQUENCY_ERROR_RANGE 			1
+#define FREQUENCY_ERROR_RANGE 			10
 #define FAST_SPEED_TIME_MS				60000
 #define SPEED_CHANGE_TIMEOUT_MS			10000
 #define CHAIN_MOTOR_ERROR_TIMEOUT_MS 	1000
@@ -45,6 +45,7 @@ bool checkTargetFrequencyReached(void);
 bool checkSetFrequency(void);
 bool checkErrorRange(uint32_t real, uint32_t given);
 bool checkIsHumanOnStairs(void);
-
+void rotationsLoadParameters(void);
+void rotationsSaveParameters(void);
 
 #endif /* INC_ENGINEFUNCTIONS_H_ */

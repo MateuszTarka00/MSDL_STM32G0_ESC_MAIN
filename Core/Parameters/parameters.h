@@ -38,10 +38,13 @@ extern Parameter parameterReleasing;
 extern Parameter parameterTrafficDirectionSignals;
 extern Parameter parameterLightning;
 
+extern Parameter parameterFactoryReset;
+
 void paramGetValueString(char *buffer, Parameter *parameter);
 void paramChangeValue(Parameter *parameter, bool increaseDecrease);
 void paramSaveValue(Parameter *parameter);
 void paramCancelValue(Parameter *parameter);
 void paramFactoryReset(void);
+void paramLoadParameters(void);
 
 #endif /* PARAMETERS_PARAMETERS_H_ */

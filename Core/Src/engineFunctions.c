@@ -8,6 +8,7 @@
 
 #include "engineFunctions.h"
 #include "confInputs.h"
+#include "flash.h"
 
 volatile uint32_t engineRotationTemporary = 0;
 volatile uint32_t handrailRotationTemporary = 0;
@@ -204,6 +205,30 @@ void checkChainMotorOK(void)
 static bool getChainMotorState(void)
 {
 	return(HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin));
+}
+
+void rotationsLoadParameters(void)
+{
+	flash_parametersToSave.flash_RotationsPerMinuteFast.engine = rotationsPerMinuteReal.engine.fastTime;
+	flash_parametersToSave.flash_RotationsPerMinuteFast.handrail = rotationsPerMinuteReal.handrail.fastTime;
+	flash_parametersToSave.flash_RotationsPerMinuteFast.step = rotationsPerMinuteReal.step.fastTime;
+
+	flash_parametersToSave.flash_RotationsPerMinuteSlow.engine = rotationsPerMinuteReal.engine.slowTime;
+	flash_parametersToSave.flash_RotationsPerMinuteSlow.handrail = rotationsPerMinuteReal.handrail.slowTime;
+	flash_parametersToSave.flash_RotationsPerMinuteSlow.step = rotationsPerMinuteReal.step.slowTime;
+}
+
+void rotationsSaveParameters(void)
+{
+	rotationsPerMinuteReal.engine.fastTime   = flash_parametersToSave.flash_RotationsPerMinuteFast.engine;
+	rotationsPerMinuteReal.handrail.fastTime = flash_parametersToSave.flash_RotationsPerMinuteFast.handrail;
+	rotationsPerMinuteReal.step.fastTime     = flash_parametersToSave.flash_RotationsPerMinuteFast.step;
+
+	rotationsPerMinuteReal.engine.slowTime   = flash_parametersToSave.flash_RotationsPerMinuteSlow.engine;
+	rotationsPerMinuteReal.handrail.slowTime = flash_parametersToSave.flash_RotationsPerMinuteSlow.handrail;
+	rotationsPerMinuteReal.step.slowTime     = flash_parametersToSave.flash_RotationsPerMinuteSlow.step;
+
+	flash_parametersSave();
 }
 
 

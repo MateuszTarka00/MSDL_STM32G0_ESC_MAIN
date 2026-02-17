@@ -4,11 +4,12 @@
  *  Created on: 10 lut 2026
  *      Author: mateo
  */
-
+//TODO poprawic wyswietlanie tytulow
 #include "settingsForm.h"
 #include "fonts.h"
 #include "st7789.h"
 #include "string.h"
+#include "flash.h"
 
 #define HEADER_TO_FIRST_ITEM_PIXELS	41
 #define ITEM_TO_ITEM_PIXELS			7
@@ -77,26 +78,26 @@ void showParameterValue(void)
 	if(currentParameter->value < currentParameter->maxValue && !(trianglesDrawed & TRIANGLE_UP))
 	{
 		trianglesDrawed |= TRIANGLE_UP;
-		ST7789_DrawFilledTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
+		ST7789_DrawTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
 				PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT, DISPLAY_X_CENTER, PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT - TRIANGLE_HEIGHT, BLACK);
 	}
 	else if(currentParameter->value == currentParameter->maxValue && (trianglesDrawed & TRIANGLE_UP))
 	{
 		trianglesDrawed &= ~TRIANGLE_UP;
-		ST7789_DrawFilledTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
+		ST7789_DrawTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
 				PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT, DISPLAY_X_CENTER, PARAMETER_HEIGHT - TRIANGLE_START_HEIGHT - TRIANGLE_HEIGHT, WHITE);
 	}
 
 	if(currentParameter->value > currentParameter->minValue && !(trianglesDrawed & TRIANGLE_DOWN))
 	{
 		trianglesDrawed |= TRIANGLE_DOWN;
-		ST7789_DrawFilledTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + PARAMETER_FONT_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
+		ST7789_DrawTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + PARAMETER_FONT_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
 				PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + PARAMETER_FONT_HEIGHT, DISPLAY_X_CENTER, PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + TRIANGLE_HEIGHT + PARAMETER_FONT_HEIGHT, BLACK);
 	}
 	else if(currentParameter->value == currentParameter->minValue && (trianglesDrawed & TRIANGLE_DOWN))
 	{
 		trianglesDrawed &= ~TRIANGLE_DOWN;
-		ST7789_DrawFilledTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + PARAMETER_FONT_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
+		ST7789_DrawTriangle(DISPLAY_X_CENTER - TRIANGLE_WIDTH, PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + PARAMETER_FONT_HEIGHT, DISPLAY_X_CENTER + TRIANGLE_WIDTH,
 				PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + PARAMETER_FONT_HEIGHT, DISPLAY_X_CENTER, PARAMETER_HEIGHT + TRIANGLE_START_HEIGHT + TRIANGLE_HEIGHT + PARAMETER_FONT_HEIGHT, WHITE);
 	}
 
@@ -200,10 +201,10 @@ MenuItem settingsMenuItems[] =
 {
     { .name = "Parametry czas"	,			.menuFunction = enterSubMenu, .param = &timesParameterMenu},
     { .name = "Kontrola",	  				.menuFunction = enterSubMenu, .param = &monitoringParameterMenu},
-    { .name = "Sterowanie",        			.menuFunction = enterSubMenu, .param = &controlParameterMenu },
+    { .name = "Sterowanie",        			.menuFunction = enterSubMenu, .param = &controlParameterMenu},
     { .name = "Dziennik zdarzen",	  		.menuFunction = 0, .param = 0 },
     { .name = "Jezyk",       				.menuFunction = 0, .param = 0 },
-    { .name = "Ustawienia fabryczne",      	.menuFunction = 0, .param = 0 },
+    { .name = "Ustawienia fabryczne",      	.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
 };
 
 MenuFormat settingsMenu =
@@ -274,6 +275,7 @@ void downButtonFunction(void)
 			break;
 
 		case PARAMETER_ADJUSTMENT:
+
 			paramChangeValue(currentParameter, FALSE);
 			showParameterValue();
 			break;
@@ -304,8 +306,24 @@ void okButtonFunction(void)
 			break;
 
 		case PARAMETER_ADJUSTMENT:
-			paramSaveValue(currentParameter);
-			backToParentMenu();
+
+			if(currentParameter == &parameterFactoryReset)
+			{
+				if(parameterFactoryReset.value)
+				{
+					flash_factoryReset();
+				}
+				else
+				{
+					backToParentMenu();
+				}
+			}
+			else
+			{
+				paramSaveValue(currentParameter);
+				backToParentMenu();
+			}
+
 			break;
 	}
 }
