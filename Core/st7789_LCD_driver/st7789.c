@@ -519,24 +519,35 @@ void ST7789_WriteChar(uint16_t x, uint16_t y, char ch, FontDef font, uint16_t co
 void ST7789_WriteString(uint16_t x, uint16_t y, const char *str, FontDef font, uint16_t color, uint16_t bgcolor)
 {
     ST7789_Select();
-    while (*str) {
-        if (x + font.width >= ST7789_WIDTH) {
-            x = 0;
-            y += font.height;
-            if (y + font.height >= ST7789_HEIGHT) {
-                break;
-            }
 
-            if (*str == ' ') {
-                // skip spaces in the beginning of the new line
-                str++;
-                continue;
-            }
+    while (*str) {
+
+        // Handle newline FIRST
+        if (*str == '\n') {
+            x = 2;
+            y += font.height;
+
+            if (y + font.height >= ST7789_HEIGHT)
+                break;
+
+            str++;
+            continue;
         }
+
+        // Handle automatic wrap
+        if (x + font.width >= ST7789_WIDTH) {
+            x = 2;
+            y += font.height;
+
+            if (y + font.height >= ST7789_HEIGHT)
+                break;
+        }
+
         ST7789_WriteChar(x, y, *str, font, color, bgcolor);
         x += font.width;
         str++;
     }
+
     ST7789_UnSelect();
 }
 

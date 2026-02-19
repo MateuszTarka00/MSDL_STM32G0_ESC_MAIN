@@ -166,7 +166,7 @@ bool checkErrorRange(uint32_t real, uint32_t given)
 	return FALSE;
 }
 
-bool checkIsHumanOnStairs(void)
+bool checkIsHumanOnStairsUp(void)
 {
 	return(HAL_GPIO_ReadPin(HUMAN_UP_GPIO_Port, HUMAN_UP_Pin));
 }

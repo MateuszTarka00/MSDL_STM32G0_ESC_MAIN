@@ -7,7 +7,7 @@
 
 #include "safetyCircuit.h"
 
-SafetyCircuitPoint safetyCircuitPoint = 0;
+SafetyCircuitPoint safetyCircuitPoint = SAFETY_CIRCUIT_UNBROKEN;
 static volatile bool safetyCircuitState = FALSE;
 
 const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =

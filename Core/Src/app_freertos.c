@@ -29,6 +29,7 @@
 #include "safetyCircuit.h"
 #include "buttonsFunctions.h"
 #include "settingsForm.h"
+#include "mainForm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -217,7 +218,7 @@ void safetyCheck(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  if(checkSafetyCircuitState())
+	  if(!checkSafetyCircuitState())
 	  {
 		  safetyCircuitPoint = checkBrokenSafetyCircuitPoint();
 	  }
@@ -261,9 +262,11 @@ void displayTask(void *argument)
 {
   /* USER CODE BEGIN displayTask */
   /* Infinite loop */
-	backToParentMenu();
+//	backToParentMenu();
+	initMainForm();
   for(;;)
   {
+	updateSafetyCircuitState();
 	buttonsSubTask();
     osDelay(1);
   }

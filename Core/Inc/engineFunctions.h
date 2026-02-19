@@ -44,7 +44,7 @@ void enableSlowSpeed(void);
 bool checkTargetFrequencyReached(void);
 bool checkSetFrequency(void);
 bool checkErrorRange(uint32_t real, uint32_t given);
-bool checkIsHumanOnStairs(void);
+bool checkIsHumanOnStairsUp(void);
 void rotationsLoadParameters(void);
 void rotationsSaveParameters(void);
 
