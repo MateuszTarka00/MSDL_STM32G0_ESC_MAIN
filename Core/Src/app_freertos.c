@@ -266,7 +266,7 @@ void displayTask(void *argument)
 	initMainForm();
   for(;;)
   {
-	updateSafetyCircuitState();
+	mainMenuSubTask();
 	buttonsSubTask();
     osDelay(1);
   }

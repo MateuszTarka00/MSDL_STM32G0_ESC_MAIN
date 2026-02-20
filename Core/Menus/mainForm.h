@@ -11,6 +11,8 @@
 #include "main.h"
 
 void updateSafetyCircuitState(void);
+void updateSensorUp(void);
+void mainMenuSubTask(void);
 void initMainForm(void);
 
 #endif /* MENUS_MAINFORM_H_ */

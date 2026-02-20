@@ -12,22 +12,35 @@
 #include "safetyCircuit.h"
 #include "engineFunctions.h"
 
-#define ITEMS_NUMBER	10
-
-#define SAFETY_CIRCUIT	8
+#define WORK_MODE			0
+#define DIRECTION			1
+#define SPEED				2
+#define BREAK_STATE			3
+#define ENGINE_STATE		4
+#define CONTACTORS_STATE	5
+#define SENSOR_UP			6
+#define SENSOR_DOWN			7
+#define SAFETY_CIRCUIT		8
+#define ERROR_STATE			9
+#define ITEMS_NUMBER		10
 
 #define CHARS_PER_LINE 21
 
 const char clearLine[22] = "                     ";
 
+const char *humanSensorsStrings[] = {
+		"Brak",
+		"Wykrycie",
+};
+
 const char *safetyCircuitStrings[] = {
-    "Stop\nmaszynownia", //ok
+    "Stop\nmaszynownia",
     "Stop wlot",
     "Prawa\nplyta grzebieniowa",
 	"Lewa\nplyta grzebieniowa",
 	"Prawy\nwlot poreczy",
 	"Lewy\nwlot poreczy",
-	"Odpad.\nstopnia", //dupa
+	"Odpad.\nstopnia",
 	"rezerwa",
 	"Blad\nobwodu",
 	"OK"
@@ -88,14 +101,14 @@ MenuItem menuItems[ITEMS_NUMBER] =
 		{
 				"Czujnik gora: ",
 				TRUE,
-				"OK",
+				"Brak",
 				143,
 		},
 
 		{
 				"Czujnik dol: ",
 				TRUE,
-				"OK",
+				"Brak",
 				166,
 		},
 
@@ -154,7 +167,36 @@ void updateSafetyCircuitState(void)
 
 void updateSensorUp(void)
 {
-	checkIsHumanOnStairsUp();
+	if(menuItems[SENSOR_UP].state != checkIsHumanOnStairsUp())
+	{
+		uint16_t stateStringBeggining = (strlen(menuItems[SENSOR_UP].staticString)*Font_11x18.width) + 2;
+		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+		char clearFirstLine[clearChars+1];
+
+		memset(clearFirstLine, ' ', clearChars);
+		clearFirstLine[clearChars] = '\0';
+		ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_UP].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+		ST7789_WriteString(2, menuItems[SENSOR_UP].height + Font_11x18.height, clearLine, Font_11x18, BLACK, WHITE);
+		menuItems[SENSOR_UP].state = checkIsHumanOnStairsUp();
+		menuItems[SENSOR_UP].stateString = humanSensorsStrings[menuItems[SENSOR_UP].state];
+
+		if(menuItems[SENSOR_UP].state)
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_UP].height, menuItems[SENSOR_UP].stateString, Font_11x18, DARKGREEN, WHITE);
+		}
+		else
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_UP].height, menuItems[SENSOR_UP].stateString, Font_11x18, RED, WHITE);
+		}
+	}
 }
+
+void updateSensorUp(void);
+void mainMenuSubTask(void)
+{
+	updateSensorUp();
+	updateSafetyCircuitState();
+}
+
 
 
