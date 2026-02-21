@@ -18,9 +18,19 @@ typedef enum
 	DIRECTION_ERROR,
 }Direction;
 
+typedef enum
+{
+	NO_LOOSER,
+	FIRST_LOOSER,
+	SECOND_LOOSER,
+	STOP,
+}Loosers;
+
 bool checkTargetFrequencyReached(void);
 bool checkIsHumanOnStairsUp(void);
 bool getChainMotorState(void);
 Direction getDirection(void);
+Loosers getLoosersState(void);
+bool getContactorsState(void);
 
 #endif /* INC_SENSORS_H_ */

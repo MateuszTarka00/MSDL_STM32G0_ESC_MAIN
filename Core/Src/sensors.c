@@ -48,3 +48,35 @@ Direction getDirection(void)
 
 	return NO_DIRECTION;
 }
+
+Loosers getLoosersState(void)
+{
+	bool loserOne = HAL_GPIO_ReadPin(LOCKER_IN1_GPIO_Port, LOCKER_IN1_Pin);
+	bool looserTwo = HAL_GPIO_ReadPin(LOCKER_IN2_GPIO_Port, LOCKER_IN2_Pin);
+
+	if(loserOne && looserTwo)
+	{
+		return STOP;
+	}
+	else
+	{
+		if(loserOne)
+		{
+			return FIRST_LOOSER;
+		}
+
+		if(looserTwo)
+		{
+			return SECOND_LOOSER;
+		}
+	}
+
+	return NO_LOOSER;
+
+}
+
+bool getContactorsState(void)
+{
+	return(HAL_GPIO_ReadPin(ACK_CONT_GPIO_Port, ACK_CONT_Pin));
+}
+

@@ -61,6 +61,23 @@ const char *speedStrings[] = {
 		"Blad",
 };
 
+const char *looserStrings[] = {
+		"Luz",
+		"Pierwszy",
+		"Drugi",
+		"Dwa",
+};
+
+const char *onOffStrings[] = {
+		"OFF",
+		"ON",
+};
+
+const char *chainMotorStrings[] = {
+		"Blad",
+		"OK",
+};
+
 typedef struct
 {
 	char *staticString;
@@ -95,7 +112,7 @@ MenuItem menuItems[ITEMS_NUMBER] =
 		{
 				"Stan hamulca: ",
 				TRUE,
-				"OK",
+				"Luz",
 				74,
 		},
 
@@ -109,7 +126,7 @@ MenuItem menuItems[ITEMS_NUMBER] =
 		{
 				"Stan stycznikow: ",
 				TRUE,
-				"OK",
+				"OFF",
 				120,
 		},
 
@@ -237,11 +254,89 @@ void updateSpeed(void)
 
 }
 
+void updateLooserState(void)
+{
+	if(menuItems[BREAK_STATE].state != getLoosersState())
+	{
+		uint16_t stateStringBeggining = ((strlen(menuItems[BREAK_STATE].staticString) - 1)*Font_11x18.width) + 2;
+		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+		char clearFirstLine[clearChars+1];
+
+		memset(clearFirstLine, ' ', clearChars);
+		clearFirstLine[clearChars] = '\0';
+		ST7789_WriteString(stateStringBeggining, menuItems[BREAK_STATE].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+		menuItems[BREAK_STATE].state = getLoosersState();
+		menuItems[BREAK_STATE].stateString = looserStrings[menuItems[BREAK_STATE].state];
+
+		if(menuItems[BREAK_STATE].state == NO_LOOSER)
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[BREAK_STATE].height, menuItems[BREAK_STATE].stateString, Font_11x18, DARKGREEN, WHITE);
+		}
+		else
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[BREAK_STATE].height, menuItems[BREAK_STATE].stateString, Font_11x18, RED, WHITE);
+		}
+	}
+}
+
+void updateContactorsState(void)
+{
+	if(menuItems[CONTACTORS_STATE].state != getContactorsState())
+	{
+		uint16_t stateStringBeggining = ((strlen(menuItems[CONTACTORS_STATE].staticString) - 1)*Font_11x18.width) + 2;
+		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+		char clearFirstLine[clearChars+1];
+
+		memset(clearFirstLine, ' ', clearChars);
+		clearFirstLine[clearChars] = '\0';
+		ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+		menuItems[CONTACTORS_STATE].state = getContactorsState();
+		menuItems[CONTACTORS_STATE].stateString = onOffStrings[menuItems[CONTACTORS_STATE].state];
+
+		if(menuItems[CONTACTORS_STATE].state)
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, menuItems[CONTACTORS_STATE].stateString, Font_11x18, DARKGREEN, WHITE);
+		}
+		else
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, menuItems[CONTACTORS_STATE].stateString, Font_11x18, RED, WHITE);
+		}
+	}
+}
+
+void updateChainMotorState(void)
+{
+	if(menuItems[ENGINE_STATE].state != getChainMotorState())
+	{
+		uint16_t stateStringBeggining = ((strlen(menuItems[ENGINE_STATE].staticString) - 1)*Font_11x18.width) + 2;
+		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+		char clearFirstLine[clearChars+1];
+
+		memset(clearFirstLine, ' ', clearChars);
+		clearFirstLine[clearChars] = '\0';
+		ST7789_WriteString(stateStringBeggining, menuItems[ENGINE_STATE].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+		menuItems[ENGINE_STATE].state = getChainMotorState();
+		menuItems[ENGINE_STATE].stateString = chainMotorStrings[menuItems[ENGINE_STATE].state];
+
+		if(menuItems[ENGINE_STATE].state)
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[ENGINE_STATE].height, menuItems[ENGINE_STATE].stateString, Font_11x18, DARKGREEN, WHITE);
+		}
+		else
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[ENGINE_STATE].height, menuItems[ENGINE_STATE].stateString, Font_11x18, RED, WHITE);
+		}
+	}
+}
+
 void mainMenuSubTask(void)
 {
 	updateSensorUp();
 	updateSafetyCircuitState();
 	updateDirection();
+	updateLooserState();
+	updateContactorsState();
+	updateChainMotorState();
 }
 
 
