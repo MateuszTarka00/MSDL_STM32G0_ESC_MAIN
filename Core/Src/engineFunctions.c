@@ -8,6 +8,7 @@
 
 #include "engineFunctions.h"
 #include "confInputs.h"
+#include "sensors.h"
 #include "flash.h"
 
 volatile uint32_t engineRotationTemporary = 0;
@@ -33,8 +34,6 @@ RotationsPerMinute rotationsPerMinuteGiven =
 		{0, 0},
 		{0, 0}
 };
-
-static bool getChainMotorState(void);
 
 static void fastSpeedTimerCallback(void * Param)
 {
@@ -128,11 +127,6 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 	__HAL_GPIO_EXTI_ENABLE_IT(MIS_ST1_Pin);
 }
 
-bool checkTargetFrequencyReached(void)
-{
-	return(HAL_GPIO_ReadPin(IN_FREQ_GPIO_Port, IN_FREQ_Pin));
-}
-
 bool checkSetFrequency(void)
 {
 	if(highSpeedSet)
@@ -166,11 +160,6 @@ bool checkErrorRange(uint32_t real, uint32_t given)
 	return FALSE;
 }
 
-bool checkIsHumanOnStairsUp(void)
-{
-	return(HAL_GPIO_ReadPin(HUMAN_UP_GPIO_Port, HUMAN_UP_Pin));
-}
-
 void enableFastSpeed(void)
 {
 	highSpeedSet = TRUE;
@@ -200,11 +189,6 @@ void checkChainMotorOK(void)
 	{
 		stopSoftwareTimer(&chainMotorErrorTimer);
 	}
-}
-
-static bool getChainMotorState(void)
-{
-	return(HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin));
 }
 
 void rotationsLoadParameters(void)

@@ -41,10 +41,8 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 void incrementRotationsNumber(uint16_t GPIO_Pin);
 void enableFastSpeed(void);
 void enableSlowSpeed(void);
-bool checkTargetFrequencyReached(void);
 bool checkSetFrequency(void);
 bool checkErrorRange(uint32_t real, uint32_t given);
-bool checkIsHumanOnStairsUp(void);
 void rotationsLoadParameters(void);
 void rotationsSaveParameters(void);
 

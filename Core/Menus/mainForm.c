@@ -11,6 +11,7 @@
 #include "fonts.h"
 #include "safetyCircuit.h"
 #include "engineFunctions.h"
+#include "sensors.h"
 
 #define WORK_MODE			0
 #define DIRECTION			1
@@ -46,6 +47,20 @@ const char *safetyCircuitStrings[] = {
 	"OK"
 };
 
+const char *directionStrings[] = {
+		"Brak",
+		"Dol",
+		"Gora",
+		"Blad",
+};
+
+const char *speedStrings[] = {
+		"Stop",
+		"Wolno",
+		"Szybko",
+		"Blad",
+};
+
 typedef struct
 {
 	char *staticString;
@@ -66,14 +81,14 @@ MenuItem menuItems[ITEMS_NUMBER] =
 		{
 				"Kierunek: ",
 				TRUE,
-				"OK",
+				"Brak",
 				28,
 		},
 
 		{
 				"Predkosc: ",
 				TRUE,
-				"OK",
+				"Stop",
 				51,
 		},
 
@@ -133,7 +148,7 @@ void initMainForm(void)
 {
 	for(uint8_t i = 0; i < ITEMS_NUMBER; i++)
 	{
-		uint16_t stateStringBeggining = (strlen(menuItems[i].staticString)*Font_11x18.width) + 2;
+		uint16_t stateStringBeggining = ((strlen(menuItems[i].staticString)-1)*Font_11x18.width) + 2;
 		ST7789_WriteString(2, menuItems[i].height, menuItems[i].staticString, Font_11x18, BLACK, WHITE);
 		ST7789_WriteString(stateStringBeggining, menuItems[i].height, menuItems[i].stateString, Font_11x18, DARKGREEN, WHITE);
 	}
@@ -143,7 +158,7 @@ void updateSafetyCircuitState(void)
 {
 	if(menuItems[SAFETY_CIRCUIT].state != safetyCircuitPoint)
 	{
-		uint16_t stateStringBeggining = (strlen(menuItems[SAFETY_CIRCUIT].staticString)*Font_11x18.width) + 2;
+		uint16_t stateStringBeggining = ((strlen(menuItems[SAFETY_CIRCUIT].staticString) - 1)*Font_11x18.width) + 2;
 		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
 		char clearFirstLine[clearChars+1];
 
@@ -169,14 +184,13 @@ void updateSensorUp(void)
 {
 	if(menuItems[SENSOR_UP].state != checkIsHumanOnStairsUp())
 	{
-		uint16_t stateStringBeggining = (strlen(menuItems[SENSOR_UP].staticString)*Font_11x18.width) + 2;
+		uint16_t stateStringBeggining = ((strlen(menuItems[SENSOR_UP].staticString) - 1)*Font_11x18.width) + 2;
 		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
 		char clearFirstLine[clearChars+1];
 
 		memset(clearFirstLine, ' ', clearChars);
 		clearFirstLine[clearChars] = '\0';
 		ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_UP].height, clearFirstLine, Font_11x18, BLACK, WHITE);
-		ST7789_WriteString(2, menuItems[SENSOR_UP].height + Font_11x18.height, clearLine, Font_11x18, BLACK, WHITE);
 		menuItems[SENSOR_UP].state = checkIsHumanOnStairsUp();
 		menuItems[SENSOR_UP].stateString = humanSensorsStrings[menuItems[SENSOR_UP].state];
 
@@ -192,10 +206,42 @@ void updateSensorUp(void)
 }
 
 void updateSensorUp(void);
+
+void updateDirection(void)
+{
+	if(menuItems[DIRECTION].state != getDirection())
+	{
+		uint16_t stateStringBeggining = ((strlen(menuItems[DIRECTION].staticString) - 1)*Font_11x18.width) + 2;
+		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+		char clearFirstLine[clearChars+1];
+
+		memset(clearFirstLine, ' ', clearChars);
+		clearFirstLine[clearChars] = '\0';
+		ST7789_WriteString(stateStringBeggining, menuItems[DIRECTION].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+		menuItems[DIRECTION].state = getDirection();
+		menuItems[DIRECTION].stateString = directionStrings[menuItems[DIRECTION].state];
+
+		if(menuItems[DIRECTION].state == DOWN || menuItems[DIRECTION].state == UP)
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[DIRECTION].height, menuItems[DIRECTION].stateString, Font_11x18, DARKGREEN, WHITE);
+		}
+		else
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[DIRECTION].height, menuItems[DIRECTION].stateString, Font_11x18, RED, WHITE);
+		}
+	}
+}
+
+void updateSpeed(void)
+{
+
+}
+
 void mainMenuSubTask(void)
 {
 	updateSensorUp();
 	updateSafetyCircuitState();
+	updateDirection();
 }
 
 
