@@ -289,6 +289,7 @@ void ST7789_TearEffect(uint8_t tear);
 
 /* Simple test function. */
 void ST7789_Test(void);
+uint16_t centerString(FontDef font, const char *str);
 
 #ifndef ST7789_ROTATION
     #error You should at least choose a display rotation!

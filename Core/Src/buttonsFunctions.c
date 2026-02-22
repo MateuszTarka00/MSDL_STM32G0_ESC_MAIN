@@ -24,6 +24,10 @@ ButtonDebounce_t btnDown   = { 0, 0, 0 };
 ButtonDebounce_t btnOk     = { 0, 0, 0 };
 ButtonDebounce_t btnEsc    = { 0, 0, 0 };
 
+void (*upButtonFunction)(void *) = 0;
+void (*downButtonFunction)(void *) = 0;
+void (*okButtonFunction)(void *) = 0;
+void (*escButtonFunction)(void *) = 0;
 
 void HAL_GPIO_EXTI_Rising_Callback(uint16_t GPIO_Pin)
 {
@@ -138,7 +142,10 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_UP_GPIO_Port, BUTTON_UP_Pin) == GPIO_PIN_RESET)
         {
-            upButtonFunction();
+            if(upButtonFunction != 0)
+            {
+            	upButtonFunction(0);
+            }
         }
         btnUp.pendingRelease = FALSE;
     }
@@ -148,7 +155,10 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_DOWN_GPIO_Port, BUTTON_DOWN_Pin) == GPIO_PIN_RESET)
         {
-        	downButtonFunction();
+        	if(downButtonFunction != 0)
+        	{
+        		downButtonFunction(0);
+        	}
         }
         btnDown.pendingRelease = FALSE;
     }
@@ -158,7 +168,10 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_OK_GPIO_Port, BUTTON_OK_Pin) == GPIO_PIN_RESET)
         {
-        	okButtonFunction();
+        	if(okButtonFunction != 0)
+        	{
+        		okButtonFunction(0);
+        	}
         }
         btnOk.pendingRelease = FALSE;
     }
@@ -168,7 +181,10 @@ void buttonsSubTask(void)
     {
         if(HAL_GPIO_ReadPin(BUTTON_ESC_GPIO_Port, BUTTON_ESC_Pin) == GPIO_PIN_RESET)
         {
-        	escButtonFunction();
+        	if(escButtonFunction != 0)
+        	{
+        		escButtonFunction(0);
+        	}
         }
         btnEsc.pendingRelease = FALSE;
     }

@@ -19,6 +19,8 @@
 extern volatile uint32_t engineRotationTemporary;
 extern volatile uint32_t handrailRotationTemporary;
 extern volatile uint32_t stepRotationTemporary;
+extern volatile bool highSpeedSet;
+extern volatile bool slowSpeedSet;
 
 typedef struct
 {

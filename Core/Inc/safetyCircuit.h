@@ -41,4 +41,6 @@ bool checkSafetyCircuitState(void);
 SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void);
 void setSafetyCircuitStateOutput(void);
 
+void updateSafetyCircuitError(uint8_t state);
+
 #endif /* INC_SAFETYCIRCUIT_H_ */

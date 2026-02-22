@@ -36,16 +36,11 @@ typedef struct
 	MenuType menuType;
 }MenuFormat;
 
-extern MenuFormat *currentMenu;
+extern MenuFormat *currentSettingsMenu;
 extern MenuFormat settingsMenu;
 extern MenuFormat parametersAdjustmentMenu;
 extern Parameter *currentParameter;
 
-void menuScrollEnterFunction(void);
-void downButtonFunction(void);
-void upButtonFunction(void);
-void okButtonFunction(void);
-void escButtonFunction(void);
-
+void enterSettingsMenu(void);
 
 #endif /* MENUS_SETTINGSFORM_H_ */

@@ -6,10 +6,12 @@
  */
 //TODO poprawic wyswietlanie tytulow
 #include "settingsForm.h"
+#include "buttonsFunctions.h"
 #include "fonts.h"
 #include "st7789.h"
 #include "string.h"
 #include "flash.h"
+#include "mainForm.h"
 
 #define HEADER_TO_FIRST_ITEM_PIXELS	41
 #define ITEM_TO_ITEM_PIXELS			7
@@ -26,47 +28,78 @@
 #define TRIANGLE_UP					1
 #define TRIANGLE_DOWN				2
 
-uint16_t centerString(FontDef font, const char *str);
 uint16_t calculateItemStartHeight(uint8_t itemNumber, FontDef font);
 
 volatile static uint8_t trianglesDrawed = 0;
 
-void enterSubMenu(void *param)
+void downButtonFunctionSettingsMenu(void *param);
+void upButtonFunctionSettingsMenu(void *param);
+void okButtonFunctionSettingsMenu(void *param);
+void escButtonFunctionSettingsMenu(void *param);
+
+void enterSettingsMenu(void)
 {
-	currentMenu = param;
+	mainMenuActive = FALSE;
+	currentSettingsMenu = &settingsMenu;
+	currentSettingsMenu->currentItem = 0;
 	ST7789_Fill_Color(WHITE);
-	currentMenu->currentItem = 0;
+	ST7789_WriteString(centerString(Font_16x26, currentSettingsMenu->header), 5, currentSettingsMenu->header, Font_16x26, BLACK, WHITE);
 
-	ST7789_WriteString(centerString(Font_16x26, currentMenu->header), 5, currentMenu->header, Font_16x26, BLACK, WHITE);
-
-	for(uint8_t i = 0; i < currentMenu->itemsNumber; i++)
+	for(uint8_t i = 0; i < currentSettingsMenu->itemsNumber; i++)
 	{
-		if(i == currentMenu->currentItem)
+		if(i == currentSettingsMenu->currentItem)
 		{
-			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentMenu->menuItems[i].name, Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, WHITE, BLACK);
 		}
 		else
 		{
-			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentMenu->menuItems[i].name, Font_11x18, BLACK, WHITE);
+			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, BLACK, WHITE);
+		}
+	}
+
+	upButtonFunction = upButtonFunctionSettingsMenu;
+	downButtonFunction = downButtonFunctionSettingsMenu;
+	okButtonFunction = okButtonFunctionSettingsMenu;
+	escButtonFunction = escButtonFunctionSettingsMenu;
+
+}
+
+void enterSubMenu(void *param)
+{
+	currentSettingsMenu = param;
+	ST7789_Fill_Color(WHITE);
+	currentSettingsMenu->currentItem = 0;
+
+	ST7789_WriteString(centerString(Font_16x26, currentSettingsMenu->header), 5, currentSettingsMenu->header, Font_16x26, BLACK, WHITE);
+
+	for(uint8_t i = 0; i < currentSettingsMenu->itemsNumber; i++)
+	{
+		if(i == currentSettingsMenu->currentItem)
+		{
+			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, WHITE, BLACK);
+		}
+		else
+		{
+			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, BLACK, WHITE);
 		}
 	}
 }
 
 void goToParentMenu(void)
 {
-	currentMenu = currentMenu->parentMenu;
+	currentSettingsMenu = currentSettingsMenu->parentMenu;
 	ST7789_Fill_Color(WHITE);
-	ST7789_WriteString(centerString(Font_16x26, currentMenu->header), 5, currentMenu->header, Font_16x26, BLACK, WHITE);
+	ST7789_WriteString(centerString(Font_16x26, currentSettingsMenu->header), 5, currentSettingsMenu->header, Font_16x26, BLACK, WHITE);
 
-	for(uint8_t i = 0; i < currentMenu->itemsNumber; i++)
+	for(uint8_t i = 0; i < currentSettingsMenu->itemsNumber; i++)
 	{
-		if(i == currentMenu->currentItem)
+		if(i == currentSettingsMenu->currentItem)
 		{
-			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentMenu->menuItems[i].name, Font_11x18, WHITE, BLACK);
+			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, WHITE, BLACK);
 		}
 		else
 		{
-			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentMenu->menuItems[i].name, Font_11x18, BLACK, WHITE);
+			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, BLACK, WHITE);
 		}
 	}
 }
@@ -108,30 +141,30 @@ void showParameterValue(void)
 void enterParameterMenu(void *param)
 {
 	currentParameter = param;
-	parametersAdjustmentMenu.header = currentMenu->menuItems[currentMenu->currentItem].name;
-	parametersAdjustmentMenu.parentMenu = currentMenu;
+	parametersAdjustmentMenu.header = currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].name;
+	parametersAdjustmentMenu.parentMenu = currentSettingsMenu;
 
-	currentMenu = &parametersAdjustmentMenu;
+	currentSettingsMenu = &parametersAdjustmentMenu;
 
 	trianglesDrawed = 0;
 
 	ST7789_Fill_Color(WHITE);
-	ST7789_WriteString(centerString(Font_16x26, currentMenu->header), 5, currentMenu->header, Font_16x26, BLACK, WHITE);
+	ST7789_WriteString(centerString(Font_16x26, currentSettingsMenu->header), 5, currentSettingsMenu->header, Font_16x26, BLACK, WHITE);
 
 	showParameterValue();
 }
 
 void callItemFunction(void)
 {
-	if(currentMenu->menuItems[currentMenu->currentItem].menuFunction != 0)
+	if(currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].menuFunction != 0)
 	{
-		currentMenu->menuItems[currentMenu->currentItem].menuFunction(currentMenu->menuItems[currentMenu->currentItem].param);
+		currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].menuFunction(currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].param);
 	}
 }
 
 void backToParentMenu(void)
 {
-	if(currentMenu->parentMenu != 0)
+	if(currentSettingsMenu->parentMenu != 0)
 	{
 		ST7789_Fill_Color(WHITE);
 		goToParentMenu();
@@ -217,24 +250,8 @@ MenuFormat settingsMenu =
 	.menuType = SCROLL_MENU,
 };
 
-MenuFormat *currentMenu = &settingsMenu;
+MenuFormat *currentSettingsMenu = &settingsMenu;
 Parameter *currentParameter = 0;
-
-uint16_t centerString(FontDef font, const char *str)
-{
-	//size of string in pixels
-	uint16_t Xstart = font.width * strlen(str);
-
-	if(Xstart > ST7789_WIDTH)
-	{
-		return 0;
-	}
-
-	Xstart = ST7789_WIDTH - Xstart; //number of empty pixels
-	Xstart /= 2; //devided by 2 to get x start to center a string
-
-	return Xstart;
-}
 
 uint16_t calculateItemStartHeight(uint8_t itemNumber, FontDef font)
 {
@@ -244,31 +261,31 @@ uint16_t calculateItemStartHeight(uint8_t itemNumber, FontDef font)
 
 void goToNextItem(void)
 {
-	if(currentMenu->currentItem == (currentMenu->itemsNumber - 1))
+	if(currentSettingsMenu->currentItem == (currentSettingsMenu->itemsNumber - 1))
 	{
 		return;
 	}
 
-	ST7789_WriteString(2, calculateItemStartHeight(currentMenu->currentItem, Font_11x18), currentMenu->menuItems[currentMenu->currentItem].name, Font_11x18, BLACK, WHITE);
-	currentMenu->currentItem++;
-	ST7789_WriteString(2, calculateItemStartHeight(currentMenu->currentItem, Font_11x18), currentMenu->menuItems[currentMenu->currentItem].name, Font_11x18, WHITE, BLACK);
+	ST7789_WriteString(2, calculateItemStartHeight(currentSettingsMenu->currentItem, Font_11x18), currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].name, Font_11x18, BLACK, WHITE);
+	currentSettingsMenu->currentItem++;
+	ST7789_WriteString(2, calculateItemStartHeight(currentSettingsMenu->currentItem, Font_11x18), currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].name, Font_11x18, WHITE, BLACK);
 }
 
 void goToPreviousItem(void)
 {
-	if(currentMenu->currentItem == 0)
+	if(currentSettingsMenu->currentItem == 0)
 	{
 		return;
 	}
 
-	ST7789_WriteString(2, calculateItemStartHeight(currentMenu->currentItem, Font_11x18), currentMenu->menuItems[currentMenu->currentItem].name, Font_11x18, BLACK, WHITE);
-	currentMenu->currentItem--;
-	ST7789_WriteString(2, calculateItemStartHeight(currentMenu->currentItem, Font_11x18), currentMenu->menuItems[currentMenu->currentItem].name, Font_11x18, WHITE, BLACK);
+	ST7789_WriteString(2, calculateItemStartHeight(currentSettingsMenu->currentItem, Font_11x18), currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].name, Font_11x18, BLACK, WHITE);
+	currentSettingsMenu->currentItem--;
+	ST7789_WriteString(2, calculateItemStartHeight(currentSettingsMenu->currentItem, Font_11x18), currentSettingsMenu->menuItems[currentSettingsMenu->currentItem].name, Font_11x18, WHITE, BLACK);
 }
 
-void downButtonFunction(void)
+void downButtonFunctionSettingsMenu(void *param)
 {
-	switch(currentMenu->menuType)
+	switch(currentSettingsMenu->menuType)
 	{
 		case SCROLL_MENU:
 			goToNextItem();
@@ -282,9 +299,9 @@ void downButtonFunction(void)
 	}
 }
 
-void upButtonFunction(void)
+void upButtonFunctionSettingsMenu(void *param)
 {
-	switch(currentMenu->menuType)
+	switch(currentSettingsMenu->menuType)
 	{
 		case SCROLL_MENU:
 			goToPreviousItem();
@@ -297,9 +314,9 @@ void upButtonFunction(void)
 	}
 }
 
-void okButtonFunction(void)
+void okButtonFunctionSettingsMenu(void *param)
 {
-	switch(currentMenu->menuType)
+	switch(currentSettingsMenu->menuType)
 	{
 		case SCROLL_MENU:
 			callItemFunction();
@@ -328,9 +345,9 @@ void okButtonFunction(void)
 	}
 }
 
-void escButtonFunction(void)
+void escButtonFunctionSettingsMenu(void *param)
 {
-	switch(currentMenu->menuType)
+	switch(currentSettingsMenu->menuType)
 	{
 		case SCROLL_MENU:
 			break;
@@ -340,5 +357,12 @@ void escButtonFunction(void)
 			break;
 	}
 
-	backToParentMenu();
+	if(currentSettingsMenu == &settingsMenu)
+	{
+		initMainForm();
+	}
+	else
+	{
+		backToParentMenu();
+	}
 }

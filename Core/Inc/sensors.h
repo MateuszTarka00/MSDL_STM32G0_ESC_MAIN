@@ -32,5 +32,7 @@ bool getChainMotorState(void);
 Direction getDirection(void);
 Loosers getLoosersState(void);
 bool getContactorsState(void);
+bool getIspectionMode(void);
+bool getThermistorState(void);
 
 #endif /* INC_SENSORS_H_ */

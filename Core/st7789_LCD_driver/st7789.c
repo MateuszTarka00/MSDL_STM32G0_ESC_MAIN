@@ -800,3 +800,19 @@ void ST7789_Test(void)
     //ST7789_DrawImage(0, 0, 240, 240, (uint16_t *)tek);
     //HAL_Delay(3000);
 }
+
+uint16_t centerString(FontDef font, const char *str)
+{
+	//size of string in pixels
+	uint16_t Xstart = font.width * strlen(str);
+
+	if(Xstart > ST7789_WIDTH)
+	{
+		return 0;
+	}
+
+	Xstart = ST7789_WIDTH - Xstart; //number of empty pixels
+	Xstart /= 2; //devided by 2 to get x start to center a string
+
+	return Xstart;
+}

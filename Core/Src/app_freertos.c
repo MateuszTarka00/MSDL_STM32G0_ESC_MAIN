@@ -30,6 +30,7 @@
 #include "buttonsFunctions.h"
 #include "settingsForm.h"
 #include "mainForm.h"
+#include "sensors.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -227,7 +228,18 @@ void safetyCheck(void *argument)
 		  safetyCircuitPoint = SAFETY_CIRCUIT_UNBROKEN;
 	  }
 
+	  updateSafetyCircuitError(safetyCircuitPoint);
 	  setSafetyCircuitStateOutput();
+
+	  if(getThermistorState())
+	  {
+		  addRemoveError(THERMISTOR, FALSE);
+	  }
+	  else
+	  {
+		  addRemoveError(THERMISTOR, TRUE);
+	  }
+
 	  osDelay(1);
   }
   /* USER CODE END safetyCheck */
@@ -266,7 +278,11 @@ void displayTask(void *argument)
 	initMainForm();
   for(;;)
   {
-	mainMenuSubTask();
+	  if(mainMenuActive)
+	  {
+		  mainMenuSubTask();
+	  }
+
 	buttonsSubTask();
     osDelay(1);
   }

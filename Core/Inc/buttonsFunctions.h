@@ -20,6 +20,11 @@ typedef struct
     uint8_t pendingRelease;
 } ButtonDebounce_t;
 
+extern void (*upButtonFunction)(void *);
+extern void (*downButtonFunction)(void *);
+extern void (*okButtonFunction)(void *);
+extern void (*escButtonFunction)(void *);
+
 void buttonsSubTask(void);
 
 #endif /* INC_BUTTONSFUNCTIONS_H_ */

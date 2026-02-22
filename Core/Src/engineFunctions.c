@@ -15,7 +15,8 @@ volatile uint32_t engineRotationTemporary = 0;
 volatile uint32_t handrailRotationTemporary = 0;
 volatile uint32_t stepRotationTemporary = 0;
 
-static volatile bool highSpeedSet = FALSE;
+volatile bool highSpeedSet = FALSE;
+volatile bool slowSpeedSet = FALSE;
 
 static SoftwareTimerHandler fastSpeedTimer;
 static SoftwareTimerHandler speedChangeTimer;
@@ -163,6 +164,7 @@ bool checkErrorRange(uint32_t real, uint32_t given)
 void enableFastSpeed(void)
 {
 	highSpeedSet = TRUE;
+	slowSpeedSet = FALSE;
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 
@@ -172,7 +174,8 @@ void enableFastSpeed(void)
 
 void enableSlowSpeed(void)
 {
-	highSpeedSet = TRUE;
+	highSpeedSet = FALSE;
+	slowSpeedSet = TRUE;
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, TRUE);
 

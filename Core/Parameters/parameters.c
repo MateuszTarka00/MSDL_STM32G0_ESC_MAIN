@@ -126,8 +126,6 @@ Parameter parameterFactoryReset=
 		ON_OFF,
 };
 
-
-
 void paramGetValueString(char *buffer, Parameter *parameter)
 {
 	switch(parameter->type)

@@ -6,6 +6,7 @@
  */
 
 #include "safetyCircuit.h"
+#include "mainForm.h"
 
 SafetyCircuitPoint safetyCircuitPoint = SAFETY_CIRCUIT_UNBROKEN;
 static volatile bool safetyCircuitState = FALSE;
@@ -46,4 +47,16 @@ SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
 void setSafetyCircuitStateOutput(void)
 {
 	HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, safetyCircuitState);
+}
+
+void updateSafetyCircuitError(uint8_t state)
+{
+	if(state != SAFETY_CIRCUIT_UNBROKEN)
+	{
+		addRemoveError(SAFETY_CIRCUIT, TRUE);
+	}
+	else
+	{
+		addRemoveError(SAFETY_CIRCUIT, FALSE);
+	}
 }

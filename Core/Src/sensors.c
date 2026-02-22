@@ -80,3 +80,13 @@ bool getContactorsState(void)
 	return(HAL_GPIO_ReadPin(ACK_CONT_GPIO_Port, ACK_CONT_Pin));
 }
 
+bool getIspectionMode(void)
+{
+	return(HAL_GPIO_ReadPin(INSPECTION_MODE_GPIO_Port, INSPECTION_MODE_Pin));
+}
+
+bool getThermistorState(void)
+{
+	return(HAL_GPIO_ReadPin(IN_THERMAL_GPIO_Port, IN_THERMAL_Pin));
+}
+
