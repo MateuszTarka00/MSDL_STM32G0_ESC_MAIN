@@ -140,6 +140,7 @@ bool flash_loadParameters(void)
 
 void flash_factoryReset(void)
 {
+
 	Flash_ErasePage(FLASH_PAGE);
 	softwareReset();
 }

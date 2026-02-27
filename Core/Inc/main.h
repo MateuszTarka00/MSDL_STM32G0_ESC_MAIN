@@ -29,11 +29,10 @@ extern "C" {
 
 /* Includes ------------------------------------------------------------------*/
 #include "stm32g0xx_hal.h"
-#include "cmsis_os2.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "cmsis_os2.h"
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -127,6 +126,14 @@ void Error_Handler(void);
 #define ROTATION_S1_Pin GPIO_PIN_11
 #define ROTATION_S1_GPIO_Port GPIOE
 #define ROTATION_S1_EXTI_IRQn EXTI4_15_IRQn
+#define ROTATION_OK_Pin GPIO_PIN_14
+#define ROTATION_OK_GPIO_Port GPIOE
+#define STAND_OK_Pin GPIO_PIN_15
+#define STAND_OK_GPIO_Port GPIOE
+#define SAFETY_OK_Pin GPIO_PIN_10
+#define SAFETY_OK_GPIO_Port GPIOB
+#define TEACH_SLOW_Pin GPIO_PIN_11
+#define TEACH_SLOW_GPIO_Port GPIOB
 #define LCD_SCK_Pin GPIO_PIN_13
 #define LCD_SCK_GPIO_Port GPIOB
 #define LCD_MISO_Pin GPIO_PIN_14
@@ -137,6 +144,16 @@ void Error_Handler(void);
 #define LCD_CS_GPIO_Port GPIOA
 #define LCD_DC_Pin GPIO_PIN_9
 #define LCD_DC_GPIO_Port GPIOA
+#define SLOW_SPEED_Pin GPIO_PIN_7
+#define SLOW_SPEED_GPIO_Port GPIOC
+#define FAST_SPEED_Pin GPIO_PIN_8
+#define FAST_SPEED_GPIO_Port GPIOD
+#define FACTORY_RESET_Pin GPIO_PIN_9
+#define FACTORY_RESET_GPIO_Port GPIOD
+#define TEACH_FAST_Pin GPIO_PIN_10
+#define TEACH_FAST_GPIO_Port GPIOD
+#define SPEED_READY_Pin GPIO_PIN_11
+#define SPEED_READY_GPIO_Port GPIOD
 #define SAFETY_END_Pin GPIO_PIN_12
 #define SAFETY_END_GPIO_Port GPIOD
 #define LCD_RST_Pin GPIO_PIN_10

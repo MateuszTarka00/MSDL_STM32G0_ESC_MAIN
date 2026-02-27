@@ -98,7 +98,7 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN2_Init();
   MX_TIM14_Init();
-//  MX_IWDG_Init();
+  MX_IWDG_Init();
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
@@ -106,7 +106,7 @@ int main(void)
   HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
   ST7789_Init();
 
-  HAL_TIM_Base_Start_IT(&htim17);
+  HAL_TIM_Base_Start_IT(&htim14);
   initWatchdogTimerInit(); //todo add tim17 start function
   /* USER CODE END 2 */
 
@@ -202,7 +202,7 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
-  if(htim->Instance == TIM17)
+  if(htim->Instance == TIM14)
   {
 	  timersHandler();
   }
