@@ -8,7 +8,6 @@
 
 #include "suppCpuCommunication.h"
 
-
 void setFactoryReset(void)
 {
 	HAL_GPIO_WritePin(FACTORY_RESET_GPIO_Port, FACTORY_RESET_Pin, TRUE);
@@ -18,6 +17,12 @@ void setTeachFast(bool onOff)
 {
 	HAL_GPIO_WritePin(TEACH_FAST_GPIO_Port, TEACH_FAST_Pin, onOff);
 }
+
+void setTeachSlow(bool onOff)
+{
+	HAL_GPIO_WritePin(TEACH_SLOW_GPIO_Port, TEACH_SLOW_Pin, onOff);
+}
+
 
 bool getSpeedReady(void)
 {
@@ -52,4 +57,9 @@ void setFastSpeed(bool onOff)
 void setTeachOutput(bool onOff)
 {
 	HAL_GPIO_WritePin(TEACH_OUTPUT_GPIO_Port, TEACH_OUTPUT_Pin, onOff);
+}
+
+bool getTeachingEnd(void)
+{
+	return HAL_GPIO_ReadPin(END_TEACHING_GPIO_Port, END_TEACHING_Pin);
 }

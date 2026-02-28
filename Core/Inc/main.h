@@ -144,6 +144,8 @@ void Error_Handler(void);
 #define LCD_CS_GPIO_Port GPIOA
 #define LCD_DC_Pin GPIO_PIN_9
 #define LCD_DC_GPIO_Port GPIOA
+#define END_TEACHING_Pin GPIO_PIN_6
+#define END_TEACHING_GPIO_Port GPIOC
 #define SLOW_SPEED_Pin GPIO_PIN_7
 #define SLOW_SPEED_GPIO_Port GPIOC
 #define FAST_SPEED_Pin GPIO_PIN_8

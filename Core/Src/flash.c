@@ -7,6 +7,7 @@
 
 #include "flash.h"
 #include "softwareReset.h"
+#include "suppCpuCommunication.h"
 #include <string.h>
 
 #define FLASH_PAGE 			200
@@ -140,8 +141,9 @@ bool flash_loadParameters(void)
 
 void flash_factoryReset(void)
 {
-
+	setFactoryReset();
 	Flash_ErasePage(FLASH_PAGE);
+	HAL_Delay(1000);
 	softwareReset();
 }
 

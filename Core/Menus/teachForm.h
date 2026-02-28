@@ -21,6 +21,7 @@ typedef enum
 	WAIT_FOR_FAST_SPEED,
 	FAST_SPEED_TIME,
 	FAST_SPEED_CONFIRMATION,
+	END,
 }TeachStateMachine;
 
 void stateMachineSubTask(void);

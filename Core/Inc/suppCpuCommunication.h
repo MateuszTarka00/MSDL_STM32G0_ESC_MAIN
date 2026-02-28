@@ -12,6 +12,7 @@
 
 void setFactoryReset(void);
 void setTeachFast(bool onOff);
+void setTeachSlow(bool onOff);
 bool getSpeedReady(void);
 bool getRotationState(void);
 bool getStandState(void);
@@ -19,4 +20,5 @@ bool getSafetyState(void);
 void setSlowSpeed(bool onOff);
 void setFastSpeed(bool onOff);
 void setTeachOutput(bool onOff);
+bool getTeachingEnd(void);
 #endif /* INC_SUPPCPUCOMMUNICATION_H_ */

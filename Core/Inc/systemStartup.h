@@ -10,6 +10,8 @@
 
 #include "main.h"
 
+extern volatile bool teachOnStartup;
+
 void startupFunction(void);
 
 #endif /* INC_SYSTEMSTARTUP_H_ */

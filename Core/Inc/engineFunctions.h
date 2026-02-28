@@ -35,8 +35,17 @@ typedef struct
 	SpeedTimes step;
 }RotationsPerMinute;
 
+typedef struct
+{
+	bool engineSpeedState;
+	bool handRailSpeedState;
+	bool stepSpeedState;
+	bool chainMotorState;
+}EngineErrors;
+
 extern RotationsPerMinute rotationsPerMinuteReal;
 extern RotationsPerMinute rotationsPerMinuteGiven;
+extern EngineErrors engineErrors;
 
 void initEngineTimers(void);
 void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMinute);
@@ -47,5 +56,7 @@ bool checkSetFrequency(void);
 bool checkErrorRange(uint32_t real, uint32_t given);
 void rotationsLoadParameters(void);
 void rotationsSaveParameters(void);
+void stepsNormalExtiCallback(uint16_t GPIO_Pin);
+void setEngineOnOff(bool onOff);
 
 #endif /* INC_ENGINEFUNCTIONS_H_ */
