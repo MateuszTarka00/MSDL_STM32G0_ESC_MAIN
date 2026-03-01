@@ -36,7 +36,15 @@ typedef enum
 	SAFETY_CIRCUIT,
 }ErrorsType;
 
-extern bool mainMenuActive;
+typedef enum
+{
+	MAIN_MENU,
+	SETTINGS_MENU,
+	TEACHING_MENU
+}MenusTypes;
+
+extern MenusTypes activeMenu;
+extern volatile uint8_t numberOfErrors;
 
 void updateSafetyCircuitState(void);
 void updateSensorUp(void);

@@ -24,7 +24,11 @@ typedef enum
 	END,
 }TeachStateMachine;
 
+extern bool teachingMenuActive;
+
 void stateMachineSubTask(void);
+void enterTeachingForm(void);
+void stepsTeachExtiCallback(uint16_t GPIO_Pin);
 //void enterRestartDriverState(void);
 //void enterPreparationState(void);
 //void enterWaitForSlowSpeed(void);

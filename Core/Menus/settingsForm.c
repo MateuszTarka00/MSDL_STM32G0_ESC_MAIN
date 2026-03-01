@@ -39,7 +39,7 @@ void escButtonFunctionSettingsMenu(void *param);
 
 void enterSettingsMenu(void)
 {
-	mainMenuActive = FALSE;
+	activeMenu = SETTINGS_MENU;
 	currentSettingsMenu = &settingsMenu;
 	currentSettingsMenu->currentItem = 0;
 	ST7789_Fill_Color(WHITE);
@@ -360,6 +360,7 @@ void escButtonFunctionSettingsMenu(void *param)
 	if(currentSettingsMenu == &settingsMenu)
 	{
 		initMainForm();
+		activeMenu = MAIN_MENU;
 	}
 	else
 	{

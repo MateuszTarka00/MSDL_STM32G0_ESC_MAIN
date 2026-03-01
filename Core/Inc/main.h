@@ -216,6 +216,7 @@ typedef enum
 }bool;
 
 extern osThreadId_t displayTaskTHandle;
+extern osThreadId_t engineControlTHandle;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

@@ -18,7 +18,6 @@
 
 extern volatile uint32_t engineRotationTemporary;
 extern volatile uint32_t handrailRotationTemporary;
-extern volatile uint32_t stepRotationTemporary;
 extern volatile bool highSpeedSet;
 extern volatile bool slowSpeedSet;
 
@@ -52,6 +51,7 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 void incrementRotationsNumber(uint16_t GPIO_Pin);
 void enableFastSpeed(void);
 void enableSlowSpeed(void);
+void stopEngine(void);
 bool checkSetFrequency(void);
 bool checkErrorRange(uint32_t real, uint32_t given);
 void rotationsLoadParameters(void);

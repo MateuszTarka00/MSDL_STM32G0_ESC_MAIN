@@ -31,6 +31,7 @@
 #include "settingsForm.h"
 #include "mainForm.h"
 #include "sensors.h"
+#include "teachForm.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -274,13 +275,29 @@ void displayTask(void *argument)
 {
   /* USER CODE BEGIN displayTask */
   /* Infinite loop */
-//	backToParentMenu();
-	initMainForm();
+	enterTeachingForm();
+	if(activeMenu == MAIN_MENU)
+	{
+		initMainForm();
+	}
+
   for(;;)
   {
-	  if(mainMenuActive)
+	  enterTeachingForm();
+
+	  switch(activeMenu)
 	  {
-		  mainMenuSubTask();
+		  case MAIN_MENU:
+			  mainMenuSubTask();
+			  break;
+
+		  case SETTINGS_MENU:
+			  //no subtask
+			  break;
+
+		  case TEACHING_MENU:
+			  stateMachineSubTask();
+			  break;
 	  }
 
 	buttonsSubTask();
@@ -302,6 +319,7 @@ void engineControl(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	rotationSubTask();
     osDelay(1);
   }
   /* USER CODE END engineControl */

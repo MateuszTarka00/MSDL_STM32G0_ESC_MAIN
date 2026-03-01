@@ -126,7 +126,7 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 	}
 
 	engineRotationTemporary = 0;
-	stepRotationTemporary = 0;
+	handrailRotationTemporary = 0;
 
 	// Enable
 	__HAL_GPIO_EXTI_ENABLE_IT(ROTATION_H1_Pin);
@@ -176,7 +176,10 @@ void enableFastSpeed(void)
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 
-	startSoftwareTimer(&fastSpeedTimer);
+	setSlowSpeed(FALSE);
+	setFastSpeed(TRUE);
+
+//	startSoftwareTimer(&fastSpeedTimer);
 
 	deInitSoftwareTimer(&stepsErrorTimer);
 	initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.handrail.fastTime, stepsErrorTimerCallback, FALSE, 0);
@@ -189,11 +192,23 @@ void enableSlowSpeed(void)
 	slowSpeedSet = TRUE;
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, TRUE);
+	setFastSpeed(FALSE);
+	setSlowSpeed(TRUE);
 
 	deInitSoftwareTimer(&stepsErrorTimer);
 	initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.handrail.slowTime, stepsErrorTimerCallback, FALSE, 0);
 
 //	startSoftwareTimer(&speedChangeTimer);
+}
+
+void stopEngine(void)
+{
+	highSpeedSet = FALSE;
+	slowSpeedSet = FALSE;
+	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
+	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
+	setFastSpeed(FALSE);
+	setSlowSpeed(FALSE);
 }
 
 void checkChainMotorOK(void)

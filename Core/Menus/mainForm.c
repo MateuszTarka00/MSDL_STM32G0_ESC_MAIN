@@ -34,11 +34,12 @@
 #define CHARS_PER_LINE 			21
 
 #define NUMBER_OF_ERROR_TYPES 	6
-#define CHANGE_ERROR_TIME_MS	5000
+#define CHANGE_ERROR_TIME_MS	2000
 
-bool mainMenuActive = TRUE;
+MenusTypes activeMenu = MAIN_MENU;
+bool errorStateActive = FALSE;
 
-static uint8_t numberOfErrors = 0;
+volatile uint8_t numberOfErrors = 0;
 static SoftwareTimerHandler errorChangeTimer;
 static uint8_t displayedErrorIndex = 0;
 
@@ -232,7 +233,6 @@ void errorChangeTimerCallback(void *param)
 
 void initMainForm(void)
 {
-	mainMenuActive = TRUE;
 	ST7789_Fill_Color(WHITE);
 	for(uint8_t i = 0; i < ITEMS_NUMBER; i++)
 	{
@@ -594,6 +594,15 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 			}
 
 		}
+	}
+
+	if(numberOfErrors)
+	{
+		errorStateActive = TRUE;
+	}
+	else
+	{
+		errorStateActive = FALSE;
 	}
 }
 

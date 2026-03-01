@@ -24,9 +24,9 @@ void checkTeachOnStartup(void)
 
 void startupFunction(void)
 {
+	checkTeachOnStartup();
 	if(flash_loadParameters())
 	{
-		checkTeachOnStartup();
 		paramLoadParameters();
 		rotationsLoadParameters();
 	}
