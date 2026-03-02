@@ -22,6 +22,8 @@ typedef enum
 	FAST_SPEED_TIME,
 	FAST_SPEED_CONFIRMATION,
 	END,
+	ENTER_ERROR_STATE,
+	ERROR_STATE,
 }TeachStateMachine;
 
 extern bool teachingMenuActive;
@@ -29,15 +31,5 @@ extern bool teachingMenuActive;
 void stateMachineSubTask(void);
 void enterTeachingForm(void);
 void stepsTeachExtiCallback(uint16_t GPIO_Pin);
-//void enterRestartDriverState(void);
-//void enterPreparationState(void);
-//void enterWaitForSlowSpeed(void);
-//void enterSlowSpeedTime(void);
-//void enterSlowSpeedConfirmation(void);
-//void enterWaitForFastSpeed(void);
-//void enterFastSpeedTime(void);
-//void enterFastSpeedConfirmation(void);
-
-
 
 #endif /* MENUS_TEACHFORM_H_ */

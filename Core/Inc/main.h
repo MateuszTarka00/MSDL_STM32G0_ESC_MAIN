@@ -120,6 +120,8 @@ void Error_Handler(void);
 #define LOCKER_IN2_GPIO_Port GPIOF
 #define LOCKER_IN1_Pin GPIO_PIN_7
 #define LOCKER_IN1_GPIO_Port GPIOF
+#define ROTATION_H2_Pin GPIO_PIN_7
+#define ROTATION_H2_GPIO_Port GPIOE
 #define ROTATION_H1_Pin GPIO_PIN_8
 #define ROTATION_H1_GPIO_Port GPIOE
 #define ROTATION_H1_EXTI_IRQn EXTI4_15_IRQn
@@ -134,6 +136,8 @@ void Error_Handler(void);
 #define SAFETY_OK_GPIO_Port GPIOB
 #define TEACH_SLOW_Pin GPIO_PIN_11
 #define TEACH_SLOW_GPIO_Port GPIOB
+#define ACK_K1_Pin GPIO_PIN_12
+#define ACK_K1_GPIO_Port GPIOB
 #define LCD_SCK_Pin GPIO_PIN_13
 #define LCD_SCK_GPIO_Port GPIOB
 #define LCD_MISO_Pin GPIO_PIN_14

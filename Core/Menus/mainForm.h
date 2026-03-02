@@ -45,6 +45,7 @@ typedef enum
 
 extern MenusTypes activeMenu;
 extern volatile uint8_t numberOfErrors;
+extern bool errorStateActive;
 
 void updateSafetyCircuitState(void);
 void updateSensorUp(void);

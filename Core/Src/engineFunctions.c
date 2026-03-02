@@ -89,15 +89,24 @@ void initEngineTimers(void)
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
 {
-	switch(GPIO_Pin)
+	if(checkTargetFrequencyReached())
 	{
-	case ROTATION_S1_Pin:
-		engineRotationTemporary++;
-		break;
+		switch(GPIO_Pin)
+		{
+		case ROTATION_S1_Pin:
+			engineRotationTemporary++;
+			break;
 
-	case ROTATION_H1_Pin:
-		handrailRotationTemporary++;
-		break;
+		case ROTATION_H1_Pin:
+			handrailRotationTemporary++;
+			break;
+		}
+	}
+	else
+	{
+		engineRotationTemporary = 0;
+		handrailRotationTemporary = 0;
+
 	}
 }
 
@@ -131,6 +140,12 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 	// Enable
 	__HAL_GPIO_EXTI_ENABLE_IT(ROTATION_H1_Pin);
 	__HAL_GPIO_EXTI_ENABLE_IT(MIS_ST1_Pin);
+}
+
+void restartRotationsTmp(void)
+{
+	engineRotationTemporary = 0;
+	handrailRotationTemporary = 0;
 }
 
 bool checkSetFrequency(void)
@@ -252,30 +267,33 @@ void stepsNormalExtiCallback(uint16_t GPIO_Pin)
 	static bool steps1 = FALSE;
 	static bool steps2 = FALSE;
 
-	if(GPIO_Pin == MIS_ST2_Pin)
+	if(checkTargetFrequencyReached())
 	{
-		if(steps1)
+		if(GPIO_Pin == MIS_ST2_Pin)
 		{
-			steps1 = FALSE;
-			stopSoftwareTimer(&stepsErrorTimer);
+			if(steps1)
+			{
+				steps1 = FALSE;
+				stopSoftwareTimer(&stepsErrorTimer);
+			}
+			else
+			{
+				steps2 = TRUE;
+				startSoftwareTimer(&stepsErrorTimer);
+			}
 		}
-		else
+		else if(GPIO_Pin == MIS_ST1_Pin)
 		{
-			steps2 = TRUE;
-			startSoftwareTimer(&stepsErrorTimer);
-		}
-	}
-	else if(GPIO_Pin == MIS_ST1_Pin)
-	{
-		if(steps2)
-		{
-			steps2 = FALSE;
-			stopSoftwareTimer(&stepsErrorTimer);
-		}
-		else
-		{
-			steps1 = TRUE;
-			startSoftwareTimer(&stepsErrorTimer);
+			if(steps2)
+			{
+				steps2 = FALSE;
+				stopSoftwareTimer(&stepsErrorTimer);
+			}
+			else
+			{
+				steps1 = TRUE;
+				startSoftwareTimer(&stepsErrorTimer);
+			}
 		}
 	}
 }

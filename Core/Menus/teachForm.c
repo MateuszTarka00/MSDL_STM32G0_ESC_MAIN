@@ -20,11 +20,14 @@
 #include "mainForm.h"
 #include "confInputs.h"
 
-#define TEACH_TIME		10000
-#define END_TEACH_TIME	12000
+#define WAIT_FOR_SPEED_TIME		60000
+#define TEACH_TIME				10000
+#define END_TEACH_TIME			12000
 
 SoftwareTimerHandler teachTimer;
 SoftwareTimerHandler endTeachingTimer;
+
+SoftwareTimerHandler waitForSpeedTimer;
 
 void enableFastSpeed(void);
 void enableSlowSpeed(void);
@@ -35,11 +38,20 @@ void okButtonFunctionTeachMenu(void *param);
 void escButtonFunctionTeachMenu(void *param);
 
 TeachStateMachine teachStateMachine = START_STATE;
+TeachStateMachine previousStateMachine;
 
 static uint32_t gapsBetweenSteps = 0;
 static uint32_t stepsCounted = 0;
 
+static bool hasErrorOccured = FALSE;
+
 bool teachingMenuActive = FALSE;
+
+void waitForSpeedTimerCallback(void *param)
+{
+	previousStateMachine = teachStateMachine;
+	teachStateMachine = ENTER_ERROR_STATE;
+}
 
 void enterEndState(void)
 {
@@ -77,6 +89,7 @@ void okButtonFunctionTeachMenu(void *param)
 		setTeachFast(FALSE);
 		setTeachSlow(TRUE);
 		teachStateMachine = WAIT_FOR_SLOW_SPEED;
+		startSoftwareTimer(&waitForSpeedTimer);
 		enterWaitForSlowSpeed();
 		break;
 
@@ -87,6 +100,7 @@ void okButtonFunctionTeachMenu(void *param)
 		setTeachSlow(FALSE);
 		setTeachFast(TRUE);
 		teachStateMachine = WAIT_FOR_FAST_SPEED;
+		startSoftwareTimer(&waitForSpeedTimer);
 		enterWaitForFastSpeed();
 		break;
 
@@ -97,6 +111,26 @@ void okButtonFunctionTeachMenu(void *param)
 		stopEngine();
 		teachStateMachine = END;
 		enterEndState();
+		break;
+
+	case ERROR_STATE:
+		if(errorStateActive)
+		{
+			activeMenu = MAIN_MENU;
+			teachStateMachine = START_STATE;
+			initMainForm();
+		}
+		else if(previousStateMachine < SLOW_SPEED_CONFIRMATION)
+		{
+			teachStateMachine = START_STATE;
+		}
+		else
+		{
+			teachStateMachine = SLOW_SPEED_CONFIRMATION;
+			setTeachFast(FALSE);
+			setTeachSlow(FALSE);
+			enterSlowSpeedConfirmation();
+		}
 		break;
 
 	default:
@@ -116,6 +150,8 @@ void escButtonFunctionTeachMenu(void *param)
 		setTeachFast(FALSE);
 		setTeachSlow(TRUE);
 		teachStateMachine = WAIT_FOR_SLOW_SPEED;
+		restartRotationsTmp();
+		startSoftwareTimer(&waitForSpeedTimer);
 		enterWaitForSlowSpeed();
 		break;
 
@@ -126,6 +162,8 @@ void escButtonFunctionTeachMenu(void *param)
 		setTeachSlow(FALSE);
 		setTeachFast(TRUE);
 		teachStateMachine = WAIT_FOR_FAST_SPEED;
+		restartRotationsTmp();
+		startSoftwareTimer(&waitForSpeedTimer);
 		enterWaitForFastSpeed();
 		break;
 
@@ -216,6 +254,46 @@ void enterFastSpeedTime(void)
 	ST7789_WriteString(2, 5, "Sterownik uczy sie\nszybkiej predkosci", Font_11x18, BLACK, WHITE);
 }
 
+void enterErrorState(void)
+{
+	teachStateMachine = ERROR_STATE;
+	setEngineOnOff(FALSE);
+	setTeachSlow(FALSE);
+	setTeachFast(FALSE);
+	stopEngine();
+	ST7789_Fill_Color(WHITE);
+
+	if(errorStateActive)
+	{
+		hasErrorOccured = TRUE;
+		ST7789_WriteString(2, 5, "Pojawil sie blad.\nNapraw blad aby\nkontynuowac.", Font_11x18, BLACK, WHITE);
+		ST7789_WriteString(2, 245, "Nacisnij ok, aby\nprzejsc do\nglownego menu.", Font_11x18, BLACK, WHITE);
+	}
+	else
+	{
+		ST7789_WriteString(2, 5, "Czas oczekiwania\nna zadana predkosc\nprzekroczyl limit.", Font_11x18, BLACK, WHITE);
+		ST7789_WriteString(2, 265, "Nacisnij ok, aby\npowtorzyc", Font_11x18, BLACK, WHITE);
+	}
+}
+
+void errorStateFunction(void)
+{
+	if(errorStateActive && !hasErrorOccured)
+	{
+		ST7789_Fill_Color(WHITE);
+		hasErrorOccured = TRUE;
+		ST7789_WriteString(2, 5, "Pojawil sie blad.\nNapraw blad aby\nkontynuowac.", Font_11x18, BLACK, WHITE);
+		ST7789_WriteString(2, 245, "Nacisnij ok, aby\nprzejsc do\nglownego menu.", Font_11x18, BLACK, WHITE);
+	}
+	else if(hasErrorOccured && !errorStateActive)
+	{
+		ST7789_Fill_Color(WHITE);
+		ST7789_WriteString(2, 5, "Blad zostal\nnaprawiony.", Font_11x18, BLACK, WHITE);
+		ST7789_WriteString(2, 265, "Nacisnij ok, aby\npowtorzyc", Font_11x18, BLACK, WHITE);
+		hasErrorOccured = FALSE;
+	}
+}
+
 void enterFastSpeedConfirmation(void)
 {
 	char buffer[30];
@@ -233,16 +311,25 @@ void enterFastSpeedConfirmation(void)
 
 void stateMachineSubTask(void)
 {
+	if(errorStateActive && teachStateMachine != ERROR_STATE && teachStateMachine != ENTER_ERROR_STATE)
+	{
+		previousStateMachine = teachStateMachine;
+		teachStateMachine = ENTER_ERROR_STATE;
+	}
+
 	switch(teachStateMachine)
 	{
 		case START_STATE:
+
+			upButtonFunction = upButtonFunctionTeachMenu;
+			downButtonFunction = downButtonFunctionTeachMenu;
+			okButtonFunction = okButtonFunctionTeachMenu;
+			escButtonFunction = escButtonFunctionTeachMenu;
+
 			if(teachOnStartup)
 			{
 				teachStateMachine = PREPARATION;
-				upButtonFunction = upButtonFunctionTeachMenu;
-				downButtonFunction = downButtonFunctionTeachMenu;
-				okButtonFunction = okButtonFunctionTeachMenu;
-				escButtonFunction = escButtonFunctionTeachMenu;
+				initSoftwareTimer(&waitForSpeedTimer, WAIT_FOR_SPEED_TIME, waitForSpeedTimerCallback, FALSE, 0);
 				enterPreparationState();
 			}
 			else
@@ -253,17 +340,9 @@ void stateMachineSubTask(void)
 			break;
 
 		case RESTART_DRIVER:
-//			enterRestartDriverState();
 			break;
 
 		case PREPARATION:
-//			setEngineOnOff(TRUE);
-//			enableSlowSpeedTeach();
-//			setFastSpeed(FALSE);
-//			setSlowSpeed(TRUE);
-//			setTeachFast(FALSE);
-//			setTeachSlow(TRUE);
-//			teachStateMachine = WAIT_FOR_SLOW_SPEED;
 			break;
 
 		case WAIT_FOR_SLOW_SPEED:
@@ -276,6 +355,7 @@ void stateMachineSubTask(void)
 
 				startSoftwareTimer(&teachTimer);
 				startSoftwareTimer(&endTeachingTimer);
+				stopSoftwareTimer(&waitForSpeedTimer);
 
 			}
 			break;
@@ -305,6 +385,7 @@ void stateMachineSubTask(void)
 
 				startSoftwareTimer(&teachTimer);
 				startSoftwareTimer(&endTeachingTimer);
+				stopSoftwareTimer(&waitForSpeedTimer);
 			}
 			break;
 
@@ -325,8 +406,16 @@ void stateMachineSubTask(void)
 
 		case END:
 			rotationsSaveParameters();
-//			activeMenu = MAIN_MENU;
 			break;
+
+		case ENTER_ERROR_STATE:
+			enterErrorState();
+			break;
+
+		case ERROR_STATE:
+			errorStateFunction();
+			break;
+
 
 	}
 }
@@ -378,7 +467,10 @@ void enterTeachingForm(void)
 {
 	if(getTeachInput())
 	{
-		activeMenu = TEACHING_MENU;
+		if(!errorStateActive)
+		{
+			activeMenu = TEACHING_MENU;
+		}
 	}
 	else if(activeMenu == TEACHING_MENU)
 	{

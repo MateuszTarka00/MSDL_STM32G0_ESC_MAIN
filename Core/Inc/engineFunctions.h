@@ -16,8 +16,6 @@
 #define SPEED_CHANGE_TIMEOUT_MS			10000
 #define CHAIN_MOTOR_ERROR_TIMEOUT_MS 	1000
 
-extern volatile uint32_t engineRotationTemporary;
-extern volatile uint32_t handrailRotationTemporary;
 extern volatile bool highSpeedSet;
 extern volatile bool slowSpeedSet;
 
@@ -49,6 +47,7 @@ extern EngineErrors engineErrors;
 void initEngineTimers(void);
 void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMinute);
 void incrementRotationsNumber(uint16_t GPIO_Pin);
+void restartRotationsTmp(void);
 void enableFastSpeed(void);
 void enableSlowSpeed(void);
 void stopEngine(void);
