@@ -234,11 +234,11 @@ void safetyCheck(void *argument)
 
 	  if(getThermistorState())
 	  {
-		  addRemoveError(THERMISTOR, FALSE);
+		  addRemoveError(THERMISTOR, TRUE);
 	  }
 	  else
 	  {
-		  addRemoveError(THERMISTOR, TRUE);
+		  addRemoveError(THERMISTOR, FALSE);
 	  }
 
 	  osDelay(1);

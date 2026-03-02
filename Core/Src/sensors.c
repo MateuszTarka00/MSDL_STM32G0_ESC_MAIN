@@ -20,7 +20,7 @@ bool checkIsHumanOnStairsUp(void)
 
 bool getChainMotorState(void)
 {
-	return(HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin));
+	return !HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin);
 }
 
 Direction getDirection(void)
@@ -51,8 +51,8 @@ Direction getDirection(void)
 
 Loosers getLoosersState(void)
 {
-	bool loserOne = HAL_GPIO_ReadPin(LOCKER_IN1_GPIO_Port, LOCKER_IN1_Pin);
-	bool looserTwo = HAL_GPIO_ReadPin(LOCKER_IN2_GPIO_Port, LOCKER_IN2_Pin);
+	bool loserOne = !HAL_GPIO_ReadPin(LOCKER_IN1_GPIO_Port, LOCKER_IN1_Pin);
+	bool looserTwo = !HAL_GPIO_ReadPin(LOCKER_IN2_GPIO_Port, LOCKER_IN2_Pin);
 
 	if(loserOne && looserTwo)
 	{
@@ -77,7 +77,7 @@ Loosers getLoosersState(void)
 
 bool getContactorsState(void)
 {
-	return(HAL_GPIO_ReadPin(ACK_CONT_GPIO_Port, ACK_CONT_Pin));
+	return(!HAL_GPIO_ReadPin(ACK_CONT_GPIO_Port, ACK_CONT_Pin));
 }
 
 bool getIspectionMode(void)
@@ -87,6 +87,6 @@ bool getIspectionMode(void)
 
 bool getThermistorState(void)
 {
-	return(HAL_GPIO_ReadPin(IN_THERMAL_GPIO_Port, IN_THERMAL_Pin));
+	return(!HAL_GPIO_ReadPin(IN_THERMAL_GPIO_Port, IN_THERMAL_Pin));
 }
 
