@@ -7,9 +7,20 @@
 
 #include "safetyCircuit.h"
 #include "mainForm.h"
+#include "softwareTimer_ms.h"
+#include "suppCpuCommunication.h"
+#include "sensors.h"
+#include "parameters.h"
+#include "engineFunctions.h"
 
+SoftwareTimerHandler contactorTimer;
+SoftwareTimerHandler looserTimer;
 SafetyCircuitPoint safetyCircuitPoint = SAFETY_CIRCUIT_UNBROKEN;
+
 static volatile bool safetyCircuitState = FALSE;
+static volatile bool contactor1errorSet = FALSE;
+static volatile bool contactor2errorSet = FALSE;
+static volatile bool contactor3errorSet = FALSE;
 
 const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =
 {
@@ -60,3 +71,104 @@ void updateSafetyCircuitError(uint8_t state)
 		addRemoveError(SAFETY_CIRCUIT, FALSE);
 	}
 }
+
+void updateContactorsStates(void)
+{
+
+	if(getIntContactorState())
+	{
+		contactor1errorSet = FALSE;
+		addRemoveError(CONTACTOR_1_FALLING_OFF, FALSE);
+	}
+	else if(!contactor1errorSet)
+	{
+		if(contactorTimer.start == FALSE)
+		{
+			startSoftwareTimer(&contactorTimer);
+		}
+	}
+
+	if(getAckK2())
+	{
+		contactor1errorSet = FALSE;
+		addRemoveError(CONTACTOR_2_FALLING_OFF, FALSE);
+	}
+	else if(!contactor2errorSet)
+	{
+		if(contactorTimer.start == FALSE)
+		{
+			startSoftwareTimer(&contactorTimer);
+		}
+	}
+
+	if(getExtContactorState())
+	{
+		contactor3errorSet = FALSE;
+		addRemoveError(CONTACTOR_3_FALLING_OFF, FALSE);
+	}
+	else if(!contactor3errorSet)
+	{
+		if(contactorTimer.start == FALSE)
+		{
+			startSoftwareTimer(&contactorTimer);
+		}
+	}
+}
+
+static void contactorTimerCallback(void *param)
+{
+	if(!getIntContactorState())
+	{
+		contactor1errorSet = TRUE;
+		addRemoveError(CONTACTOR_1_FALLING_OFF, TRUE);
+	}
+
+
+	if(!getAckK2())
+	{
+		contactor2errorSet = TRUE;
+		addRemoveError(CONTACTOR_2_FALLING_OFF, TRUE);
+	}
+
+	if(!getExtContactorState())
+	{
+		contactor3errorSet = TRUE;
+		addRemoveError(CONTACTOR_3_FALLING_OFF, TRUE);
+	}
+
+}
+
+static void looserTimerCallback(void *param)
+{
+	addRemoveError(LOOSER_ERROR, TRUE);
+}
+
+void initSafetyTimers(void)
+{
+	deInitSoftwareTimer(&contactorTimer);
+	deInitSoftwareTimer(&looserTimer);
+
+	initSoftwareTimer(&contactorTimer, parameterContactorTime.value, contactorTimerCallback, FALSE, 0);
+	initSoftwareTimer(&looserTimer, parameterContactorTime.value, looserTimerCallback, FALSE, 0);
+}
+
+void updateLoosersStates(void)
+{
+	if(getLoosersState())
+	{
+		if(highSpeedSet || slowSpeedSet)
+		{
+			if(looserTimer.start == FALSE)
+			{
+				startSoftwareTimer(&looserTimer);
+			}
+		}
+	}
+	else
+	{
+		addRemoveError(LOOSER_ERROR, FALSE);
+		stopSoftwareTimer(&looserTimer);
+	}
+}
+
+

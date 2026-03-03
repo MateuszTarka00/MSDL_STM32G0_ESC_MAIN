@@ -51,8 +51,8 @@ Direction getDirection(void)
 
 Loosers getLoosersState(void)
 {
-	bool loserOne = !HAL_GPIO_ReadPin(LOCKER_IN1_GPIO_Port, LOCKER_IN1_Pin);
-	bool looserTwo = !HAL_GPIO_ReadPin(LOCKER_IN2_GPIO_Port, LOCKER_IN2_Pin);
+	bool loserOne = HAL_GPIO_ReadPin(LOCKER_IN1_GPIO_Port, LOCKER_IN1_Pin);
+	bool looserTwo = HAL_GPIO_ReadPin(LOCKER_IN2_GPIO_Port, LOCKER_IN2_Pin);
 
 	if(loserOne && looserTwo)
 	{
@@ -75,9 +75,15 @@ Loosers getLoosersState(void)
 
 }
 
-bool getContactorsState(void)
+bool getExtContactorState(void)
 {
 	return(!HAL_GPIO_ReadPin(ACK_CONT_GPIO_Port, ACK_CONT_Pin));
+}
+
+
+bool getIntContactorState(void)
+{
+	return(HAL_GPIO_ReadPin(ACK_K1_GPIO_Port, ACK_K1_Pin));
 }
 
 bool getIspectionMode(void)

@@ -104,6 +104,8 @@ void Error_Handler(void);
 #define CAN_OK_GPIO_Port GPIOA
 #define TEACH_OUTPUT_Pin GPIO_PIN_6
 #define TEACH_OUTPUT_GPIO_Port GPIOA
+#define ACK_K2_Pin GPIO_PIN_7
+#define ACK_K2_GPIO_Port GPIOA
 #define WATCHDOG_OUT_Pin GPIO_PIN_4
 #define WATCHDOG_OUT_GPIO_Port GPIOC
 #define ACK_CONT_Pin GPIO_PIN_5

@@ -218,8 +218,11 @@ void safetyCheck(void *argument)
 {
   /* USER CODE BEGIN safetyCheck */
   /* Infinite loop */
+  initSafetyTimers();
   for(;;)
   {
+	  updateLoosersStates();
+//	  updateContactorsStates();
 	  if(!checkSafetyCircuitState())
 	  {
 		  safetyCircuitPoint = checkBrokenSafetyCircuitPoint();

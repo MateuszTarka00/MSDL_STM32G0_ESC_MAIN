@@ -31,8 +31,9 @@ bool checkIsHumanOnStairsUp(void);
 bool getChainMotorState(void);
 Direction getDirection(void);
 Loosers getLoosersState(void);
-bool getContactorsState(void);
+bool getIntContactorState(void);
 bool getIspectionMode(void);
 bool getThermistorState(void);
+bool getExtContactorState(void);
 
 #endif /* INC_SENSORS_H_ */

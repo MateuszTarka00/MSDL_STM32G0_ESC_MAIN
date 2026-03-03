@@ -33,7 +33,7 @@
 
 #define CHARS_PER_LINE 			21
 
-#define NUMBER_OF_ERROR_TYPES 	6
+#define NUMBER_OF_ERROR_TYPES 	9
 #define CHANGE_ERROR_TIME_MS	2000
 
 MenusTypes activeMenu = MAIN_MENU;
@@ -45,6 +45,9 @@ static uint8_t displayedErrorIndex = 0;
 
 static ErrorsType actualErrors[NUMBER_OF_ERROR_TYPES] =
 		{
+				0,
+				0,
+				0,
 				0,
 				0,
 				0,
@@ -70,6 +73,7 @@ const char *safetyCircuitStrings[] = {
 	"Odpad.\nstopnia",
 	"rezerwa",
 	"Blad\nobwodu",
+	"Blad\nluzownika",
 	"OK"
 };
 
@@ -85,6 +89,13 @@ const char *looserStrings[] = {
 		"Pierwszy",
 		"Drugi",
 		"Dwa",
+};
+
+const char *contractorsStrings[] = {
+		"3 OFF",
+		"2 OFF",
+		"1 OFF",
+		"ON",
 };
 
 const char *onOffStrings[] = {
@@ -114,9 +125,11 @@ const char *errorsStrings[] = {
 		"Brak\nbledu",
 		"\nTermistor",
 		"Odpadniecie\nlancuch",
-		"Odpadniecie\n topien",
+		"Brak\nstopnia",
 		"Gwiazda\ntrojkat",
-		"dpadniecie\n",
+		"\nOdpad. stycznika 1",
+		"\nOdpad. stycznika 2",
+		"\nOdpad. stycznika 3",
 		"Obwod\nbezpieczenstwa"
 };
 
@@ -497,7 +510,10 @@ void updateLooserState(void)
 
 void updateContactorsState(void)
 {
-	if(menuItems[CONTACTORS_STATE].state != getContactorsState())
+	static uint8_t tempState;
+	tempState = getIntContactorState() + getAckK2() + getExtContactorState();
+
+	if(menuItems[CONTACTORS_STATE].state != tempState)
 	{
 		uint16_t stateStringBeggining = ((strlen(menuItems[CONTACTORS_STATE].staticString) - 1)*Font_11x18.width) + 2;
 		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
@@ -506,10 +522,10 @@ void updateContactorsState(void)
 		memset(clearFirstLine, ' ', clearChars);
 		clearFirstLine[clearChars] = '\0';
 		ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, clearFirstLine, Font_11x18, BLACK, WHITE);
-		menuItems[CONTACTORS_STATE].state = getContactorsState();
-		menuItems[CONTACTORS_STATE].stateString = onOffStrings[menuItems[CONTACTORS_STATE].state];
+		menuItems[CONTACTORS_STATE].state = tempState;
+		menuItems[CONTACTORS_STATE].stateString = contractorsStrings[menuItems[CONTACTORS_STATE].state];
 
-		if(menuItems[CONTACTORS_STATE].state)
+		if(menuItems[CONTACTORS_STATE].state == 3)
 		{
 			ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, menuItems[CONTACTORS_STATE].stateString, Font_11x18, DARKGREEN, WHITE);
 			menuItems[CONTACTORS_STATE].stringColor = DARKGREEN;

@@ -10,6 +10,7 @@
 #include "confInputs.h"
 #include "sensors.h"
 #include "flash.h"
+#include "parameters.h"
 
 volatile uint32_t engineRotationTemporary = 0;
 volatile uint32_t handrailRotationTemporary = 0;
@@ -17,7 +18,8 @@ volatile uint32_t handrailRotationTemporary = 0;
 volatile bool highSpeedSet = FALSE;
 volatile bool slowSpeedSet = FALSE;
 
-static SoftwareTimerHandler fastSpeedTimer;
+SoftwareTimerHandler fastSpeedTimer;
+SoftwareTimerHandler slowSpeedTimer;
 static SoftwareTimerHandler speedChangeTimer;
 static SoftwareTimerHandler chainMotorErrorTimer;
 static SoftwareTimerHandler stepsErrorTimer;
@@ -79,12 +81,14 @@ static void chainMotorErrorCallback(void)
 void initEngineTimers(void)
 {
 	deInitSoftwareTimer(&fastSpeedTimer);
+	deInitSoftwareTimer(&slowSpeedTimer);
 	deInitSoftwareTimer(&speedChangeTimer);
 	deInitSoftwareTimer(&chainMotorErrorTimer);
 
-	initSoftwareTimer(&fastSpeedTimer, FAST_SPEED_TIME_MS, fastSpeedTimerCallback, FALSE, 0);
+	initSoftwareTimer(&slowSpeedTimer, parameterSlowTime.value, fastSpeedTimerCallback, FALSE, 0);
+	initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, fastSpeedTimerCallback, FALSE, 0);
 	initSoftwareTimer(&speedChangeTimer, SPEED_CHANGE_TIMEOUT_MS, speedChangeTimeoutCallback, FALSE, 0);
-	initSoftwareTimer(&chainMotorErrorTimer, CHAIN_MOTOR_ERROR_TIMEOUT_MS, chainMotorErrorCallback, FALSE, 0);
+	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
 }
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)

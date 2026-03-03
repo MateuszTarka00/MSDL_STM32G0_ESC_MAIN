@@ -12,9 +12,7 @@
 #include "softwareTimer_ms.h"
 
 #define FREQUENCY_ERROR_RANGE 			10
-#define FAST_SPEED_TIME_MS				60000
-#define SPEED_CHANGE_TIMEOUT_MS			10000
-#define CHAIN_MOTOR_ERROR_TIMEOUT_MS 	1000
+#define SPEED_CHANGE_TIMEOUT_MS			20000
 
 extern volatile bool highSpeedSet;
 extern volatile bool slowSpeedSet;
@@ -43,6 +41,9 @@ typedef struct
 extern RotationsPerMinute rotationsPerMinuteReal;
 extern RotationsPerMinute rotationsPerMinuteGiven;
 extern EngineErrors engineErrors;
+
+extern SoftwareTimerHandler fastSpeedTimer;
+extern SoftwareTimerHandler slowSpeedTimer;
 
 void initEngineTimers(void);
 void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMinute);

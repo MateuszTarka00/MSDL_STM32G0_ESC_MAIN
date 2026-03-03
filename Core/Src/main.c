@@ -32,6 +32,7 @@
 #include "softwareTimer_ms.h"
 #include "systemStartup.h"
 #include "externalWatchdog.h"
+#include "parameters.h"
 #include "st7789.h"
 /* USER CODE END Includes */
 
@@ -103,6 +104,7 @@ int main(void)
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
   startupFunction();
+  applyParameters();
   HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
   ST7789_Init();
 

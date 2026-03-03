@@ -47,6 +47,21 @@ static bool hasErrorOccured = FALSE;
 
 bool teachingMenuActive = FALSE;
 
+void enterSlowSpeedConfirmation(void)
+{
+	char buffer[30];
+	ST7789_Fill_Color(WHITE);
+	ST7789_WriteString(2, 5, "Pomiary wolnej\npredkosci:", Font_11x18, BLACK, WHITE);
+	sprintf(buffer, "Silnik: %u obr/s", rotationsPerMinuteGiven.engine.slowTime);
+	ST7789_WriteString(2, 50, buffer, Font_11x18, BLACK, WHITE);
+	sprintf(buffer, "Porecz: %u obr/s", rotationsPerMinuteGiven.handrail.slowTime);
+	ST7789_WriteString(2, 73, buffer, Font_11x18, BLACK, WHITE);
+	sprintf(buffer, "Stopnie: %u ms", rotationsPerMinuteGiven.step.slowTime);
+	ST7789_WriteString(2, 96, buffer, Font_11x18, BLACK, WHITE);
+	ST7789_WriteString(2, 265, "ESC -> Powtorz", Font_11x18, BLACK, WHITE);
+	ST7789_WriteString(2, 285, "OK -> Zapisz", Font_11x18, BLACK, WHITE);
+}
+
 void waitForSpeedTimerCallback(void *param)
 {
 	previousStateMachine = teachStateMachine;
@@ -62,14 +77,30 @@ void enterEndState(void)
 
 void enableSlowSpeedTeach(void)
 {
+	highSpeedSet = FALSE;
+	slowSpeedSet = TRUE;
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, TRUE);
+}
+
+void enableFastSpeedTeach(void)
+{
+	slowSpeedSet = FALSE;
+	highSpeedSet = TRUE;
+	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
+	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 }
 
 void enterWaitForSlowSpeed(void)
 {
 	ST7789_Fill_Color(WHITE);
 	ST7789_WriteString(2, 5, "Oczekiwanie na\nosiagniecie zadanej\npredkosci", Font_11x18, BLACK, WHITE);
+}
+
+void enterWaitForLoosers(void)
+{
+	ST7789_Fill_Color(WHITE);
+	ST7789_WriteString(2, 5, "Oczekiwanie na zanik\nsygnalu luzownikow", Font_11x18, BLACK, WHITE);
 }
 
 void enterWaitForFastSpeed(void)
@@ -83,20 +114,13 @@ void okButtonFunctionTeachMenu(void *param)
 	switch(teachStateMachine)
 	{
 	case PREPARATION:
-		setEngineOnOff(TRUE);
-		enableSlowSpeedTeach();
-		enableSlowSpeed();
-		setTeachFast(FALSE);
-		setTeachSlow(TRUE);
-		teachStateMachine = WAIT_FOR_SLOW_SPEED;
-		startSoftwareTimer(&waitForSpeedTimer);
-		enterWaitForSlowSpeed();
+		teachStateMachine = WAIT_FOR_LOOSERS;
+		enterWaitForLoosers();
 		break;
 
 	case SLOW_SPEED_CONFIRMATION:
 		setEngineOnOff(TRUE);
-		enableSlowSpeedTeach();
-		enableFastSpeed();
+		enableFastSpeedTeach();
 		setTeachSlow(FALSE);
 		setTeachFast(TRUE);
 		teachStateMachine = WAIT_FOR_FAST_SPEED;
@@ -144,21 +168,13 @@ void escButtonFunctionTeachMenu(void *param)
 	switch(teachStateMachine)
 	{
 	case SLOW_SPEED_CONFIRMATION:
-		setEngineOnOff(TRUE);
-		enableSlowSpeedTeach();
-		enableSlowSpeed();
-		setTeachFast(FALSE);
-		setTeachSlow(TRUE);
-		teachStateMachine = WAIT_FOR_SLOW_SPEED;
-		restartRotationsTmp();
-		startSoftwareTimer(&waitForSpeedTimer);
-		enterWaitForSlowSpeed();
+		teachStateMachine = WAIT_FOR_LOOSERS;
+		enterWaitForLoosers();
 		break;
 
 	case FAST_SPEED_CONFIRMATION:
 		setEngineOnOff(TRUE);
-		enableSlowSpeedTeach();
-		enableFastSpeed();
+		enableFastSpeedTeach();
 		setTeachSlow(FALSE);
 		setTeachFast(TRUE);
 		teachStateMachine = WAIT_FOR_FAST_SPEED;
@@ -181,12 +197,6 @@ void upButtonFunctionTeachMenu(void *param)
 void downButtonFunctionTeachMenu(void *param)
 {
 
-}
-
-void enableFastSpeedTeach(void)
-{
-	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
-	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 }
 
 void endTeachingTimerCallback(void *param)
@@ -218,7 +228,7 @@ void enterRestartDriverState(void)
 {
 	ST7789_Fill_Color(WHITE);
 	ST7789_WriteString(2, 5, "Aby przejsc do trybu nauki predkosci,\nzrestartuj urzadzenie", Font_11x18, BLACK, WHITE);
-	ST7789_WriteString(2, 150, "Aby wyjsc, wylacz\nteachSwitch", Font_11x18, BLACK, WHITE);
+	ST7789_WriteString(2, 265, "Aby wyjsc, wylacz\nteachSwitch", Font_11x18, BLACK, WHITE);
 }
 
 void enterPreparationState(void)
@@ -231,21 +241,6 @@ void enterSlowSpeedTime(void)
 {
 	ST7789_Fill_Color(WHITE);
 	ST7789_WriteString(2, 5, "Sterownik uczy sie\nwolnej predkosci", Font_11x18, BLACK, WHITE);
-}
-
-void enterSlowSpeedConfirmation(void)
-{
-	char buffer[30];
-	ST7789_Fill_Color(WHITE);
-	ST7789_WriteString(2, 5, "Pomiary wolnej\npredkosci:", Font_11x18, BLACK, WHITE);
-	sprintf(buffer, "Silnik: %u obr/s", rotationsPerMinuteGiven.engine.slowTime);
-	ST7789_WriteString(2, 50, buffer, Font_11x18, BLACK, WHITE);
-	sprintf(buffer, "Porecz: %u obr/s", rotationsPerMinuteGiven.handrail.slowTime);
-	ST7789_WriteString(2, 73, buffer, Font_11x18, BLACK, WHITE);
-	sprintf(buffer, "Stopnie: %u ms", rotationsPerMinuteGiven.step.slowTime);
-	ST7789_WriteString(2, 96, buffer, Font_11x18, BLACK, WHITE);
-	ST7789_WriteString(2, 265, "ESC -> Powtorz", Font_11x18, BLACK, WHITE);
-	ST7789_WriteString(2, 285, "OK -> Zapisz", Font_11x18, BLACK, WHITE);
 }
 
 void enterFastSpeedTime(void)
@@ -343,6 +338,19 @@ void stateMachineSubTask(void)
 			break;
 
 		case PREPARATION:
+			break;
+
+		case WAIT_FOR_LOOSERS:
+			if(!getLoosersState())
+			{
+				setEngineOnOff(TRUE);
+				enableSlowSpeedTeach();
+				setTeachFast(FALSE);
+				setTeachSlow(TRUE);
+				teachStateMachine = WAIT_FOR_SLOW_SPEED;
+				startSoftwareTimer(&waitForSpeedTimer);
+				enterWaitForSlowSpeed();
+			}
 			break;
 
 		case WAIT_FOR_SLOW_SPEED:

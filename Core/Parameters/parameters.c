@@ -6,6 +6,8 @@
  */
 
 #include "parameters.h"
+#include "safetyCircuit.h"
+#include "engineFunctions.h"
 #include "string.h"
 #include "stdio.h"
 #include "flash.h"
@@ -206,16 +208,16 @@ void paramCancelValue(Parameter *parameter)
 void paramLoadParameters(void)
 {
 	parameterLooserTime.value = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
-	parameterEngineTime.value = flash_parametersToSave.flash_settingsValues.parameterEngineTime;
+	parameterEngineTime.value = flash_parametersToSave.flash_settingsValues.parameterEngineTime; //Zrobione
 	parameterContactorTime.value = flash_parametersToSave.flash_settingsValues.parameterContactorTime;
-	parameterFastTime.value = flash_parametersToSave.flash_settingsValues.parameterFastTime;
-	parameterSlowTime.value = flash_parametersToSave.flash_settingsValues.parameterSlowTime;
-	parameterStarTriangleTime.value = flash_parametersToSave.flash_settingsValues.parameterStarTriangleTime;
+	parameterFastTime.value = flash_parametersToSave.flash_settingsValues.parameterFastTime;//Zrobione
+	parameterSlowTime.value = flash_parametersToSave.flash_settingsValues.parameterSlowTime;//Zrobione
+	parameterStarTriangleTime.value = flash_parametersToSave.flash_settingsValues.parameterStarTriangleTime; //Na razie odpuszczamy
 	parameterEngineControl.value = flash_parametersToSave.flash_settingsValues.parameterEngineControl;
-	parameterAutoStop.value = flash_parametersToSave.flash_settingsValues.parameterAutoStop;
+	parameterAutoStop.value = flash_parametersToSave.flash_settingsValues.parameterAutoStop; //Zrobione
 	parameterReleasing.value = flash_parametersToSave.flash_settingsValues.parameterReleasing;
-	parameterTrafficDirectionSignals.value = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals;
-	parameterLightning.value = flash_parametersToSave.flash_settingsValues.parameterLightning;
+	parameterTrafficDirectionSignals.value = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals; //Zrobione
+	parameterLightning.value = flash_parametersToSave.flash_settingsValues.parameterLightning; //Zrobione
 
 	parameterLooserTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
 	parameterEngineTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterEngineTime;
@@ -229,3 +231,16 @@ void paramLoadParameters(void)
 	parameterTrafficDirectionSignals.lastValue = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals;
 	parameterLightning.lastValue = flash_parametersToSave.flash_settingsValues.parameterLightning;
 }
+
+void applyParameters(void)
+{
+	initEngineTimers();
+	initSafetyTimers();
+}
+
+
+
+
+
+
+

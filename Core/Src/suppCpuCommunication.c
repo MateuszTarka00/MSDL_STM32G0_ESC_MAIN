@@ -63,3 +63,9 @@ bool getTeachingEnd(void)
 {
 	return HAL_GPIO_ReadPin(END_TEACHING_GPIO_Port, END_TEACHING_Pin);
 }
+
+bool getAckK2(void)
+{
+	return HAL_GPIO_ReadPin(ACK_K2_Pin, ACK_K2_GPIO_Port);
+}
+

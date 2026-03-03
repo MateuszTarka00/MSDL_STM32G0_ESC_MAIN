@@ -40,7 +40,9 @@ extern SafetyCircuitPoint safetyCircuitPoint;
 bool checkSafetyCircuitState(void);
 SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void);
 void setSafetyCircuitStateOutput(void);
-
+void initSafetyTimers(void);
+void updateContactorsStates(void);
+void updateLoosersStates(void);
 void updateSafetyCircuitError(uint8_t state);
 
 #endif /* INC_SAFETYCIRCUIT_H_ */

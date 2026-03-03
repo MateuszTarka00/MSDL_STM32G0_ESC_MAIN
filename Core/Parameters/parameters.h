@@ -46,5 +46,6 @@ void paramSaveValue(Parameter *parameter);
 void paramCancelValue(Parameter *parameter);
 void paramFactoryReset(void);
 void paramLoadParameters(void);
+void applyParameters(void);
 
 #endif /* PARAMETERS_PARAMETERS_H_ */
