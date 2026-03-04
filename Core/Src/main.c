@@ -109,7 +109,7 @@ int main(void)
   ST7789_Init();
 
   HAL_TIM_Base_Start_IT(&htim14);
-  initWatchdogTimerInit(); //todo add tim17 start function
+  initWatchdogTimerInit();
   /* USER CODE END 2 */
 
   /* Init scheduler */

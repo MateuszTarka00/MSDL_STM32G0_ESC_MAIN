@@ -55,9 +55,31 @@ SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
 	return SAFETY_CIRCUIT_ERROR;
 }
 
-void setSafetyCircuitStateOutput(void)
+void setContactorK1State(void)
 {
-	HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, safetyCircuitState);
+	static uint8_t restartClicks = 10;
+	static uint32_t ticksTemp;
+
+	if(safetyCircuitState)
+	{
+		if(restartClicks)
+		{
+			if(xTaskGetTickCount() - ticksTemp >= CONTACTOR_CLICK_TIME)
+			{
+				HAL_GPIO_TogglePin(K1_EN_GPIO_Port, K1_EN_Pin);
+				ticksTemp = xTaskGetTickCount();
+				restartClicks--;
+			}
+		}
+		else
+		{
+			HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, safetyCircuitState);
+		}
+	}
+	else
+	{
+		restartClicks = 10;
+	}
 }
 
 void updateSafetyCircuitError(uint8_t state)

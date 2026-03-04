@@ -164,6 +164,8 @@ void Error_Handler(void);
 #define SPEED_READY_GPIO_Port GPIOD
 #define SAFETY_END_Pin GPIO_PIN_12
 #define SAFETY_END_GPIO_Port GPIOD
+#define HARD_STOP_Pin GPIO_PIN_13
+#define HARD_STOP_GPIO_Port GPIOD
 #define LCD_RST_Pin GPIO_PIN_10
 #define LCD_RST_GPIO_Port GPIOA
 #define LCD_BKL_Pin GPIO_PIN_8

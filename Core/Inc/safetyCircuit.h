@@ -13,6 +13,7 @@
 #define NUMBER_OF_CIRCUITS_POINTS	8
 #define BROKEN_CIRCUIT_POINT		0
 #define WORKING_CIRCUIT_POIT		1
+#define CONTACTOR_CLICK_TIME		200
 
 typedef struct
 {
@@ -39,7 +40,7 @@ extern SafetyCircuitPoint safetyCircuitPoint;
 
 bool checkSafetyCircuitState(void);
 SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void);
-void setSafetyCircuitStateOutput(void);
+void setContactorK1State(void);
 void initSafetyTimers(void);
 void updateContactorsStates(void);
 void updateLoosersStates(void);

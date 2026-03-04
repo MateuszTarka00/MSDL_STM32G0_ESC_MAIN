@@ -233,7 +233,7 @@ void safetyCheck(void *argument)
 	  }
 
 	  updateSafetyCircuitError(safetyCircuitPoint);
-	  setSafetyCircuitStateOutput();
+	  setContactorK1State();
 
 	  if(getThermistorState())
 	  {
