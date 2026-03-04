@@ -69,3 +69,8 @@ bool getAckK2(void)
 	return HAL_GPIO_ReadPin(ACK_K2_Pin, ACK_K2_GPIO_Port);
 }
 
+void setHardStop(bool onOff)
+{
+	HAL_GPIO_WritePin(HARD_STOP_GPIO_Port, HARD_STOP_Pin, onOff);
+}
+

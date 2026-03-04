@@ -12,6 +12,7 @@
 #include "string.h"
 #include "flash.h"
 #include "mainForm.h"
+#include "sensors.h"
 
 #define HEADER_TO_FIRST_ITEM_PIXELS	41
 #define ITEM_TO_ITEM_PIXELS			7
@@ -36,6 +37,16 @@ void downButtonFunctionSettingsMenu(void *param);
 void upButtonFunctionSettingsMenu(void *param);
 void okButtonFunctionSettingsMenu(void *param);
 void escButtonFunctionSettingsMenu(void *param);
+
+void turnOffEngineMessage(void)
+{
+	ST7789_WriteString(2, 265, "Aby zapisac, wylacz\nsygnaly kierunku", Font_11x18, BLACK, WHITE);
+}
+
+void turnOffEngineMessageFactoryReset(void)
+{
+	ST7789_WriteString(2, 265, "Aby zrestartowac,\nwylacz sygnaly\nkierunku", Font_11x18, BLACK, WHITE);
+}
 
 void enterSettingsMenu(void)
 {
@@ -328,7 +339,14 @@ void okButtonFunctionSettingsMenu(void *param)
 			{
 				if(parameterFactoryReset.value)
 				{
-					flash_factoryReset();
+					if(getDirection())
+					{
+						turnOffEngineMessageFactoryReset();
+					}
+					else
+					{
+						flash_factoryReset();
+					}
 				}
 				else
 				{
@@ -337,8 +355,15 @@ void okButtonFunctionSettingsMenu(void *param)
 			}
 			else
 			{
-				paramSaveValue(currentParameter);
-				backToParentMenu();
+				if(getDirection() && currentParameter != &parameterLightning )
+				{
+					turnOffEngineMessage();
+				}
+				else
+				{
+					paramSaveValue(currentParameter);
+					backToParentMenu();
+				}
 			}
 
 			break;

@@ -478,12 +478,14 @@ void enterTeachingForm(void)
 		if(!errorStateActive)
 		{
 			activeMenu = TEACHING_MENU;
+			setTeachOutput(TRUE);
 		}
 	}
 	else if(activeMenu == TEACHING_MENU)
 	{
 		activeMenu = MAIN_MENU;
 		teachStateMachine = START_STATE;
+		setTeachOutput(FALSE);
 		initMainForm();
 	}
 }

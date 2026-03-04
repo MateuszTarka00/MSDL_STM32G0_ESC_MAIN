@@ -22,4 +22,5 @@ void setFastSpeed(bool onOff);
 void setTeachOutput(bool onOff);
 bool getTeachingEnd(void);
 bool getAckK2(void);
+void setHardStop(bool onOff);
 #endif /* INC_SUPPCPUCOMMUNICATION_H_ */
