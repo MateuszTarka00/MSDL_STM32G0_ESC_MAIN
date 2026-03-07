@@ -20,9 +20,11 @@ typedef enum
 typedef enum
 {
 	CONSTANS,
-	TIMED,
-	AUTO_STOP,
+	FAST_STOP,
+	FAST_SLOW,
+	FAST_SLOW_STOP,
 	INSPECTION,
+	SERVICE,
 }WorkModeType;
 
 typedef enum
@@ -37,6 +39,8 @@ typedef enum
 	CONTACTOR_3_FALLING_OFF,
 	SAFETY_CIRCUIT,
 	LOOSER_ERROR,
+	SPEED_CHANGE_ERROR,
+	SPEED_ERROR,
 }ErrorsType;
 
 typedef enum
@@ -49,6 +53,8 @@ typedef enum
 extern MenusTypes activeMenu;
 extern volatile uint8_t numberOfErrors;
 extern bool errorStateActive;
+extern uint8_t noContactorErrors;
+extern WorkModeType workMode;
 
 void updateSafetyCircuitState(void);
 void updateSensorUp(void);

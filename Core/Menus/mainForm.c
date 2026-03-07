@@ -16,35 +16,45 @@
 #include "softwareTimer_ms.h"
 #include "settingsForm.h"
 #include "buttonsFunctions.h"
+#include "systemStartup.h"
 
-#define UNINITIALIZED_VALUE		255
+#define UNINITIALIZED_VALUE			255
 
-#define WORK_MODE				0
-#define DIRECTION				1
-#define SPEED					2
-#define BREAK_STATE				3
-#define ENGINE_STATE			4
-#define CONTACTORS_STATE		5
-#define SENSOR_UP				6
-#define SENSOR_DOWN				7
-#define SAFETY_CIRCUIT			8
-#define ERROR_STATE				9
-#define ITEMS_NUMBER			10
+#define WORK_MODE					0
+#define DIRECTION					1
+#define SPEED						2
+#define BREAK_STATE					3
+#define ENGINE_STATE				4
+#define CONTACTORS_STATE			5
+#define SENSOR_UP					6
+#define SENSOR_DOWN					7
+#define SAFETY_CIRCUIT				8
+#define ERROR_STATE					9
+#define ITEMS_NUMBER				10
 
-#define CHARS_PER_LINE 			21
+#define CHARS_PER_LINE 				21
 
-#define NUMBER_OF_ERROR_TYPES 	9
-#define CHANGE_ERROR_TIME_MS	2000
+#define NUMBER_OF_ERROR_TYPES 		11
+#define CHANGE_ERROR_TIME_MS		2000
+#define TEACH_NEEDED_INFORMATION	3000
 
 MenusTypes activeMenu = MAIN_MENU;
 bool errorStateActive = FALSE;
 
 volatile uint8_t numberOfErrors = 0;
 static SoftwareTimerHandler errorChangeTimer;
+static SoftwareTimerHandler teachNeededInformation;
 static uint8_t displayedErrorIndex = 0;
+static bool changeString = FALSE;
+
+uint8_t noContactorErrors = 0;
+
+WorkModeType workMode;
 
 static ErrorsType actualErrors[NUMBER_OF_ERROR_TYPES] =
 		{
+				0,
+				0,
 				0,
 				0,
 				0,
@@ -73,7 +83,6 @@ const char *safetyCircuitStrings[] = {
 	"Odpad.\nstopnia",
 	"rezerwa",
 	"Blad\nobwodu",
-	"Blad\nluzownika",
 	"OK"
 };
 
@@ -116,21 +125,26 @@ const char *speedStrings[] = {
 
 const char *workModeStrings[] = {
 		"Ciagla",
-		"Czasowa",
-		"Auto-Stop",
-		"Inspekcja"
+		"Szyb-stop",
+		"Szyb-wol",
+		"Szyb-wol-st",
+		"Inspekcja",
+		"Serwisowy",
 };
 
 const char *errorsStrings[] = {
 		"Brak\nbledu",
 		"\nTermistor",
-		"Odpadniecie\nlancuch",
+		"\nOdpad. lancuch",
 		"Brak\nstopnia",
 		"Gwiazda\ntrojkat",
 		"\nOdpad. stycznika 1",
 		"\nOdpad. stycznika 2",
 		"\nOdpad. stycznika 3",
-		"Obwod\nbezpieczenstwa"
+		"Obwod\nbezpieczenstwa",
+		"Blad\nluzownika",
+		"Blad\nzmiany predkosci",
+		"Bledna\npredkosc",
 };
 
 typedef struct
@@ -243,6 +257,35 @@ void errorChangeTimerCallback(void *param)
 	}
 }
 
+void teachNeededInformationCallback(void)
+{
+	if(changeString)
+	{
+		changeString = FALSE;
+	}
+	else
+	{
+		changeString = TRUE;
+	}
+}
+
+void updateTeachInformationState()
+{
+	static bool changeStringTemp = FALSE;
+
+	if(changeString != changeStringTemp)
+	{
+		changeStringTemp = changeString;
+		if(changeStringTemp)
+		{
+			ST7789_WriteString(centerString(Font_11x18, "Brak zpis. pred."), 290, "Brak zpis. pred.", Font_11x18, BLACK, WHITE);
+		}
+		else
+		{
+			ST7789_WriteString(centerString(Font_11x18, "OK -> Ustawienia"), 290, "OK -> Ustawienia", Font_11x18, BLACK, WHITE);
+		}
+	}
+}
 
 void initMainForm(void)
 {
@@ -262,6 +305,12 @@ void initMainForm(void)
 		}
 	}
 
+	if(!checkSpeedTeached())
+	{
+		initSoftwareTimer(&teachNeededInformation, TEACH_NEEDED_INFORMATION, teachNeededInformationCallback, TRUE, 0);
+		startSoftwareTimer(&teachNeededInformation);
+	}
+
 	upButtonFunction = upButtonFunctionMainMenu;
 	downButtonFunction = downButtonFunctionMainMenu;
 	okButtonFunction = okButtonFunctionMainMenu;
@@ -270,19 +319,35 @@ void initMainForm(void)
 
 void updateWorkMode(void)
 {
-	WorkModeType workMode;
-
-	if(getIspectionMode())
+	if(serviceMode)
+	{
+		workMode = SERVICE;
+	}
+	else if(getIspectionMode())
 	{
 		workMode = INSPECTION;
 	}
 	else if(parameterAutoStop.value)
 	{
-		workMode = AUTO_STOP;
+		if(parameterReleasing.value)
+		{
+			workMode = FAST_SLOW_STOP;
+		}
+		else
+		{
+			workMode = FAST_STOP;
+		}
 	}
 	else
 	{
-		workMode = TIMED;
+		if(parameterReleasing.value)
+		{
+			workMode = FAST_SLOW;
+		}
+		else
+		{
+			workMode = CONSTANS;
+		}
 	}
 
 	if(menuItems[WORK_MODE].state != workMode)
@@ -297,7 +362,7 @@ void updateWorkMode(void)
 		menuItems[WORK_MODE].state = workMode;
 		menuItems[WORK_MODE].stateString = workModeStrings[menuItems[WORK_MODE].state];
 
-		if(menuItems[WORK_MODE].state == INSPECTION)
+		if(menuItems[WORK_MODE].state == INSPECTION || menuItems[WORK_MODE].state == SERVICE)
 		{
 			ST7789_WriteString(stateStringBeggining, menuItems[WORK_MODE].height, menuItems[WORK_MODE].stateString, Font_11x18, RED, WHITE);
 			menuItems[WORK_MODE].stringColor = RED;
@@ -567,58 +632,73 @@ void updateChainMotorState(void)
 
 void addRemoveError(ErrorsType error, bool removeAdd)
 {
-	if(removeAdd)
+	if(!serviceMode)
 	{
-		for(uint8_t i = 0; i < numberOfErrors; i++)
-		{
-			if(actualErrors[i] == error)
-			{
-				return;
-			}
-		}
-
-		actualErrors[numberOfErrors] = error;
-		numberOfErrors++;
-
-		if(numberOfErrors > 1)
-		{
-			deInitSoftwareTimer(&errorChangeTimer);
-			initSoftwareTimer(&errorChangeTimer, CHANGE_ERROR_TIME_MS, errorChangeTimerCallback, TRUE, 0);
-			startSoftwareTimer(&errorChangeTimer);
-		}
-	}
-	else
-	{
-		if(numberOfErrors > 0)
+		if(removeAdd)
 		{
 			for(uint8_t i = 0; i < numberOfErrors; i++)
 			{
 				if(actualErrors[i] == error)
 				{
-					memcpy(&actualErrors[i], &actualErrors[i+1], NUMBER_OF_ERROR_TYPES - i - 1);
-
-					actualErrors[numberOfErrors-1] = NO_ERROR;
-					numberOfErrors--;
-
-					if(numberOfErrors < 1)
-					{
-						stopSoftwareTimer(&errorChangeTimer);
-					}
-
-					displayedErrorIndex = 0;
+					return;
 				}
 			}
 
-		}
-	}
+			actualErrors[numberOfErrors] = error;
+			numberOfErrors++;
 
-	if(numberOfErrors)
-	{
-		errorStateActive = TRUE;
-	}
-	else
-	{
-		errorStateActive = FALSE;
+
+			if(error != CONTACTOR_1_FALLING_OFF && error != CONTACTOR_2_FALLING_OFF && error !=CONTACTOR_3_FALLING_OFF)
+			{
+				noContactorErrors++;
+			}
+
+			if(numberOfErrors > 1)
+			{
+				deInitSoftwareTimer(&errorChangeTimer);
+				initSoftwareTimer(&errorChangeTimer, CHANGE_ERROR_TIME_MS, errorChangeTimerCallback, TRUE, 0);
+				startSoftwareTimer(&errorChangeTimer);
+			}
+		}
+		else
+		{
+			if(numberOfErrors > 0)
+			{
+				for(uint8_t i = 0; i < numberOfErrors; i++)
+				{
+					if(actualErrors[i] == error)
+					{
+						memcpy(&actualErrors[i], &actualErrors[i+1], NUMBER_OF_ERROR_TYPES - i - 1);
+
+						actualErrors[numberOfErrors-1] = NO_ERROR;
+						numberOfErrors--;
+
+						if(error != CONTACTOR_1_FALLING_OFF && error != CONTACTOR_2_FALLING_OFF && error !=CONTACTOR_3_FALLING_OFF)
+						{
+							noContactorErrors--;
+						}
+
+						if(numberOfErrors < 1)
+						{
+							stopSoftwareTimer(&errorChangeTimer);
+						}
+
+						displayedErrorIndex = 0;
+
+					}
+				}
+
+			}
+		}
+
+		if(numberOfErrors)
+		{
+			errorStateActive = TRUE;
+		}
+		else
+		{
+			errorStateActive = FALSE;
+		}
 	}
 }
 
@@ -633,6 +713,7 @@ void mainMenuSubTask(void)
 	updateSpeed();
 	updateWorkMode();
 	updateErrorState();
+	updateTeachInformationState();
 }
 
 void downButtonFunctionMainMenu(void *param)

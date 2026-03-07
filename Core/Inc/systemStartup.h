@@ -11,6 +11,7 @@
 #include "main.h"
 
 extern volatile bool teachOnStartup;
+extern volatile bool serviceMode;
 
 void startupFunction(void);
 

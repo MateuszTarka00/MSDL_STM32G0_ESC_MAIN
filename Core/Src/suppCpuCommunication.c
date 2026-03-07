@@ -39,7 +39,7 @@ bool getStandState(void)
 	return HAL_GPIO_ReadPin(STAND_OK_GPIO_Port, STAND_OK_Pin);
 }
 
-bool getSafetyState(void)
+bool getSafetyStateSupp(void)
 {
 	return HAL_GPIO_ReadPin(SAFETY_OK_GPIO_Port, SAFETY_OK_Pin);
 }
@@ -59,14 +59,14 @@ void setTeachOutput(bool onOff)
 	HAL_GPIO_WritePin(TEACH_OUTPUT_GPIO_Port, TEACH_OUTPUT_Pin, onOff);
 }
 
-bool getTeachingEnd(void)
+void setTeachingEnd(bool onOff)
 {
-	return HAL_GPIO_ReadPin(END_TEACHING_GPIO_Port, END_TEACHING_Pin);
+	HAL_GPIO_WritePin(END_TEACHING_GPIO_Port, END_TEACHING_Pin, onOff);
 }
 
 bool getAckK2(void)
 {
-	return HAL_GPIO_ReadPin(ACK_K2_Pin, ACK_K2_GPIO_Port);
+	return HAL_GPIO_ReadPin(ACK_K2_GPIO_Port, ACK_K2_Pin);
 }
 
 void setHardStop(bool onOff)

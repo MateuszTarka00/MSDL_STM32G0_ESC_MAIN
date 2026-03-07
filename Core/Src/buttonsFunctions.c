@@ -11,6 +11,7 @@
 #include "task.h"
 #include "cmsis_os.h"
 #include "engineFunctions.h"
+#include "mainForm.h"
 
 #define BUTTON_UP		0x01
 #define BUTTON_DOWN		0x02
@@ -293,7 +294,14 @@ void rotationSubTask(void)
     {
         if(HAL_GPIO_ReadPin(MIS_ST2_GPIO_Port, MIS_ST2_Pin) == GPIO_PIN_SET)
         {
-        	stepsTeachExtiCallback(MIS_ST2_Pin);
+        	if(activeMenu == TEACHING_MENU)
+        	{
+        		stepsTeachExtiCallback(MIS_ST2_Pin);
+        	}
+        	else
+        	{
+        		stepsNormalExtiCallback(MIS_ST2_Pin);
+        	}
         }
         st2.pendingPress = FALSE;
     }
@@ -301,10 +309,14 @@ void rotationSubTask(void)
     if(st1.pendingPress &&
        (now - st1.lastTick) >= pdMS_TO_TICKS(DEBOUNCE_TIME_ROTATION_MS))
     {
-        if(HAL_GPIO_ReadPin(MIS_ST1_GPIO_Port, MIS_ST1_Pin) == GPIO_PIN_SET)
-        {
-        	stepsTeachExtiCallback(MIS_ST1_Pin);
-        }
+    	if(activeMenu == TEACHING_MENU)
+    	{
+    		stepsTeachExtiCallback(MIS_ST1_Pin);
+    	}
+    	else
+    	{
+    		stepsNormalExtiCallback(MIS_ST1_Pin);
+    	}
         st1.pendingPress = FALSE;
     }
 }

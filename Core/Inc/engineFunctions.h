@@ -58,5 +58,8 @@ void rotationsLoadParameters(void);
 void rotationsSaveParameters(void);
 void stepsNormalExtiCallback(uint16_t GPIO_Pin);
 void setEngineOnOff(bool onOff);
+void checkLooserStateSubTask(void);
+bool checkSpeedTeached(void);
+void engineSubTask(void);
 
 #endif /* INC_ENGINEFUNCTIONS_H_ */

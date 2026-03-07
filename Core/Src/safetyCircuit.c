@@ -39,7 +39,7 @@ const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =
 
 bool checkSafetyCircuitState(void)
 {
-	safetyCircuitState = HAL_GPIO_ReadPin(SAFETY_END_GPIO_Port, SAFETY_END_Pin);
+	safetyCircuitState = HAL_GPIO_ReadPin(SAFETY_END_GPIO_Port, SAFETY_END_Pin) && getSafetyStateSupp();
 	return safetyCircuitState;
 }
 
@@ -57,10 +57,10 @@ SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
 
 void setContactorK1State(void)
 {
-	static uint8_t restartClicks = 10;
+	static uint8_t restartClicks = 6;
 	static uint32_t ticksTemp;
 
-	if(safetyCircuitState)
+	if(safetyCircuitState && !noContactorErrors)
 	{
 		if(restartClicks)
 		{
@@ -74,17 +74,20 @@ void setContactorK1State(void)
 		else
 		{
 			HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, safetyCircuitState);
+			setHardStop(!safetyCircuitState);
 		}
 	}
 	else
 	{
-		restartClicks = 10;
+		setHardStop(TRUE);
+		HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, FALSE);
+		restartClicks = 6;
 	}
 }
 
 void updateSafetyCircuitError(uint8_t state)
 {
-	if(state != SAFETY_CIRCUIT_UNBROKEN)
+	if(state != SAFETY_CIRCUIT_UNBROKEN || !getSafetyStateSupp())
 	{
 		addRemoveError(SAFETY_CIRCUIT, TRUE);
 	}
@@ -171,7 +174,7 @@ void initSafetyTimers(void)
 	deInitSoftwareTimer(&looserTimer);
 
 	initSoftwareTimer(&contactorTimer, parameterContactorTime.value, contactorTimerCallback, FALSE, 0);
-	initSoftwareTimer(&looserTimer, parameterContactorTime.value, looserTimerCallback, FALSE, 0);
+	initSoftwareTimer(&looserTimer, parameterLooserTime.value, looserTimerCallback, FALSE, 0);
 }
 
 void updateLoosersStates(void)

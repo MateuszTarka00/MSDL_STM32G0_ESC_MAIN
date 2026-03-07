@@ -29,9 +29,6 @@ SoftwareTimerHandler endTeachingTimer;
 
 SoftwareTimerHandler waitForSpeedTimer;
 
-void enableFastSpeed(void);
-void enableSlowSpeed(void);
-
 void downButtonFunctionTeachMenu(void *param);
 void upButtonFunctionTeachMenu(void *param);
 void okButtonFunctionTeachMenu(void *param);
@@ -115,6 +112,10 @@ void okButtonFunctionTeachMenu(void *param)
 	{
 	case PREPARATION:
 		teachStateMachine = WAIT_FOR_LOOSERS;
+		setEngineOnOff(TRUE);
+		enableSlowSpeedTeach();
+		setTeachFast(FALSE);
+		setTeachSlow(TRUE);
 		enterWaitForLoosers();
 		break;
 
@@ -132,6 +133,7 @@ void okButtonFunctionTeachMenu(void *param)
 		setEngineOnOff(FALSE);
 		setTeachSlow(FALSE);
 		setTeachFast(FALSE);
+		setTeachingEnd(TRUE);
 		stopEngine();
 		teachStateMachine = END;
 		enterEndState();
@@ -169,6 +171,10 @@ void escButtonFunctionTeachMenu(void *param)
 	{
 	case SLOW_SPEED_CONFIRMATION:
 		teachStateMachine = WAIT_FOR_LOOSERS;
+		setEngineOnOff(TRUE);
+		enableSlowSpeedTeach();
+		setTeachFast(FALSE);
+		setTeachSlow(TRUE);
 		enterWaitForLoosers();
 		break;
 
@@ -258,7 +264,7 @@ void enterErrorState(void)
 	stopEngine();
 	ST7789_Fill_Color(WHITE);
 
-	if(errorStateActive)
+	if(errorStateActive || getLoosersState())
 	{
 		hasErrorOccured = TRUE;
 		ST7789_WriteString(2, 5, "Pojawil sie blad.\nNapraw blad aby\nkontynuowac.", Font_11x18, BLACK, WHITE);
@@ -343,18 +349,13 @@ void stateMachineSubTask(void)
 		case WAIT_FOR_LOOSERS:
 			if(!getLoosersState())
 			{
-				setEngineOnOff(TRUE);
-				enableSlowSpeedTeach();
-				setTeachFast(FALSE);
-				setTeachSlow(TRUE);
 				teachStateMachine = WAIT_FOR_SLOW_SPEED;
-				startSoftwareTimer(&waitForSpeedTimer);
 				enterWaitForSlowSpeed();
 			}
 			break;
 
 		case WAIT_FOR_SLOW_SPEED:
-			if(checkTargetFrequencyReached())// && getSpeedReady())
+			if(checkTargetFrequencyReached() && getSpeedReady())
 			{
 				teachStateMachine = SLOW_SPEED_TIME;
 				enterSlowSpeedTime();
@@ -369,7 +370,7 @@ void stateMachineSubTask(void)
 			break;
 
 		case SLOW_SPEED_TIME:
-			if(endTeachingTimer.start == FALSE)// && getTeachingEnd())
+			if(endTeachingTimer.start == FALSE)
 			{
 				teachStateMachine = SLOW_SPEED_CONFIRMATION;
 				calculateTeachedSpeeds(FALSE);
@@ -386,7 +387,7 @@ void stateMachineSubTask(void)
 
 
 		case WAIT_FOR_FAST_SPEED:
-			if(checkTargetFrequencyReached())// && getSpeedReady())
+			if(checkTargetFrequencyReached() && getSpeedReady())
 			{
 				teachStateMachine = FAST_SPEED_TIME;
 				enterFastSpeedTime();
@@ -398,7 +399,7 @@ void stateMachineSubTask(void)
 			break;
 
 		case FAST_SPEED_TIME:
-			if(endTeachingTimer.start == FALSE)// && getTeachingEnd())
+			if(endTeachingTimer.start == FALSE)
 			{
 				teachStateMachine = FAST_SPEED_CONFIRMATION;
 				calculateTeachedSpeeds(TRUE);
@@ -473,9 +474,9 @@ void stepsTeachExtiCallback(uint16_t GPIO_Pin)
 
 void enterTeachingForm(void)
 {
-	if(getTeachInput())
+	if(getTeachInput() || teachOnStartup)
 	{
-		if(!errorStateActive)
+		if(!errorStateActive && !serviceMode)
 		{
 			activeMenu = TEACHING_MENU;
 			setTeachOutput(TRUE);

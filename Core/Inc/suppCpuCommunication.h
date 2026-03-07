@@ -16,11 +16,11 @@ void setTeachSlow(bool onOff);
 bool getSpeedReady(void);
 bool getRotationState(void);
 bool getStandState(void);
-bool getSafetyState(void);
+bool getSafetyStateSupp(void);
 void setSlowSpeed(bool onOff);
 void setFastSpeed(bool onOff);
 void setTeachOutput(bool onOff);
-bool getTeachingEnd(void);
+void setTeachingEnd(bool onOff);
 bool getAckK2(void);
 void setHardStop(bool onOff);
 #endif /* INC_SUPPCPUCOMMUNICATION_H_ */

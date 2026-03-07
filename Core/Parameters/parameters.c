@@ -238,7 +238,21 @@ void applyParameters(void)
 	initSafetyTimers();
 }
 
+#define SIGNAL_RED_Pin GPIO_PIN_2
+#define SIGNAL_RED_GPIO_Port GPIOE
+#define SIGNAL_GREEN_Pin GPIO_PIN_3
+#define SIGNAL_GREEN_GPIO_Port GPIOE
 
+void toeBoardLightFunction(void)
+{
+	HAL_GPIO_WritePin(TOEBOARD_LIGHT_GPIO_Port, TOEBOARD_LIGHT_Pin, parameterLightning.value);
+}
+
+void trafficSignalsFunction(void)
+{
+	HAL_GPIO_WritePin(SIGNAL_GREEN_GPIO_Port, SIGNAL_GREEN_Pin, parameterLightning.value);
+	HAL_GPIO_WritePin(SIGNAL_RED_GPIO_Port, SIGNAL_RED_Pin, parameterLightning.value);
+}
 
 
 

@@ -32,6 +32,7 @@
 #include "mainForm.h"
 #include "sensors.h"
 #include "teachForm.h"
+#include "iwdg.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -221,8 +222,10 @@ void safetyCheck(void *argument)
   initSafetyTimers();
   for(;;)
   {
+	  HAL_IWDG_Refresh(&hiwdg);
 	  updateLoosersStates();
-//	  updateContactorsStates();
+	  updateContactorsStates();
+	  checkLooserStateSubTask();
 	  if(!checkSafetyCircuitState())
 	  {
 		  safetyCircuitPoint = checkBrokenSafetyCircuitPoint();
@@ -286,6 +289,7 @@ void displayTask(void *argument)
 
   for(;;)
   {
+	  HAL_IWDG_Refresh(&hiwdg);
 	  enterTeachingForm();
 
 	  switch(activeMenu)
@@ -322,6 +326,14 @@ void engineControl(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	  HAL_IWDG_Refresh(&hiwdg);
+	 if(activeMenu != TEACHING_MENU)
+	 {
+		 engineSubTask();
+	 }
+
+	toeBoardLightFunction();
+	trafficSignalsFunction();
 	rotationSubTask();
     osDelay(1);
   }
