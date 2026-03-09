@@ -17,6 +17,7 @@
 #include "settingsForm.h"
 #include "buttonsFunctions.h"
 #include "systemStartup.h"
+#include "suppCpuCommunication.h"
 
 #define UNINITIALIZED_VALUE			255
 
@@ -36,16 +37,16 @@
 
 #define NUMBER_OF_ERROR_TYPES 		11
 #define CHANGE_ERROR_TIME_MS		2000
-#define TEACH_NEEDED_INFORMATION	3000
+#define INFORMATION_TIME_MS			3000
 
 MenusTypes activeMenu = MAIN_MENU;
 bool errorStateActive = FALSE;
 
 volatile uint8_t numberOfErrors = 0;
 static SoftwareTimerHandler errorChangeTimer;
-static SoftwareTimerHandler teachNeededInformation;
+static SoftwareTimerHandler informationTimer;
 static uint8_t displayedErrorIndex = 0;
-static bool changeString = FALSE;
+static uint8_t changeString = 0;
 
 uint8_t noContactorErrors = 0;
 
@@ -100,13 +101,6 @@ const char *looserStrings[] = {
 		"Dwa",
 };
 
-const char *contractorsStrings[] = {
-		"3 OFF",
-		"2 OFF",
-		"1 OFF",
-		"ON",
-};
-
 const char *onOffStrings[] = {
 		"OFF",
 		"ON",
@@ -127,7 +121,7 @@ const char *workModeStrings[] = {
 		"Ciagla",
 		"Szyb-stop",
 		"Szyb-wol",
-		"Szyb-wol-st",
+		"Szyb-wol-s",
 		"Inspekcja",
 		"Serwisowy",
 };
@@ -140,7 +134,7 @@ const char *errorsStrings[] = {
 		"Gwiazda\ntrojkat",
 		"\nOdpad. stycznika 1",
 		"\nOdpad. stycznika 2",
-		"\nOdpad. stycznika 3",
+		"\nBlad. stycznika 3",
 		"Obwod\nbezpieczenstwa",
 		"Blad\nluzownika",
 		"Blad\nzmiany predkosci",
@@ -199,7 +193,7 @@ MenuObjects menuItems[ITEMS_NUMBER] =
 		},
 
 		{
-				"Stan stycznikow: ",
+				"Stycz: ",
 				UNINITIALIZED_VALUE,
 				"OFF",
 				DARKGREEN,
@@ -257,32 +251,53 @@ void errorChangeTimerCallback(void *param)
 	}
 }
 
-void teachNeededInformationCallback(void)
+void InformationTimerCallback(void)
 {
-	if(changeString)
+	changeString++;
+
+	if(checkSpeedTeached())
 	{
-		changeString = FALSE;
+		if(changeString >=2)
+		{
+			changeString = 0;
+		}
 	}
 	else
 	{
-		changeString = TRUE;
+		if(changeString >=3)
+		{
+			changeString = 0;
+		}
 	}
 }
 
-void updateTeachInformationState()
+void updateInformationState()
 {
-	static bool changeStringTemp = FALSE;
+	static uint8_t changeStringTmp = 1;
 
-	if(changeString != changeStringTemp)
+
+	if(changeStringTmp != changeString)
 	{
-		changeStringTemp = changeString;
-		if(changeStringTemp)
+		changeStringTmp = changeString;
+
+		switch(changeStringTmp)
 		{
-			ST7789_WriteString(centerString(Font_11x18, "Brak zpis. pred."), 290, "Brak zpis. pred.", Font_11x18, BLACK, WHITE);
-		}
-		else
-		{
+		case 0:
 			ST7789_WriteString(centerString(Font_11x18, "OK -> Ustawienia"), 290, "OK -> Ustawienia", Font_11x18, BLACK, WHITE);
+			break;
+		case 1:
+			if(cpu2Alive)
+			{
+				ST7789_WriteString(centerString(Font_11x18, "CPU1:ON CPU2:ON "), 290, "CPU1:ON CPU2:ON ", Font_11x18, BLACK, WHITE);
+			}
+			else
+			{
+				ST7789_WriteString(centerString(Font_11x18, "CPU1:ON CPU2:OFF"), 290, "CPU1:ON CPU2:OFF", Font_11x18, BLACK, WHITE);
+			}
+			break;
+		case 2:
+			ST7789_WriteString(centerString(Font_11x18, "Brak zpis. pred."), 290, "Brak zpis. pred.", Font_11x18, BLACK, WHITE);
+			break;
 		}
 	}
 }
@@ -305,11 +320,9 @@ void initMainForm(void)
 		}
 	}
 
-	if(!checkSpeedTeached())
-	{
-		initSoftwareTimer(&teachNeededInformation, TEACH_NEEDED_INFORMATION, teachNeededInformationCallback, TRUE, 0);
-		startSoftwareTimer(&teachNeededInformation);
-	}
+
+	initSoftwareTimer(&informationTimer, INFORMATION_TIME_MS, InformationTimerCallback, TRUE, 0);
+	startSoftwareTimer(&informationTimer);
 
 	upButtonFunction = upButtonFunctionMainMenu;
 	downButtonFunction = downButtonFunctionMainMenu;
@@ -575,10 +588,13 @@ void updateLooserState(void)
 
 void updateContactorsState(void)
 {
-	static uint8_t tempState;
-	tempState = getIntContactorState() + getAckK2() + getExtContactorState();
+	static uint8_t tempState, directionTmp;
+	tempState = getIntContactorState() + (getAckK2()*2) + (getExtContactorState()*4);
+	char buffer[20];
+	sprintf(buffer, "K1:%u K2:%u S1:%u", getIntContactorState(), getAckK2(), getExtContactorState());
 
-	if(menuItems[CONTACTORS_STATE].state != tempState)
+
+	if(menuItems[CONTACTORS_STATE].state != tempState || directionTmp != getDirection())
 	{
 		uint16_t stateStringBeggining = ((strlen(menuItems[CONTACTORS_STATE].staticString) - 1)*Font_11x18.width) + 2;
 		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
@@ -588,9 +604,9 @@ void updateContactorsState(void)
 		clearFirstLine[clearChars] = '\0';
 		ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, clearFirstLine, Font_11x18, BLACK, WHITE);
 		menuItems[CONTACTORS_STATE].state = tempState;
-		menuItems[CONTACTORS_STATE].stateString = contractorsStrings[menuItems[CONTACTORS_STATE].state];
+		menuItems[CONTACTORS_STATE].stateString = buffer;
 
-		if(menuItems[CONTACTORS_STATE].state == 3)
+		if((menuItems[CONTACTORS_STATE].state == 7 && getDirection()) || (menuItems[CONTACTORS_STATE].state == 3 && !getDirection()))
 		{
 			ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, menuItems[CONTACTORS_STATE].stateString, Font_11x18, DARKGREEN, WHITE);
 			menuItems[CONTACTORS_STATE].stringColor = DARKGREEN;
@@ -601,6 +617,8 @@ void updateContactorsState(void)
 			menuItems[CONTACTORS_STATE].stringColor = RED;
 		}
 	}
+
+	directionTmp = getDirection();
 }
 
 void updateChainMotorState(void)
@@ -713,7 +731,7 @@ void mainMenuSubTask(void)
 	updateSpeed();
 	updateWorkMode();
 	updateErrorState();
-	updateTeachInformationState();
+	updateInformationState();
 }
 
 void downButtonFunctionMainMenu(void *param)

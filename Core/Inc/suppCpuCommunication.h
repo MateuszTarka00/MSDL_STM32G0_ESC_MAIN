@@ -10,6 +10,8 @@
 
 #include "main.h"
 
+extern bool cpu2Alive;
+
 void setFactoryReset(void);
 void setTeachFast(bool onOff);
 void setTeachSlow(bool onOff);
@@ -23,4 +25,5 @@ void setTeachOutput(bool onOff);
 void setTeachingEnd(bool onOff);
 bool getAckK2(void);
 void setHardStop(bool onOff);
+void checkCpu2Alive(void);
 #endif /* INC_SUPPCPUCOMMUNICATION_H_ */

@@ -20,7 +20,7 @@ bool checkIsHumanOnStairsUp(void)
 
 bool getChainMotorState(void)
 {
-	return !HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin);
+	return HAL_GPIO_ReadPin(CHAIN_MOT_GPIO_Port, CHAIN_MOT_Pin);
 }
 
 Direction getDirection(void)

@@ -126,18 +126,38 @@ void updateContactorsStates(void)
 		}
 	}
 
-	if(getExtContactorState())
+
+	if((getDirection() == UP || getDirection() == DOWN) && getAckK2() && getIntContactorState())
 	{
-		contactor3errorSet = FALSE;
-		addRemoveError(CONTACTOR_3_FALLING_OFF, FALSE);
-	}
-	else if(!contactor3errorSet)
-	{
-		if(contactorTimer.start == FALSE)
+		if(getExtContactorState())
 		{
-			startSoftwareTimer(&contactorTimer);
+			contactor3errorSet = FALSE;
+			addRemoveError(CONTACTOR_3_FALLING_OFF, FALSE);
+		}
+		else
+		{
+			if(contactorTimer.start == FALSE)
+			{
+				startSoftwareTimer(&contactorTimer);
+			}
 		}
 	}
+	else
+	{
+		if(!getExtContactorState())
+		{
+			contactor3errorSet = FALSE;
+			addRemoveError(CONTACTOR_3_FALLING_OFF, FALSE);
+		}
+		else
+		{
+			if(contactorTimer.start == FALSE)
+			{
+				startSoftwareTimer(&contactorTimer);
+			}
+		}
+	}
+
 }
 
 static void contactorTimerCallback(void *param)
@@ -155,10 +175,22 @@ static void contactorTimerCallback(void *param)
 		addRemoveError(CONTACTOR_2_FALLING_OFF, TRUE);
 	}
 
-	if(!getExtContactorState())
+	if((getDirection() == UP || getDirection() == DOWN) && getAckK2() && getIntContactorState())
 	{
-		contactor3errorSet = TRUE;
-		addRemoveError(CONTACTOR_3_FALLING_OFF, TRUE);
+		if(!getExtContactorState())
+		{
+			contactor3errorSet = TRUE;
+			addRemoveError(CONTACTOR_3_FALLING_OFF, TRUE);
+		}
+
+	}
+	else
+	{
+		if(getExtContactorState())
+		{
+			contactor3errorSet = TRUE;
+			addRemoveError(CONTACTOR_3_FALLING_OFF, TRUE);
+		}
 	}
 
 }

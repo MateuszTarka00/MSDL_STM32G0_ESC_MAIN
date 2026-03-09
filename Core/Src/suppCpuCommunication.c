@@ -8,6 +8,10 @@
 
 #include "suppCpuCommunication.h"
 
+#define HEARTBIT_MISSING_TIME_MS	2000
+
+bool cpu2Alive = TRUE;
+
 void setFactoryReset(void)
 {
 	HAL_GPIO_WritePin(FACTORY_RESET_GPIO_Port, FACTORY_RESET_Pin, TRUE);
@@ -73,4 +77,25 @@ void setHardStop(bool onOff)
 {
 	HAL_GPIO_WritePin(HARD_STOP_GPIO_Port, HARD_STOP_Pin, onOff);
 }
+
+
+void checkCpu2Alive(void)
+{
+	static bool heartBitState = TRUE;
+	static uint32_t tempTicks;
+
+	if(heartBitState != getSpeedReady())
+	{
+		tempTicks = xTaskGetTickCount();
+		cpu2Alive = TRUE;
+		heartBitState = getSpeedReady();
+	}
+
+	if(xTaskGetTickCount() - tempTicks >= HEARTBIT_MISSING_TIME_MS)
+	{
+		cpu2Alive = FALSE;
+	}
+
+}
+
 

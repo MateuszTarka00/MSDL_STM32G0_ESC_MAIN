@@ -296,6 +296,7 @@ void displayTask(void *argument)
 	  {
 		  case MAIN_MENU:
 			  mainMenuSubTask();
+			  checkCpu2Alive();
 			  break;
 
 		  case SETTINGS_MENU:
