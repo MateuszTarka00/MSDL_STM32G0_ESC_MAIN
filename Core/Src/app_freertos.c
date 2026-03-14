@@ -33,6 +33,9 @@
 #include "sensors.h"
 #include "teachForm.h"
 #include "iwdg.h"
+#include "canCommunication.h"
+#include "fdcan.h"
+#include "queue.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -66,7 +69,7 @@ osThreadId_t canMenagerTHandle;
 const osThreadAttr_t canMenagerT_attributes = {
   .name = "canMenagerT",
   .priority = (osPriority_t) osPriorityNormal3,
-  .stack_size = 1024 * 4
+  .stack_size = 512 * 4
 };
 /* Definitions for displayTaskT */
 osThreadId_t displayTaskTHandle;
@@ -82,6 +85,13 @@ const osThreadAttr_t engineControlT_attributes = {
   .priority = (osPriority_t) osPriorityNormal1,
   .stack_size = 128 * 4
 };
+/* Definitions for canReceiverT */
+osThreadId_t canReceiverTHandle;
+const osThreadAttr_t canReceiverT_attributes = {
+  .name = "canReceiverT",
+  .priority = (osPriority_t) osPriorityNormal4,
+  .stack_size = 512 * 4
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -92,6 +102,7 @@ void safetyCheck(void *argument);
 void canMenager(void *argument);
 void displayTask(void *argument);
 void engineControl(void *argument);
+void canReceiver(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -183,6 +194,7 @@ void MX_FREERTOS_Init(void) {
 
   /* USER CODE BEGIN RTOS_QUEUES */
   /* add queues, ... */
+	CAN_InitRTOS();
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
@@ -197,6 +209,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of engineControlT */
   engineControlTHandle = osThreadNew(engineControl, NULL, &engineControlT_attributes);
+
+  /* creation of canReceiverT */
+  canReceiverTHandle = osThreadNew(canReceiver, NULL, &canReceiverT_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -225,7 +240,6 @@ void safetyCheck(void *argument)
 	  HAL_IWDG_Refresh(&hiwdg);
 	  updateLoosersStates();
 	  updateContactorsStates();
-	  checkLooserStateSubTask();
 	  if(!checkSafetyCircuitState())
 	  {
 		  safetyCircuitPoint = checkBrokenSafetyCircuitPoint();
@@ -263,8 +277,14 @@ void canMenager(void *argument)
 {
   /* USER CODE BEGIN canMenager */
   /* Infinite loop */
+	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+	HAL_FDCAN_Start(&hfdcan2);
+	CAN_Message_t msg;
   for(;;)
   {
+	heartBitSubTask();
+	checkHeartBeatStatusSubTask();
+
     osDelay(1);
   }
   /* USER CODE END canMenager */
@@ -339,6 +359,29 @@ void engineControl(void *argument)
     osDelay(1);
   }
   /* USER CODE END engineControl */
+}
+
+/* USER CODE BEGIN Header_canReceiver */
+/**
+* @brief Function implementing the canReceiverT thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_canReceiver */
+void canReceiver(void *argument)
+{
+  /* USER CODE BEGIN canReceiver */
+  /* Infinite loop */
+  for(;;)
+  {
+	  CAN_Message_t msg;
+	if(xQueueReceive(canRxQueue, &msg, 1))
+	{
+		processMessage(&msg);
+	}
+    osDelay(100);
+  }
+  /* USER CODE END canReceiver */
 }
 
 /* Private application code --------------------------------------------------*/

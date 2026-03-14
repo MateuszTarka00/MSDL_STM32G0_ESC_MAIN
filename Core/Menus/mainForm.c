@@ -18,6 +18,7 @@
 #include "buttonsFunctions.h"
 #include "systemStartup.h"
 #include "suppCpuCommunication.h"
+#include "canCommunication.h"
 
 #define UNINITIALIZED_VALUE			255
 
@@ -47,8 +48,6 @@ static SoftwareTimerHandler errorChangeTimer;
 static SoftwareTimerHandler informationTimer;
 static uint8_t displayedErrorIndex = 0;
 static uint8_t changeString = 0;
-
-uint8_t noContactorErrors = 0;
 
 WorkModeType workMode;
 
@@ -132,9 +131,9 @@ const char *errorsStrings[] = {
 		"\nOdpad. lancuch",
 		"Brak\nstopnia",
 		"Gwiazda\ntrojkat",
-		"\nOdpad. stycznika 1",
-		"\nOdpad. stycznika 2",
-		"\nBlad. stycznika 3",
+		"Blad\nprzekaznika 1",
+		"Blad\nstycznika 2",
+		"Blad\nstycznika 3",
 		"Obwod\nbezpieczenstwa",
 		"Blad\nluzownika",
 		"Blad\nzmiany predkosci",
@@ -257,14 +256,14 @@ void InformationTimerCallback(void)
 
 	if(checkSpeedTeached())
 	{
-		if(changeString >=2)
+		if(changeString >=3)
 		{
 			changeString = 0;
 		}
 	}
 	else
 	{
-		if(changeString >=3)
+		if(changeString >=4)
 		{
 			changeString = 0;
 		}
@@ -296,6 +295,16 @@ void updateInformationState()
 			}
 			break;
 		case 2:
+			if(getBootomBoardAlive())
+			{
+				ST7789_WriteString(centerString(Font_11x18, "  DOL:  ONLINE  "), 290, "  DOL:  ONLINE  ", Font_11x18, BLACK, WHITE);
+			}
+			else
+			{
+				ST7789_WriteString(centerString(Font_11x18, "  DOL: OFFLINE  "), 290, "  DOL: OFFLINE  ", Font_11x18, BLACK, WHITE);
+			}
+			break;
+		case 3:
 			ST7789_WriteString(centerString(Font_11x18, "Brak zpis. pred."), 290, "Brak zpis. pred.", Font_11x18, BLACK, WHITE);
 			break;
 		}
@@ -472,6 +481,33 @@ void updateSensorUp(void)
 	}
 }
 
+void updateSensorDown(void)
+{
+	if(menuItems[SENSOR_DOWN].state != getHumanDown())
+	{
+		uint16_t stateStringBeggining = ((strlen(menuItems[SENSOR_DOWN].staticString) - 1)*Font_11x18.width) + 2;
+		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+		char clearFirstLine[clearChars+1];
+
+		memset(clearFirstLine, ' ', clearChars);
+		clearFirstLine[clearChars] = '\0';
+		ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_DOWN].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+		menuItems[SENSOR_DOWN].state = getHumanDown();
+		menuItems[SENSOR_DOWN].stateString = humanSensorsStrings[menuItems[SENSOR_DOWN].state];
+
+		if(menuItems[SENSOR_DOWN].state)
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_DOWN].height, menuItems[SENSOR_DOWN].stateString, Font_11x18, DARKGREEN, WHITE);
+			menuItems[SENSOR_DOWN].stringColor = DARKGREEN;
+		}
+		else
+		{
+			ST7789_WriteString(stateStringBeggining, menuItems[SENSOR_DOWN].height, menuItems[SENSOR_DOWN].stateString, Font_11x18, RED, WHITE);
+			menuItems[SENSOR_DOWN].stringColor = RED;
+		}
+	}
+}
+
 void updateDirection(void)
 {
 	if(menuItems[DIRECTION].state != getDirection())
@@ -501,7 +537,7 @@ void updateDirection(void)
 
 void updateSpeed(void)
 {
-	static SpeedType speedState = STOP;
+	static SpeedType speedState = SPEED_STOP;
 
 	if(checkTargetFrequencyReached())
 	{
@@ -590,8 +626,8 @@ void updateContactorsState(void)
 {
 	static uint8_t tempState, directionTmp;
 	tempState = getIntContactorState() + (getAckK2()*2) + (getExtContactorState()*4);
-	char buffer[20];
-	sprintf(buffer, "K1:%u K2:%u S1:%u", getIntContactorState(), getAckK2(), getExtContactorState());
+	static char contactorsBuffer[20];
+	sprintf(contactorsBuffer, "K1:%u K2:%u S1:%u", getIntContactorState(), getAckK2(), getExtContactorState());
 
 
 	if(menuItems[CONTACTORS_STATE].state != tempState || directionTmp != getDirection())
@@ -604,7 +640,7 @@ void updateContactorsState(void)
 		clearFirstLine[clearChars] = '\0';
 		ST7789_WriteString(stateStringBeggining, menuItems[CONTACTORS_STATE].height, clearFirstLine, Font_11x18, BLACK, WHITE);
 		menuItems[CONTACTORS_STATE].state = tempState;
-		menuItems[CONTACTORS_STATE].stateString = buffer;
+		menuItems[CONTACTORS_STATE].stateString = contactorsBuffer;
 
 		if((menuItems[CONTACTORS_STATE].state == 7 && getDirection()) || (menuItems[CONTACTORS_STATE].state == 3 && !getDirection()))
 		{
@@ -665,12 +701,6 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 			actualErrors[numberOfErrors] = error;
 			numberOfErrors++;
 
-
-			if(error != CONTACTOR_1_FALLING_OFF && error != CONTACTOR_2_FALLING_OFF && error !=CONTACTOR_3_FALLING_OFF)
-			{
-				noContactorErrors++;
-			}
-
 			if(numberOfErrors > 1)
 			{
 				deInitSoftwareTimer(&errorChangeTimer);
@@ -690,11 +720,6 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 
 						actualErrors[numberOfErrors-1] = NO_ERROR;
 						numberOfErrors--;
-
-						if(error != CONTACTOR_1_FALLING_OFF && error != CONTACTOR_2_FALLING_OFF && error !=CONTACTOR_3_FALLING_OFF)
-						{
-							noContactorErrors--;
-						}
 
 						if(numberOfErrors < 1)
 						{
@@ -723,6 +748,7 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 void mainMenuSubTask(void)
 {
 	updateSensorUp();
+	updateSensorDown();
 	updateSafetyCircuitState();
 	updateDirection();
 	updateLooserState();

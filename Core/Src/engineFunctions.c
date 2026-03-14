@@ -28,7 +28,6 @@ SoftwareTimerHandler slowSpeedTimer;
 static SoftwareTimerHandler speedChangeTimer;
 static SoftwareTimerHandler chainMotorErrorTimer;
 static SoftwareTimerHandler stepsErrorTimer;
-static SoftwareTimerHandler looserErrorTimer;
 static SoftwareTimerHandler speedSave;
 
 static WorkModeType engineWorkMode = CONSTANS;
@@ -78,17 +77,20 @@ static void slowSpeedTimerCallback(void * Param)
 
 static void speedChangeTimeoutCallback(void)
 {
-	if(!checkTargetFrequencyReached())
+	if(!errorStateActive)
 	{
-		highSpeedSet = FALSE;
-		slowSpeedSet = FALSE;
-		HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
-		HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
-		addRemoveError(SPEED_CHANGE_ERROR, TRUE);
+		if(!checkTargetFrequencyReached())
+		{
+			highSpeedSet = FALSE;
+			slowSpeedSet = FALSE;
+			HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
+			HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
+			addRemoveError(SPEED_CHANGE_ERROR, TRUE);
+		}
+		else
+		{
+			speedReached = TRUE;
 	}
-	else
-	{
-		speedReached = TRUE;
 	}
 }
 
@@ -197,14 +199,12 @@ void initEngineTimers(void)
 	deInitSoftwareTimer(&slowSpeedTimer);
 	deInitSoftwareTimer(&speedChangeTimer);
 	deInitSoftwareTimer(&chainMotorErrorTimer);
-	deInitSoftwareTimer(&looserErrorTimer);
 	deInitSoftwareTimer(&speedSave);
 
 	initSoftwareTimer(&slowSpeedTimer, parameterSlowTime.value, softStopEngine, FALSE, 0);
 	initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
 	initSoftwareTimer(&speedChangeTimer, SPEED_CHANGE_TIMEOUT_MS, speedChangeTimeoutCallback, FALSE, 0);
 	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
-	initSoftwareTimer(&looserErrorTimer, parameterLooserTime.value, looserErrorCallback, FALSE, 0);
 	initSoftwareTimer(&speedSave, SAVE_SPEED_TIME_MS, saveMeasuredRotationsValueTimerCallback, TRUE, &rotationsPerMinuteReal);
 }
 
@@ -395,14 +395,6 @@ void stepsNormalExtiCallback(uint16_t GPIO_Pin)
 				startSoftwareTimer(&stepsErrorTimer);
 			}
 		}
-	}
-}
-
-void checkLooserStateSubTask(void)
-{
-	if(highSpeedSet || slowSpeedSet)
-	{
-		startSoftwareTimer(&looserErrorTimer);
 	}
 }
 

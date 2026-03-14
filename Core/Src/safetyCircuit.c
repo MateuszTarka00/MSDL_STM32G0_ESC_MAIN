@@ -22,6 +22,11 @@ static volatile bool contactor1errorSet = FALSE;
 static volatile bool contactor2errorSet = FALSE;
 static volatile bool contactor3errorSet = FALSE;
 
+static bool contactorState1 = FALSE;
+static bool contactorState2 = TRUE;
+
+static uint8_t restartClicks = 6;
+
 const SafetyCircuitPoints safetyCircuitPoints[NUMBER_OF_CIRCUITS_POINTS] =
 {
 	{SAFETY_C1_GPIO_Port, SAFETY_C1_Pin},
@@ -57,23 +62,35 @@ SafetyCircuitPoint checkBrokenSafetyCircuitPoint(void)
 
 void setContactorK1State(void)
 {
-	static uint8_t restartClicks = 6;
 	static uint32_t ticksTemp;
 
-	if(safetyCircuitState && !noContactorErrors)
+	if(safetyCircuitState && !errorStateActive)
 	{
 		if(restartClicks)
 		{
 			if(xTaskGetTickCount() - ticksTemp >= CONTACTOR_CLICK_TIME)
 			{
-				HAL_GPIO_TogglePin(K1_EN_GPIO_Port, K1_EN_Pin);
-				ticksTemp = xTaskGetTickCount();
-				restartClicks--;
+				if(contactorState1 == getIntContactorState())
+				{
+					contactorState1 = !contactorState1;
+					HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, contactorState1);
+					ticksTemp = xTaskGetTickCount();
+					restartClicks--;
+				}
+				else
+				{
+					if(contactorTimer.start == FALSE)
+					{
+						startSoftwareTimer(&contactorTimer);
+					}
+				}
 			}
 		}
 		else
 		{
 			HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, safetyCircuitState);
+			contactorState1 = safetyCircuitState;
+			contactorState2 = safetyCircuitState;
 			setHardStop(!safetyCircuitState);
 		}
 	}
@@ -81,6 +98,8 @@ void setContactorK1State(void)
 	{
 		setHardStop(TRUE);
 		HAL_GPIO_WritePin(K1_EN_GPIO_Port, K1_EN_Pin, FALSE);
+		contactorState1 = FALSE;
+		contactorState2 = FALSE;
 		restartClicks = 6;
 	}
 }
@@ -100,43 +119,23 @@ void updateSafetyCircuitError(uint8_t state)
 void updateContactorsStates(void)
 {
 
-	if(getIntContactorState())
-	{
-		contactor1errorSet = FALSE;
-		addRemoveError(CONTACTOR_1_FALLING_OFF, FALSE);
-	}
-	else if(!contactor1errorSet)
+	if(getAckK2() != contactorState2 && !contactor2errorSet)
 	{
 		if(contactorTimer.start == FALSE)
 		{
 			startSoftwareTimer(&contactorTimer);
 		}
 	}
-
-	if(getAckK2())
-	{
-		contactor1errorSet = FALSE;
-		addRemoveError(CONTACTOR_2_FALLING_OFF, FALSE);
-	}
-	else if(!contactor2errorSet)
-	{
-		if(contactorTimer.start == FALSE)
-		{
-			startSoftwareTimer(&contactorTimer);
-		}
-	}
-
 
 	if((getDirection() == UP || getDirection() == DOWN) && getAckK2() && getIntContactorState())
 	{
 		if(getExtContactorState())
 		{
-			contactor3errorSet = FALSE;
-			addRemoveError(CONTACTOR_3_FALLING_OFF, FALSE);
+
 		}
 		else
 		{
-			if(contactorTimer.start == FALSE)
+			if(contactorTimer.start == FALSE && !restartClicks)
 			{
 				startSoftwareTimer(&contactorTimer);
 			}
@@ -146,12 +145,11 @@ void updateContactorsStates(void)
 	{
 		if(!getExtContactorState())
 		{
-			contactor3errorSet = FALSE;
-			addRemoveError(CONTACTOR_3_FALLING_OFF, FALSE);
+
 		}
 		else
 		{
-			if(contactorTimer.start == FALSE)
+			if(contactorTimer.start == FALSE && !restartClicks)
 			{
 				startSoftwareTimer(&contactorTimer);
 			}
@@ -162,14 +160,14 @@ void updateContactorsStates(void)
 
 static void contactorTimerCallback(void *param)
 {
-	if(!getIntContactorState())
+	if(getIntContactorState() != contactorState1)
 	{
 		contactor1errorSet = TRUE;
 		addRemoveError(CONTACTOR_1_FALLING_OFF, TRUE);
 	}
 
 
-	if(!getAckK2())
+	if(getAckK2() != contactorState2)
 	{
 		contactor2errorSet = TRUE;
 		addRemoveError(CONTACTOR_2_FALLING_OFF, TRUE);
@@ -197,7 +195,20 @@ static void contactorTimerCallback(void *param)
 
 static void looserTimerCallback(void *param)
 {
-	addRemoveError(LOOSER_ERROR, TRUE);
+	if(getDirection())
+	{
+		if(getLoosersState())
+		{
+			addRemoveError(LOOSER_ERROR, TRUE);
+		}
+	}
+	else
+	{
+		if(getLoosersState() < STOP)
+		{
+			addRemoveError(LOOSER_ERROR, TRUE);
+		}
+	}
 }
 
 void initSafetyTimers(void)
@@ -211,9 +222,9 @@ void initSafetyTimers(void)
 
 void updateLoosersStates(void)
 {
-	if(getLoosersState())
+	if(getDirection())
 	{
-		if(highSpeedSet || slowSpeedSet)
+		if(getLoosersState())
 		{
 			if(looserTimer.start == FALSE)
 			{
@@ -223,8 +234,13 @@ void updateLoosersStates(void)
 	}
 	else
 	{
-		addRemoveError(LOOSER_ERROR, FALSE);
-		stopSoftwareTimer(&looserTimer);
+		if(getLoosersState() < STOP)
+		{
+			if(looserTimer.start == FALSE)
+			{
+				startSoftwareTimer(&looserTimer);
+			}
+		}
 	}
 }
 

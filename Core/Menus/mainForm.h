@@ -53,7 +53,6 @@ typedef enum
 extern MenusTypes activeMenu;
 extern volatile uint8_t numberOfErrors;
 extern bool errorStateActive;
-extern uint8_t noContactorErrors;
 extern WorkModeType workMode;
 
 void updateSafetyCircuitState(void);

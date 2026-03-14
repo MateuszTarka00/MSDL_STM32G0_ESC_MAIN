@@ -225,6 +225,7 @@ typedef enum
 
 extern osThreadId_t displayTaskTHandle;
 extern osThreadId_t engineControlTHandle;
+extern osThreadId_t canReceiverTHandle;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

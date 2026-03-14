@@ -109,7 +109,7 @@ int main(void)
 
   HAL_TIM_Base_Start_IT(&htim14);
   initWatchdogTimerInit();
-  MX_IWDG_Init();
+//  MX_IWDG_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
