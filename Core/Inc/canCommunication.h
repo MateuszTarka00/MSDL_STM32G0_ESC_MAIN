@@ -22,6 +22,7 @@
 #define PARAMETR_GET_ACTION				0x0003
 
 #define BOTTOM_SENSOR_EVENT				0x0000
+#define BOTTOM_SAFETY_CIRCUIT_EVENT		0x0001
 
 #define RECOGNITION_ACTION_SIZE			0x03
 
@@ -134,6 +135,7 @@ void heartBitSubTask(void);
 bool getBootomBoardAlive(void);
 void processMessage(CAN_Message_t *msg);
 bool getHumanDown(void);
+bool getSafetyCircuitBottom(void);
 
 
 #endif /* INC_CANCOMMUNICATION_H_ */

@@ -16,16 +16,12 @@ static volatile uint8_t myID = MASTER_ID;
 static uint32_t FDCAN_BytesToDLC(uint8_t len);
 static uint8_t devicesNumber = 0;
 
-static SoftwareTimerHandler canDevicesHeartBitLostTimer[DEVICES_MAX_NUMBER];
-static SoftwareTimerHandler sendEmergencyHeartBitTimer;
-
 static CanDevice canDevices[DEVICES_MAX_NUMBER];
 static bool humanDownStairs = FALSE;
+static bool bottomSafetyCircuit = FALSE;
+
 
 QueueHandle_t canRxQueue;
-
-static void canDevicesHeartBitLostTimerHandler(void *param);
-static void sendEmergencyHeartBitTimerHandler(void *param);
 
 void CAN_InitRTOS(void)
 {
@@ -123,6 +119,9 @@ void processEvent(uint16_t eventId, uint8_t value)
 	case BOTTOM_SENSOR_EVENT:
 		humanDownStairs = value;
 		break;
+	case BOTTOM_SAFETY_CIRCUIT_EVENT:
+		bottomSafetyCircuit = value;
+		break;
 	default:
 		break;
 	}
@@ -196,7 +195,7 @@ void heartBitSubTask(void)
 	static uint32_t ticksTmp = 0;
 	uint32_t ticksNow = xTaskGetTickCount();
 
-	if((ticksNow - HEARTBIT_PERIOD_MS) > ticksTmp)
+	if((ticksNow - HEARTBIT_PERIOD_MS) >= ticksTmp && ticksNow > HEARTBIT_PERIOD_MS)
 	{
 		recognitionActionTx();
 		ticksTmp = xTaskGetTickCount();
@@ -208,6 +207,7 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
     FDCAN_RxHeaderTypeDef rxHeader;
     uint8_t rxData[8];
     CAN_Message_t msg;
+    BaseType_t hpw = pdFALSE;
 
     HAL_FDCAN_GetRxMessage(
         hfdcan,
@@ -224,36 +224,12 @@ void HAL_FDCAN_RxFifo0Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo0ITs)
         xQueueSendFromISR(
             canRxQueue,
             &msg,
-			canReceiverTHandle
+			hpw
         );
+
+        portYIELD_FROM_ISR(hpw);
     }
 }
-
-//void HAL_FDCAN_RxFifo1Callback(FDCAN_HandleTypeDef* hfdcan, uint32_t RxFifo1ITs)
-//{
-//    FDCAN_RxHeaderTypeDef rxHeader;
-//    uint8_t rxData[8];
-//
-//    HAL_FDCAN_GetRxMessage(
-//        hfdcan,
-//        FDCAN_RX_FIFO0,
-//        &rxHeader,
-//        rxData
-//    );
-//
-//	CAN_Message_t msg;
-//    msg.id = rxHeader.Identifier;
-//    msg.len = rxHeader.DataLength >> 16;
-//
-//    if(rxData[msg.len - 1] == myID || rxData[msg.len - 1] == ALL_OBJECTS_ID) //Check if it is for me
-//    {
-//        xQueueSendFromISR(
-//            canRxQueue,
-//            &msg,
-//			canReceiverTHandle
-//        );
-//    }
-//}
 
 void checkHeartBeatStatusSubTask(void)
 {
@@ -319,6 +295,11 @@ void processMessage(CAN_Message_t *msg)
 bool getHumanDown(void)
 {
 	return humanDownStairs;
+}
+
+bool getSafetyCircuitBottom(void)
+{
+	return bottomSafetyCircuit;
 }
 
 

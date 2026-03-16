@@ -279,7 +279,7 @@ void canMenager(void *argument)
   /* Infinite loop */
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
 	HAL_FDCAN_Start(&hfdcan2);
-	CAN_Message_t msg;
+
   for(;;)
   {
 	heartBitSubTask();
@@ -374,12 +374,11 @@ void canReceiver(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  CAN_Message_t msg;
-	if(xQueueReceive(canRxQueue, &msg, 1))
+	CAN_Message_t msg;
+	if(xQueueReceive(canRxQueue, &msg, portMAX_DELAY) == pdTRUE)
 	{
 		processMessage(&msg);
 	}
-    osDelay(100);
   }
   /* USER CODE END canReceiver */
 }
