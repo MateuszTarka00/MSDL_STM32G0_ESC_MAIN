@@ -39,6 +39,7 @@ extern Parameter parameterTrafficDirectionSignals;
 extern Parameter parameterLightning;
 
 extern Parameter parameterFactoryReset;
+extern Parameter parameteClearLogs;
 
 void paramGetValueString(char *buffer, Parameter *parameter);
 void paramChangeValue(Parameter *parameter, bool increaseDecrease);

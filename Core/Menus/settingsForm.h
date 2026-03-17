@@ -39,6 +39,7 @@ typedef struct
 extern MenuFormat *currentSettingsMenu;
 extern MenuFormat settingsMenu;
 extern MenuFormat parametersAdjustmentMenu;
+extern MenuFormat logsMenu;
 extern Parameter *currentParameter;
 
 void enterSettingsMenu(void);

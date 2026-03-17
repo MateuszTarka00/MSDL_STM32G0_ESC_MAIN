@@ -19,6 +19,7 @@
 #include "systemStartup.h"
 #include "suppCpuCommunication.h"
 #include "canCommunication.h"
+#include "logs.h"
 
 #define UNINITIALIZED_VALUE			255
 
@@ -699,6 +700,7 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 			}
 
 			actualErrors[numberOfErrors] = error;
+			addLog(error);
 			numberOfErrors++;
 
 			if(numberOfErrors > 1)

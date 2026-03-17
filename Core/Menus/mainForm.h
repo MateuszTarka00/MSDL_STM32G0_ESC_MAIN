@@ -55,6 +55,8 @@ extern volatile uint8_t numberOfErrors;
 extern bool errorStateActive;
 extern WorkModeType workMode;
 
+extern const char *errorsStrings[];
+
 void updateSafetyCircuitState(void);
 void updateSensorUp(void);
 void mainMenuSubTask(void);

@@ -13,6 +13,7 @@
 #include "flash.h"
 #include "mainForm.h"
 #include "sensors.h"
+#include "logs.h"
 
 #define HEADER_TO_FIRST_ITEM_PIXELS	41
 #define ITEM_TO_ITEM_PIXELS			7
@@ -93,6 +94,24 @@ void enterSubMenu(void *param)
 		{
 			ST7789_WriteString(2, calculateItemStartHeight(i, Font_11x18), currentSettingsMenu->menuItems[i].name, Font_11x18, BLACK, WHITE);
 		}
+	}
+}
+
+void enterLogsMenu(void *param)
+{
+	currentSettingsMenu = param;
+	ST7789_Fill_Color(WHITE);
+	currentSettingsMenu->currentItem = 0;
+	currentSettingsMenu->itemsNumber = 0;
+
+	ST7789_WriteString(centerString(Font_16x26, currentSettingsMenu->header), 5, currentSettingsMenu->header, Font_16x26, BLACK, WHITE);
+
+	uint8_t logNumber = 0;
+	while(actualLogs[logNumber] != 0xFF || logNumber < MAXIMUM_LOGS_NUMBER)
+	{
+		currentSettingsMenu->itemsNumber++;
+		currentSettingsMenu->menuItems[logNumber].name = errorsStrings[actualLogs[logNumber]];
+		ST7789_WriteString(2, calculateItemStartHeight(logNumber, Font_11x18), currentSettingsMenu->menuItems[logNumber].name, Font_11x18, WHITE, BLACK);
 	}
 }
 
@@ -241,12 +260,40 @@ MenuFormat controlParameterMenu =
 	.menuType = SCROLL_MENU,
 };
 
+MenuItem logsViewMenuItems[20]; //It is created in enter menu function
+
+MenuFormat logsViewMenu =
+{
+    .header = "Zdarzenia",
+    .menuItems = logsViewMenuItems,   // ← pointer to first MenuItem
+    .itemsNumber = 0,
+    .currentItem = 0,
+	.parentMenu = &logsMenu,
+	.menuType = SCROLL_MENU,
+};
+
+MenuItem logsMenuItems[] =
+{
+    { .name = "Zdarzenia"			,			.menuFunction = enterLogsMenu, .param = &logsViewMenu},
+    { .name = "wyczysc zdarzenia"	,      		.menuFunction = enterParameterMenu, .param = &parameteClearLogs},
+};
+
+MenuFormat logsMenu =
+{
+    .header = "Ustawienia",
+    .menuItems = logsMenuItems,   // ← pointer to first MenuItem
+    .itemsNumber = sizeof(logsMenuItems) / sizeof(logsMenuItems[0]),
+    .currentItem = 0,
+	.parentMenu = &settingsMenu,
+	.menuType = SCROLL_MENU,
+};
+
 MenuItem settingsMenuItems[] =
 {
     { .name = "Parametry czas"	,			.menuFunction = enterSubMenu, .param = &timesParameterMenu},
     { .name = "Kontrola",	  				.menuFunction = enterSubMenu, .param = &monitoringParameterMenu},
     { .name = "Sterowanie",        			.menuFunction = enterSubMenu, .param = &controlParameterMenu},
-    { .name = "Dziennik zdarzen",	  		.menuFunction = 0, .param = 0 },
+    { .name = "Dziennik zdarzen",	  		.menuFunction = enterSubMenu, .param = &logsMenu },
     { .name = "Jezyk",       				.menuFunction = 0, .param = 0 },
     { .name = "Ustawienia fabryczne",      	.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
 };
@@ -352,6 +399,11 @@ void okButtonFunctionSettingsMenu(void *param)
 				{
 					backToParentMenu();
 				}
+			}
+			if(currentParameter == &parameteClearLogs)
+			{
+				clearLogs();
+				backToParentMenu();
 			}
 			else
 			{

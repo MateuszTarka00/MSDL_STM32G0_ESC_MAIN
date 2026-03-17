@@ -128,6 +128,17 @@ Parameter parameterFactoryReset=
 		ON_OFF,
 };
 
+//Fake parameter, only for format purpose
+Parameter parameteClearLogs=
+{
+		0,
+		0,
+		1,
+		0,
+		1,
+		ON_OFF,
+};
+
 void paramGetValueString(char *buffer, Parameter *parameter)
 {
 	switch(parameter->type)
