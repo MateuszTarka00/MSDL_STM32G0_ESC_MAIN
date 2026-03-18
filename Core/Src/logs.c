@@ -7,18 +7,24 @@
 
 #include "logs.h"
 #include "flash.h"
+#include "string.h"
 
-#define LOGS_FLASH_PAGE 			199
+#define LOGS_FLASH_PAGE 			250
 #define FLASH_DATA_SIZE 			MAXIMUM_LOGS_NUMBER
+
+#define WAIT_FOR_SAVE_MS			1000
 
 uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
 
+static bool saveLogsFlag = FALSE;
+static uint32_t saveTimeStamp = 0;
+
 void addLog(uint8_t log)
 {
-	Flash_ErasePage(LOGS_FLASH_PAGE);
+	saveLogsFlag = TRUE;
+	saveTimeStamp = xTaskGetTickCount();
 	memcpy(&actualLogs[1], actualLogs, MAXIMUM_LOGS_NUMBER-1);
 	actualLogs[0] = log;
-	Flash_WriteLogs(LOGS_FLASH_PAGE, actualLogs);
 }
 
 void clearLogs(void)
@@ -45,4 +51,16 @@ void Flash_WriteLogs(uint32_t pageIndex, uint8_t *data)
     }
 
     HAL_FLASH_Lock();
+}
+
+void saveLogs(void)
+{
+	uint32_t ticksNow = xTaskGetTickCount();
+
+	if(saveLogsFlag && ((ticksNow - saveTimeStamp) > WAIT_FOR_SAVE_MS))
+	{
+//		Flash_ErasePage(LOGS_FLASH_PAGE);
+//		Flash_WriteLogs(LOGS_FLASH_PAGE, actualLogs);
+		saveLogsFlag = FALSE;
+	}
 }

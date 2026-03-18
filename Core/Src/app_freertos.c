@@ -36,6 +36,7 @@
 #include "canCommunication.h"
 #include "fdcan.h"
 #include "queue.h"
+#include "logs.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -76,7 +77,7 @@ osThreadId_t displayTaskTHandle;
 const osThreadAttr_t displayTaskT_attributes = {
   .name = "displayTaskT",
   .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 512 * 4
+  .stack_size = 2048 * 4
 };
 /* Definitions for engineControlT */
 osThreadId_t engineControlTHandle;
@@ -89,7 +90,7 @@ const osThreadAttr_t engineControlT_attributes = {
 osThreadId_t canReceiverTHandle;
 const osThreadAttr_t canReceiverT_attributes = {
   .name = "canReceiverT",
-  .priority = (osPriority_t) osPriorityNormal4,
+  .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 512 * 4
 };
 
@@ -277,13 +278,13 @@ void canMenager(void *argument)
 {
   /* USER CODE BEGIN canMenager */
   /* Infinite loop */
-	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
-	HAL_FDCAN_Start(&hfdcan2);
+//	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+//	HAL_FDCAN_Start(&hfdcan2);
 
   for(;;)
   {
-	heartBitSubTask();
-	checkHeartBeatStatusSubTask();
+//	heartBitSubTask();
+//	checkHeartBeatStatusSubTask();
 
     osDelay(1);
   }
@@ -328,6 +329,7 @@ void displayTask(void *argument)
 			  break;
 	  }
 
+//	saveLogs();
 	buttonsSubTask();
     osDelay(1);
   }

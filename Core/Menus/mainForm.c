@@ -700,7 +700,7 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 			}
 
 			actualErrors[numberOfErrors] = error;
-			addLog(error);
+//			addLog(error);
 			numberOfErrors++;
 
 			if(numberOfErrors > 1)

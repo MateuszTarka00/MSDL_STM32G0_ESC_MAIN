@@ -9,12 +9,15 @@
 #include "softwareReset.h"
 #include "suppCpuCommunication.h"
 #include <string.h>
+#include "FreeRTOS.h"
+#include "task.h"
 
-#define FLASH_PAGE 			200
+#define FLASH_PAGE 			250
 #define FLASH_BASE_ADDR     0x08000000U
 #define FLASH_MAGIC         0xDEADBEEFUL
 #define FLASH_DATA_SIZE \
     (sizeof(Flash_parametersToSave) - sizeof(uint32_t))
+
 
 Flash_parametersToSave flash_parametersToSave = {};
 
@@ -26,6 +29,10 @@ uint32_t Flash_GetPageAddress(uint32_t pageIndex)
 
 void Flash_ErasePage(uint32_t pageIndex)
 {
+	uint32_t err;
+	__disable_irq();
+    taskENTER_CRITICAL();   // disable FreeRTOS preemption
+
     HAL_FLASH_Unlock();
 
     FLASH_EraseInitTypeDef eraseInit = {0};
@@ -35,13 +42,18 @@ void Flash_ErasePage(uint32_t pageIndex)
     eraseInit.Page = pageIndex;
     eraseInit.NbPages = 1;
 
-    if (HAL_FLASHEx_Erase(&eraseInit, &pageError) != HAL_OK) {
-        // Handle error
-        HAL_FLASH_Lock();
-        return;
+    HAL_StatusTypeDef status = HAL_FLASHEx_Erase(&eraseInit, &pageError);
+
+    while (__HAL_FLASH_GET_FLAG(FLASH_FLAG_BSY));  // wait until done
+
+    if (status != HAL_OK) {
+        err = HAL_FLASH_GetError();  // log or handle error
     }
 
     HAL_FLASH_Lock();
+
+    taskEXIT_CRITICAL();
+    __enable_irq();
 }
 
 void Flash_WriteStruct(uint32_t pageIndex, const Flash_parametersToSave *data)

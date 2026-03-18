@@ -34,6 +34,7 @@
 #include "externalWatchdog.h"
 #include "parameters.h"
 #include "st7789.h"
+#include "flash.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -99,6 +100,7 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN2_Init();
   MX_TIM14_Init();
+//  MX_IWDG_Init();
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */

@@ -9,6 +9,7 @@
 #define INC_FLASH_H_
 
 #include "main.h"
+#include "softwareTimer_ms.h"
 
 typedef struct
 {
@@ -42,6 +43,7 @@ typedef struct __attribute__((packed))
 }Flash_parametersToSave;
 
 extern Flash_parametersToSave flash_parametersToSave;
+extern SoftwareTimerHandler parametersSaveTimer;
 
 void Flash_ErasePage(uint32_t pageIndex);
 void Flash_WriteStruct(uint32_t pageIndex, const Flash_parametersToSave *data);
@@ -52,5 +54,6 @@ uint32_t crc32_compute(const uint8_t *data, uint32_t length);
 void flash_parametersSave(void);
 bool flash_loadParameters(void);
 void flash_factoryReset(void);
+void initFlashTimers(void);
 
 #endif /* INC_FLASH_H_ */

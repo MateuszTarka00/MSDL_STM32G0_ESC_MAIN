@@ -78,6 +78,9 @@ void HAL_MspInit(void)
   /* PVD_VDDIO2_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(PVD_VDDIO2_IRQn, 3, 0);
   HAL_NVIC_EnableIRQ(PVD_VDDIO2_IRQn);
+  /* FLASH_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(FLASH_IRQn, 3, 0);
+  HAL_NVIC_EnableIRQ(FLASH_IRQn);
 
   /** Disable the internal Pull-Up in Dead Battery pins of UCPD peripheral
   */

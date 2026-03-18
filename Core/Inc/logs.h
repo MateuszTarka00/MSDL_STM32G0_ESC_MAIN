@@ -17,6 +17,6 @@ extern uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
 void addLog(uint8_t log);
 void clearLogs(void);
 void Flash_WriteLogs(uint32_t pageIndex, uint8_t *data);
-
+void saveLogs(void);
 
 #endif /* INC_LOGS_H_ */
