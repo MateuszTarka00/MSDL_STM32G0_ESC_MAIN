@@ -34,6 +34,21 @@ uint16_t calculateItemStartHeight(uint8_t itemNumber, FontDef font);
 
 volatile static uint8_t trianglesDrawed = 0;
 
+const char *logsStrings[] = {
+		"Brak bledu",
+		"Termistor",
+		"Odpad. lancuch",
+		"Brak stopnia",
+		"Gwiazda trojkat",
+		"Blad przekaznika 1",
+		"Blad stycznika 2",
+		"Blad stycznika 3",
+		"Obwod bezpieczenstwa",
+		"Blad luzownika",
+		"Blad zmiany predkosci",
+		"Bledna predkosc",
+};
+
 void downButtonFunctionSettingsMenu(void *param);
 void upButtonFunctionSettingsMenu(void *param);
 void okButtonFunctionSettingsMenu(void *param);
@@ -107,11 +122,20 @@ void enterLogsMenu(void *param)
 	ST7789_WriteString(centerString(Font_16x26, currentSettingsMenu->header), 5, currentSettingsMenu->header, Font_16x26, BLACK, WHITE);
 
 	uint8_t logNumber = 0;
-	while(actualLogs[logNumber] != 0xFF || logNumber < MAXIMUM_LOGS_NUMBER)
+	while(actualLogs[logNumber] != 0xFF && actualLogs[logNumber] != 0x00 && logNumber < MAXIMUM_LOGS_NUMBER)
 	{
+		currentSettingsMenu->menuItems[logNumber].name = logsStrings[actualLogs[logNumber]];
+		if(logNumber == currentSettingsMenu->currentItem)
+		{
+			ST7789_WriteString(2, calculateItemStartHeight(logNumber, Font_11x18), currentSettingsMenu->menuItems[logNumber].name, Font_11x18, WHITE, BLACK);
+		}
+		else
+		{
+			ST7789_WriteString(2, calculateItemStartHeight(logNumber, Font_11x18), currentSettingsMenu->menuItems[logNumber].name, Font_11x18, BLACK, WHITE);
+		}
+		logNumber++;
+
 		currentSettingsMenu->itemsNumber++;
-		currentSettingsMenu->menuItems[logNumber].name = errorsStrings[actualLogs[logNumber]];
-		ST7789_WriteString(2, calculateItemStartHeight(logNumber, Font_11x18), currentSettingsMenu->menuItems[logNumber].name, Font_11x18, WHITE, BLACK);
 	}
 }
 
@@ -211,10 +235,10 @@ MenuItem timesParameterMenuItems[] =
 {
     { .name = "Czas luzownika",				.menuFunction = enterParameterMenu, .param = &parameterLooserTime},
     { .name = "Czas lancucha",	  			.menuFunction = enterParameterMenu, .param = &parameterEngineTime},
-    { .name = "Czas stycznikow",   			.menuFunction = enterParameterMenu, .param = &parameterContactorTime},
-    { .name = "Czas pracy szybko",	  		.menuFunction = enterParameterMenu, .param = &parameterFastTime},
-    { .name = "Czas pracy wolno",       	.menuFunction = enterParameterMenu, .param = &parameterSlowTime},
-    { .name = "Czas gwiazda/trojkat",      	.menuFunction = enterParameterMenu, .param = &parameterStarTriangleTime},
+    { .name = "Czas stycznik.",   			.menuFunction = enterParameterMenu, .param = &parameterContactorTime},
+    { .name = "Czas szybko",	  			.menuFunction = enterParameterMenu, .param = &parameterFastTime},
+    { .name = "Czas wolno",       			.menuFunction = enterParameterMenu, .param = &parameterSlowTime},
+    { .name = "Czas g/t",      				.menuFunction = enterParameterMenu, .param = &parameterStarTriangleTime},
 };
 
 MenuFormat timesParameterMenu =
@@ -230,9 +254,9 @@ MenuFormat timesParameterMenu =
 
 MenuItem monitoringParameterMenuItems[] =
 {
-    { .name = "Kontrola lancucha",				.menuFunction = enterParameterMenu, .param = &parameterEngineControl },
-	{ .name = "Kontrola poreczy",				.menuFunction = enterParameterMenu, .param = &parameterHandrailControl },
-	{ .name = "Kontrola stopnia",				.menuFunction = enterParameterMenu, .param = &parameterStepControl },
+    { .name = "Kontr lancuch",				.menuFunction = enterParameterMenu, .param = &parameterEngineControl },
+	{ .name = "Kontr poreczy",				.menuFunction = enterParameterMenu, .param = &parameterHandrailControl },
+	{ .name = "Kontr stopnia",				.menuFunction = enterParameterMenu, .param = &parameterStepControl },
 };
 
 MenuFormat monitoringParameterMenu =
@@ -277,13 +301,13 @@ MenuFormat logsViewMenu =
 
 MenuItem logsMenuItems[] =
 {
-    { .name = "Zdarzenia"			,			.menuFunction = enterLogsMenu, .param = &logsViewMenu},
-    { .name = "wyczysc zdarzenia"	,      		.menuFunction = enterParameterMenu, .param = &parameteClearLogs},
+    { .name = "Zdarzenia"		,				.menuFunction = enterLogsMenu, .param = &logsViewMenu},
+    { .name = "wyczysc zdarz"	,      			.menuFunction = enterParameterMenu, .param = &parameteClearLogs},
 };
 
 MenuFormat logsMenu =
 {
-    .header = "Ustawienia",
+    .header = "Menu zdarzen",
     .menuItems = logsMenuItems,   // ← pointer to first MenuItem
     .itemsNumber = sizeof(logsMenuItems) / sizeof(logsMenuItems[0]),
     .currentItem = 0,
@@ -296,9 +320,9 @@ MenuItem settingsMenuItems[] =
     { .name = "Parametry czas"	,			.menuFunction = enterSubMenu, .param = &timesParameterMenu},
     { .name = "Kontrola",	  				.menuFunction = enterSubMenu, .param = &monitoringParameterMenu},
     { .name = "Sterowanie",        			.menuFunction = enterSubMenu, .param = &controlParameterMenu},
-    { .name = "Dziennik zdarzen",	  		.menuFunction = enterSubMenu, .param = &logsMenu },
+    { .name = "Menu zdarzen",	  			.menuFunction = enterSubMenu, .param = &logsMenu },
     { .name = "Jezyk",       				.menuFunction = 0, .param = 0 },
-    { .name = "Ustawienia fabryczne",      	.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
+    { .name = "Ustaw. fabr.",      	.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
 };
 
 MenuFormat settingsMenu =
@@ -395,6 +419,7 @@ void okButtonFunctionSettingsMenu(void *param)
 					}
 					else
 					{
+						clearLogs();
 						flash_factoryReset();
 					}
 				}
@@ -407,6 +432,8 @@ void okButtonFunctionSettingsMenu(void *param)
 			{
 				clearLogs();
 				backToParentMenu();
+				currentParameter->value = FALSE;
+
 			}
 			else
 			{

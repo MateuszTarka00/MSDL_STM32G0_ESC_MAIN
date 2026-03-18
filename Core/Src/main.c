@@ -100,7 +100,6 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN2_Init();
   MX_TIM14_Init();
-//  MX_IWDG_Init();
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */

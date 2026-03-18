@@ -278,13 +278,13 @@ void canMenager(void *argument)
 {
   /* USER CODE BEGIN canMenager */
   /* Infinite loop */
-//	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
-//	HAL_FDCAN_Start(&hfdcan2);
+	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
+	HAL_FDCAN_Start(&hfdcan2);
 
   for(;;)
   {
-//	heartBitSubTask();
-//	checkHeartBeatStatusSubTask();
+	heartBitSubTask();
+	checkHeartBeatStatusSubTask();
 
     osDelay(1);
   }

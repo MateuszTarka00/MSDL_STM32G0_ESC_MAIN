@@ -10,13 +10,14 @@
 
 #include "main.h"
 
-#define MAXIMUM_LOGS_NUMBER	20
+#define MAXIMUM_LOGS_NUMBER	10
 
-extern uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
+extern volatile uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
 
 void addLog(uint8_t log);
 void clearLogs(void);
 void Flash_WriteLogs(uint32_t pageIndex, uint8_t *data);
 void saveLogs(void);
+void initializeLogs(void);
 
 #endif /* INC_LOGS_H_ */

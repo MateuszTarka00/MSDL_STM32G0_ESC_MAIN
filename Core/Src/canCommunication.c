@@ -18,8 +18,7 @@ static uint8_t devicesNumber = 0;
 
 static CanDevice canDevices[DEVICES_MAX_NUMBER];
 static bool humanDownStairs = FALSE;
-static bool bottomSafetyCircuit = FALSE;
-
+static uint8_t bottomSafetyCircuit = 0;
 
 QueueHandle_t canRxQueue;
 
@@ -42,8 +41,10 @@ void FDCAN_Send(uint16_t id, uint8_t *data, uint8_t len)
     TxHeader.TxEventFifoControl = FDCAN_NO_TX_EVENTS;
     TxHeader.MessageMarker = 0;
 
-    /* Wait until TX FIFO has free space */
-    while (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan2) == 0);
+    while (HAL_FDCAN_GetTxFifoFreeLevel(&hfdcan2) == 0)
+    {
+        vTaskDelay(pdMS_TO_TICKS(1)); // yield CPU
+    }
 
     HAL_FDCAN_AddMessageToTxFifoQ(&hfdcan2, &TxHeader, data);
 }

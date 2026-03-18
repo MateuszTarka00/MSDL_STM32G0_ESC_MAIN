@@ -87,6 +87,18 @@ const char *safetyCircuitStrings[] = {
 	"OK"
 };
 
+const char *safetyCircuitBottomStrings[] = {
+    "Stop\nmaszynownia dol",
+    "Stop wlot\ndol",
+    "Prawa\nplyta grzebieniowa dol",
+	"Lewa\nplyta grzebieniowa dol",
+	"Lewy\nwlot poreczy dol",
+	"Prawy\nwlot poreczy dol",
+	"Odpad.\nstopnia dol",
+	"kontakt\nlancucha lewy dol",
+	"kontakt\nlancucha prawy dol"
+};
+
 const char *directionStrings[] = {
 		"Brak",
 		"Dol",
@@ -400,29 +412,74 @@ void updateWorkMode(void)
 
 void updateSafetyCircuitState(void)
 {
-	if(menuItems[SAFETY_CIRCUIT].state != safetyCircuitPoint)
+	uint8_t safetyCircuitBottom;
+	static bool isBottom = FALSE;
+	if(safetyCircuitPoint == SAFETY_CIRCUIT_ERROR)
 	{
-		uint16_t stateStringBeggining = ((strlen(menuItems[SAFETY_CIRCUIT].staticString) - 1)*Font_11x18.width) + 2;
-		uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
-		char clearFirstLine[clearChars+1];
+		isBottom = TRUE;
+		safetyCircuitBottom = getSafetyCircuitBottom();
+	}
 
-		memset(clearFirstLine, ' ', clearChars);
-		clearFirstLine[clearChars] = '\0';
-		ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, clearFirstLine, Font_11x18, BLACK, WHITE);
-		ST7789_WriteString(2, menuItems[SAFETY_CIRCUIT].height + Font_11x18.height, clearLine, Font_11x18, BLACK, WHITE);
-		menuItems[SAFETY_CIRCUIT].state = safetyCircuitPoint;
-		menuItems[SAFETY_CIRCUIT].stateString = safetyCircuitStrings[menuItems[SAFETY_CIRCUIT].state];
-
-		if(menuItems[SAFETY_CIRCUIT].state == SAFETY_CIRCUIT_UNBROKEN)
+	if(isBottom && safetyCircuitPoint == SAFETY_CIRCUIT_ERROR)
+	{
+		if(menuItems[SAFETY_CIRCUIT].state != safetyCircuitBottom)
 		{
-			ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, menuItems[SAFETY_CIRCUIT].stateString, Font_11x18, DARKGREEN, WHITE);
-			menuItems[SAFETY_CIRCUIT].stringColor = DARKGREEN;
+			uint16_t stateStringBeggining = ((strlen(menuItems[SAFETY_CIRCUIT].staticString) - 1)*Font_11x18.width) + 2;
+			uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+			char clearFirstLine[clearChars+1];
+
+			memset(clearFirstLine, ' ', clearChars);
+			clearFirstLine[clearChars] = '\0';
+			ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+			ST7789_WriteString(2, menuItems[SAFETY_CIRCUIT].height + Font_11x18.height, clearLine, Font_11x18, BLACK, WHITE);
+			menuItems[SAFETY_CIRCUIT].state = safetyCircuitBottom;
+			menuItems[SAFETY_CIRCUIT].stateString = safetyCircuitBottomStrings[menuItems[SAFETY_CIRCUIT].state];
+
+			if(menuItems[SAFETY_CIRCUIT].state == SAFETY_CIRCUIT_UNBROKEN)
+			{
+				ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, menuItems[SAFETY_CIRCUIT].stateString, Font_11x18, DARKGREEN, WHITE);
+				menuItems[SAFETY_CIRCUIT].stringColor = DARKGREEN;
+			}
+			else
+			{
+				ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, menuItems[SAFETY_CIRCUIT].stateString, Font_11x18, RED, WHITE);
+				menuItems[SAFETY_CIRCUIT].stringColor = RED;
+
+			}
 		}
-		else
+	}
+	else
+	{
+		if(isBottom)
 		{
-			ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, menuItems[SAFETY_CIRCUIT].stateString, Font_11x18, RED, WHITE);
-			menuItems[SAFETY_CIRCUIT].stringColor = RED;
+			isBottom = FALSE;
+			menuItems[SAFETY_CIRCUIT].state = UNINITIALIZED_VALUE;
+		}
 
+		if(menuItems[SAFETY_CIRCUIT].state != safetyCircuitPoint)
+		{
+			uint16_t stateStringBeggining = ((strlen(menuItems[SAFETY_CIRCUIT].staticString) - 1)*Font_11x18.width) + 2;
+			uint8_t clearChars = (ST7789_WIDTH - stateStringBeggining)/Font_11x18.width;
+			char clearFirstLine[clearChars+1];
+
+			memset(clearFirstLine, ' ', clearChars);
+			clearFirstLine[clearChars] = '\0';
+			ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, clearFirstLine, Font_11x18, BLACK, WHITE);
+			ST7789_WriteString(2, menuItems[SAFETY_CIRCUIT].height + Font_11x18.height, clearLine, Font_11x18, BLACK, WHITE);
+			menuItems[SAFETY_CIRCUIT].state = safetyCircuitPoint;
+			menuItems[SAFETY_CIRCUIT].stateString = safetyCircuitStrings[menuItems[SAFETY_CIRCUIT].state];
+
+			if(menuItems[SAFETY_CIRCUIT].state == SAFETY_CIRCUIT_UNBROKEN)
+			{
+				ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, menuItems[SAFETY_CIRCUIT].stateString, Font_11x18, DARKGREEN, WHITE);
+				menuItems[SAFETY_CIRCUIT].stringColor = DARKGREEN;
+			}
+			else
+			{
+				ST7789_WriteString(stateStringBeggining, menuItems[SAFETY_CIRCUIT].height, menuItems[SAFETY_CIRCUIT].stateString, Font_11x18, RED, WHITE);
+				menuItems[SAFETY_CIRCUIT].stringColor = RED;
+
+			}
 		}
 	}
 }
@@ -700,7 +757,7 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 			}
 
 			actualErrors[numberOfErrors] = error;
-//			addLog(error);
+			addLog(error);
 			numberOfErrors++;
 
 			if(numberOfErrors > 1)

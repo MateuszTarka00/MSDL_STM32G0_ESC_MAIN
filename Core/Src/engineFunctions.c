@@ -278,13 +278,13 @@ bool checkSetFrequency(void)
 	}
 	else if(highSpeedSet)
 	{
-		engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.fastTime,  rotationsPerMinuteGiven.engine.fastTime) | !getRotationControl();
-		engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.fastTime, rotationsPerMinuteGiven.handrail.fastTime) | !getHandrailControl();
+		engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.fastTime,  rotationsPerMinuteGiven.engine.fastTime);
+		engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.fastTime, rotationsPerMinuteGiven.handrail.fastTime) | !parameterHandrailControl.value;
 	}
 	else if(slowSpeedSet)
 	{
-		engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.slowTime,  rotationsPerMinuteGiven.engine.slowTime) | !getRotationControl();
-		engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.slowTime, rotationsPerMinuteGiven.handrail.slowTime) | !getHandrailControl();
+		engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.slowTime,  rotationsPerMinuteGiven.engine.slowTime);
+		engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.slowTime, rotationsPerMinuteGiven.handrail.slowTime) | !parameterHandrailControl.value;
 	}
 	else
 	{
@@ -324,17 +324,20 @@ void stopEngine(void)
 
 void checkChainMotorOK(void)
 {
-	if(!getChainMotorState())
+	if(parameterEngineControl.value)
 	{
-		if(chainMotorErrorTimer.start == FALSE)
+		if(!getChainMotorState())
 		{
-			startSoftwareTimer(&chainMotorErrorTimer);
+			if(chainMotorErrorTimer.start == FALSE)
+			{
+				startSoftwareTimer(&chainMotorErrorTimer);
+			}
 		}
-	}
-	else
-	{
-		stopSoftwareTimer(&chainMotorErrorTimer);
-		addRemoveError(CHAIN_FALLING_OFF, FALSE);
+		else
+		{
+			stopSoftwareTimer(&chainMotorErrorTimer);
+			addRemoveError(CHAIN_FALLING_OFF, FALSE);
+		}
 	}
 }
 
@@ -367,7 +370,7 @@ void stepsNormalExtiCallback(uint16_t GPIO_Pin)
 	static bool steps1 = FALSE;
 	static bool steps2 = FALSE;
 
-	if(checkTargetFrequencyReached())
+	if(checkTargetFrequencyReached() && !parameterStepControl.value)
 	{
 		if(GPIO_Pin == MIS_ST2_Pin)
 		{
@@ -423,7 +426,10 @@ void engineSubTask(void)
 		}
 	}
 
-	checkChainMotorOK();
+	if(activeMenu != TEACHING_MENU)
+	{
+		checkChainMotorOK();
+	}
 
 	if(checkSetFrequency() && !getIspectionMode() && !serviceMode && speedReached)
 	{
@@ -492,9 +498,9 @@ void engineSubTask(void)
 
 bool checkSpeedTeached(void)
 {
-	if(((rotationsPerMinuteGiven.engine.fastTime == 0 || rotationsPerMinuteGiven.engine.slowTime == 0) && getRotationControl()) ||
-		((rotationsPerMinuteGiven.handrail.fastTime == 0 || rotationsPerMinuteGiven.handrail.slowTime == 0) && getHandrailControl()) ||
-		((rotationsPerMinuteGiven.step.fastTime == 0 || rotationsPerMinuteGiven.step.slowTime == 0) && getStandControl()) )
+	if(((rotationsPerMinuteGiven.engine.fastTime == 0 || rotationsPerMinuteGiven.engine.slowTime == 0)) ||
+		((rotationsPerMinuteGiven.handrail.fastTime == 0 || rotationsPerMinuteGiven.handrail.slowTime == 0) && parameterHandrailControl.value) ||
+		((rotationsPerMinuteGiven.step.fastTime == 0 || rotationsPerMinuteGiven.step.slowTime == 0) && parameterStepControl.value) )
 	{
 		return FALSE;
 	}

@@ -12,6 +12,7 @@
 #include "confInputs.h"
 #include "flash.h"
 #include "suppCpuCommunication.h"
+#include "logs.h"
 
 volatile bool teachOnStartup = FALSE;
 
@@ -38,6 +39,7 @@ void startupFunction(void)
 {
 	getServiceMode();
 	checkTeachOnStartup();
+	initializeLogs();
 	if(flash_loadParameters())
 	{
 		paramLoadParameters();
