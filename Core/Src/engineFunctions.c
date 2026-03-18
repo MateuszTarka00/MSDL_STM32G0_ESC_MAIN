@@ -494,7 +494,7 @@ bool checkSpeedTeached(void)
 {
 	if(((rotationsPerMinuteGiven.engine.fastTime == 0 || rotationsPerMinuteGiven.engine.slowTime == 0) && getRotationControl()) ||
 		((rotationsPerMinuteGiven.handrail.fastTime == 0 || rotationsPerMinuteGiven.handrail.slowTime == 0) && getHandrailControl()) ||
-		((rotationsPerMinuteGiven.step.fastTime == 0 || rotationsPerMinuteGiven.step.slowTime == 0) && getRotationControl()) )
+		((rotationsPerMinuteGiven.step.fastTime == 0 || rotationsPerMinuteGiven.step.slowTime == 0) && getStandControl()) )
 	{
 		return FALSE;
 	}

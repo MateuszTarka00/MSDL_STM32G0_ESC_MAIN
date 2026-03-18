@@ -33,6 +33,8 @@ extern Parameter parameterFastTime;
 extern Parameter parameterSlowTime;
 extern Parameter parameterStarTriangleTime;
 extern Parameter parameterEngineControl;
+extern Parameter parameterHandrailControl;
+extern Parameter parameterStepControl;
 extern Parameter parameterAutoStop;
 extern Parameter parameterReleasing;
 extern Parameter parameterTrafficDirectionSignals;

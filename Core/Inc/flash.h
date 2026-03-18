@@ -31,6 +31,9 @@ typedef struct
 	uint8_t parameterReleasing;
 	uint8_t parameterTrafficDirectionSignals;
 	uint8_t parameterLightning;
+	uint8_t parameterHandrailControl;
+	uint8_t parameterStepControl;
+
 }Flash_settingsValues;
 
 typedef struct __attribute__((packed))

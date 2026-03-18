@@ -227,9 +227,12 @@ MenuFormat timesParameterMenu =
 	.menuType = SCROLL_MENU,
 };
 
+
 MenuItem monitoringParameterMenuItems[] =
 {
     { .name = "Kontrola lancucha",				.menuFunction = enterParameterMenu, .param = &parameterEngineControl },
+	{ .name = "Kontrola poreczy",				.menuFunction = enterParameterMenu, .param = &parameterHandrailControl },
+	{ .name = "Kontrola stopnia",				.menuFunction = enterParameterMenu, .param = &parameterStepControl },
 };
 
 MenuFormat monitoringParameterMenu =

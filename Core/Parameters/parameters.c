@@ -76,6 +76,26 @@ Parameter parameterEngineControl =
 		ON_OFF,
 };
 
+Parameter parameterHandrailControl =
+{
+		1,
+		1,
+		1,
+		0,
+		1,
+		ON_OFF,
+};
+
+Parameter parameterStepControl =
+{
+		1,
+		1,
+		1,
+		0,
+		1,
+		ON_OFF,
+};
+
 
 Parameter parameterAutoStop =
 {
@@ -207,6 +227,8 @@ void paramSaveValue(Parameter *parameter)
 	flash_parametersToSave.flash_settingsValues.parameterReleasing = parameterReleasing.value;
 	flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals = parameterTrafficDirectionSignals.value;
 	flash_parametersToSave.flash_settingsValues.parameterLightning = parameterLightning.value;
+	flash_parametersToSave.flash_settingsValues.parameterHandrailControl = parameterHandrailControl.value;
+	flash_parametersToSave.flash_settingsValues.parameterStepControl = parameterStepControl.value;
 
 	flash_parametersSave();
 }
@@ -229,6 +251,8 @@ void paramLoadParameters(void)
 	parameterReleasing.value = flash_parametersToSave.flash_settingsValues.parameterReleasing;
 	parameterTrafficDirectionSignals.value = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals; //Zrobione
 	parameterLightning.value = flash_parametersToSave.flash_settingsValues.parameterLightning; //Zrobione
+	parameterHandrailControl.value = flash_parametersToSave.flash_settingsValues.parameterHandrailControl;
+	parameterStepControl.value = flash_parametersToSave.flash_settingsValues.parameterStepControl;
 
 	parameterLooserTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
 	parameterEngineTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterEngineTime;
@@ -241,6 +265,8 @@ void paramLoadParameters(void)
 	parameterReleasing.lastValue = flash_parametersToSave.flash_settingsValues.parameterReleasing;
 	parameterTrafficDirectionSignals.lastValue = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals;
 	parameterLightning.lastValue = flash_parametersToSave.flash_settingsValues.parameterLightning;
+	parameterHandrailControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterHandrailControl;
+	parameterStepControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterStepControl;
 }
 
 void applyParameters(void)
