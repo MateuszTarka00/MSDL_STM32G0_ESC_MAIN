@@ -238,7 +238,7 @@ void safetyCheck(void *argument)
   initSafetyTimers();
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	  updateLoosersStates();
 	  updateContactorsStates();
 	  if(!checkSafetyCircuitState())
@@ -310,7 +310,7 @@ void displayTask(void *argument)
 
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	  enterTeachingForm();
 
 	  switch(activeMenu)
@@ -349,7 +349,7 @@ void engineControl(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	 if(activeMenu != TEACHING_MENU)
 	 {
 		 engineSubTask();
