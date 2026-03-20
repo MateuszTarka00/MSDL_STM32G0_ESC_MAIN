@@ -14,7 +14,13 @@ typedef enum
 {
 	ON_OFF,
 	TIME_MS,
+	LANGUAGE,
 }ParamyterType;
+
+typedef enum
+{
+	POLISH
+}LanguageType;
 
 typedef struct
 {
@@ -39,6 +45,7 @@ extern Parameter parameterAutoStop;
 extern Parameter parameterReleasing;
 extern Parameter parameterTrafficDirectionSignals;
 extern Parameter parameterLightning;
+extern Parameter parameterLanguage;
 
 extern Parameter parameterFactoryReset;
 extern Parameter parameteClearLogs;

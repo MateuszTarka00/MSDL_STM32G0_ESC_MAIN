@@ -14,6 +14,7 @@
 #include "mainForm.h"
 #include "systemStartup.h"
 #include "suppCpuCommunication.h"
+#include "canCommunication.h"
 
 #define SAVE_SPEED_TIME_MS	1000
 
@@ -451,41 +452,26 @@ void engineSubTask(void)
 			break;
 
 		case FAST_STOP:
-			if(getDirection() == DOWN)
+			if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
+			   (getDirection() == UP && getHumanDown()))
 			{
-				if(checkIsHumanOnStairsUp())
-				{
-					enableFastSpeed();
-				}
-				//TODO dodac human down
+				enableFastSpeed();
 			}
+
 			break;
 		case FAST_SLOW:
-			if(getDirection() == DOWN)
+			if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
+			   (getDirection() == UP && getHumanDown()))
 			{
-				if(checkIsHumanOnStairsUp())
-				{
-					enableFastSpeed();
-				}
-				else
-				{
-					if(!highSpeedSet && !slowSpeedSet)
-					{
-						enableSlowSpeed();
-					}
-				}
-				//TODO dodac human down
+				enableFastSpeed();
 			}
 			break;
 
 		case FAST_SLOW_STOP:
-			if(getDirection() == DOWN)
+			if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
+			   (getDirection() == UP && getHumanDown()))
 			{
-				if(checkIsHumanOnStairsUp())
-				{
-					enableFastSpeed();
-				}
-				//TODO dodac human down
+				enableFastSpeed();
 			}
 			break;
 		}

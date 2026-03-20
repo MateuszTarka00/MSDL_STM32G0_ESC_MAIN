@@ -137,6 +137,16 @@ Parameter parameterLightning=
 		ON_OFF,
 };
 
+Parameter parameterLanguage=
+{
+		0,
+		0,
+		0,
+		0,
+		1,
+		LANGUAGE,
+};
+
 //Fake parameter, only for format purpose
 Parameter parameterFactoryReset=
 {
@@ -191,6 +201,17 @@ void paramGetValueString(char *buffer, Parameter *parameter)
 
 				sprintf(buffer, "%u.%u s", stringValueInteger, stringValueFraction);
 			}
+
+		case LANGUAGE:
+			switch(parameter->value)
+			{
+				case POLISH:
+					sprintf(buffer, "Polski");
+					break;
+				default:
+					break;
+			}
+
 	}
 }
 
@@ -274,11 +295,6 @@ void applyParameters(void)
 	initEngineTimers();
 	initSafetyTimers();
 }
-
-#define SIGNAL_RED_Pin GPIO_PIN_2
-#define SIGNAL_RED_GPIO_Port GPIOE
-#define SIGNAL_GREEN_Pin GPIO_PIN_3
-#define SIGNAL_GREEN_GPIO_Port GPIOE
 
 void toeBoardLightFunction(void)
 {

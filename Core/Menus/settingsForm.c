@@ -317,12 +317,12 @@ MenuFormat logsMenu =
 
 MenuItem settingsMenuItems[] =
 {
-    { .name = "Parametry czas"	,			.menuFunction = enterSubMenu, .param = &timesParameterMenu},
-    { .name = "Kontrola",	  				.menuFunction = enterSubMenu, .param = &monitoringParameterMenu},
-    { .name = "Sterowanie",        			.menuFunction = enterSubMenu, .param = &controlParameterMenu},
-    { .name = "Menu zdarzen",	  			.menuFunction = enterSubMenu, .param = &logsMenu },
-    { .name = "Jezyk",       				.menuFunction = 0, .param = 0 },
-    { .name = "Ustaw. fabr.",      	.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
+    { .name = "Parametry czas"	,			.menuFunction = enterSubMenu, 		.param = &timesParameterMenu},
+    { .name = "Kontrola",	  				.menuFunction = enterSubMenu, 		.param = &monitoringParameterMenu},
+    { .name = "Sterowanie",        			.menuFunction = enterSubMenu, 		.param = &controlParameterMenu},
+    { .name = "Menu zdarzen",	  			.menuFunction = enterSubMenu, 		.param = &logsMenu },
+    { .name = "Jezyk",       				.menuFunction = enterParameterMenu, .param = &parameterLanguage},
+    { .name = "Ustaw. fabr.",      			.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
 };
 
 MenuFormat settingsMenu =
