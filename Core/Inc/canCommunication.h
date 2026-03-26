@@ -14,6 +14,7 @@
 
 #define MASTER_ID						0x00
 #define BOTTOM_CONTROL_BOARD_ID			0x01
+#define DISPLAY_ID						0x02
 
 //action list
 #define RECOGNITION_ACTION				0x0000
@@ -23,8 +24,11 @@
 
 #define BOTTOM_SENSOR_EVENT				0x0000
 #define BOTTOM_SAFETY_CIRCUIT_EVENT		0x0001
+#define ERROR_EVENT						0x0002
+#define WORK_TYPE_EVENT					0x0003
 
 #define RECOGNITION_ACTION_SIZE			0x03
+#define EVENT_SIZE						0x04
 
 #define DEVICES_MAX_NUMBER				16
 
@@ -113,6 +117,12 @@ typedef struct{
 	uint8_t  destination;
 }ParameterActionGetStructureRx;
 
+typedef struct{
+	uint16_t eventID;
+	uint8_t value;
+	uint8_t  destination;
+}eventStructureTx;
+
 typedef struct
 {
     uint8_t  nodeId;
@@ -136,6 +146,9 @@ bool getBootomBoardAlive(void);
 void processMessage(CAN_Message_t *msg);
 bool getHumanDown(void);
 bool getSafetyCircuitBottom(void);
+void errorEventTx(uint8_t value);
+void workTypeEventTx(uint8_t value);
+
 
 
 #endif /* INC_CANCOMMUNICATION_H_ */

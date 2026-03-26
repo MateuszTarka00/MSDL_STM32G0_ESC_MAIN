@@ -59,7 +59,7 @@ void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOC, WATCHDOG_OUT_Pin|END_TEACHING_Pin|SLOW_SPEED_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, HARD_STOP_Pin|CUSTOM_OUT_Pin|TOEBOARD_LIGHT_Pin|SIGNAL_RED_Pin
+  HAL_GPIO_WritePin(GPIOE, HARD_STOP_Pin|VOLTAGE_REDUCTION_Pin|TOEBOARD_LIGHT_Pin|SIGNAL_RED_Pin
                           |SIGNAL_GREEN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
@@ -100,9 +100,9 @@ void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PFPin PFPin PFPin PFPin
-                           PFPin PFPin PFPin PFPin */
+                           PFPin PFPin PFPin */
   GPIO_InitStruct.Pin = LOCKER_CONTROL_Pin|RELEASE_CONTROL_Pin|STAR_TRIANGLE_CONTROL_Pin|LOCKER_IN2_Pin
-                          |LOCKER_IN1_Pin|CHECK_UP_Pin|CHECK_DOWN_Pin|INSPECTION_MODE_Pin;
+                          |LOCKER_IN1_Pin|CHECK_UP_Pin|CHECK_DOWN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
@@ -143,7 +143,7 @@ void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PEPin PEPin PEPin PEPin
                            PEPin */
-  GPIO_InitStruct.Pin = HARD_STOP_Pin|CUSTOM_OUT_Pin|TOEBOARD_LIGHT_Pin|SIGNAL_RED_Pin
+  GPIO_InitStruct.Pin = HARD_STOP_Pin|VOLTAGE_REDUCTION_Pin|TOEBOARD_LIGHT_Pin|SIGNAL_RED_Pin
                           |SIGNAL_GREEN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
@@ -203,8 +203,8 @@ void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(SPEED_READY_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PDPin PDPin */
-  GPIO_InitStruct.Pin = SAFETY_END_Pin|IN_THERMAL_Pin;
+  /*Configure GPIO pins : PDPin PDPin PDPin */
+  GPIO_InitStruct.Pin = SAFETY_END_Pin|INSPECTION_MODE_Pin|IN_THERMAL_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(GPIOD, &GPIO_InitStruct);

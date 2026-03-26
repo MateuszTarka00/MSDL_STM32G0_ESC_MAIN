@@ -47,6 +47,8 @@ const char *logsStrings[] = {
 		"Blad luzownika",
 		"Blad zmiany predkosci",
 		"Bledna predkosc",
+		"\nCPU2 OFF",
+		"\nDOL OFFLINE"
 };
 
 void downButtonFunctionSettingsMenu(void *param);
@@ -323,6 +325,7 @@ MenuItem settingsMenuItems[] =
     { .name = "Menu zdarzen",	  			.menuFunction = enterSubMenu, 		.param = &logsMenu },
     { .name = "Jezyk",       				.menuFunction = enterParameterMenu, .param = &parameterLanguage},
     { .name = "Ustaw. fabr.",      			.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
+	{ .name = "Praca bez dolu",				.menuFunction = enterParameterMenu, .param = &workWithoutBottom},
 };
 
 MenuFormat settingsMenu =
@@ -446,6 +449,11 @@ void okButtonFunctionSettingsMenu(void *param)
 					paramSaveValue(currentParameter);
 					backToParentMenu();
 				}
+			}
+
+			if(currentParameter == &workWithoutBottom && workWithoutBottom.value == TRUE)
+			{
+				addRemoveError(BOTTOM_DEAD, FALSE);
 			}
 
 			break;

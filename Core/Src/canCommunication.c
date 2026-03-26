@@ -10,6 +10,10 @@
 #include "string.h"
 #include "softwareTimer_ms.h"
 #include "FreeRTOS.h"
+#include "parameters.h"
+#include "mainForm.h"
+
+#define WAIT_FOR_MAPPING_MS	5000
 
 static volatile uint8_t myID = MASTER_ID;
 
@@ -93,6 +97,30 @@ void recognitionActionTx(void)
 	uint16_t arbitration = (myID<<8) + (ACTION<<ACTION_EVENT_BIT) + (REQUEST<<RQ_RS_BIT);
 
 	FDCAN_Send(arbitration, (uint8_t *)&message, RECOGNITION_ACTION_SIZE);
+}
+
+void errorEventTx(uint8_t value)
+{
+	eventStructureTx message;
+	message.eventID = ERROR_EVENT << 8;
+	message.value = value;
+	message.destination = DISPLAY_ID;
+
+	uint16_t arbitration = (myID<<8) + (EVENT<<ACTION_EVENT_BIT) + (REQUEST<<RQ_RS_BIT);
+
+	FDCAN_Send(arbitration, (uint8_t *)&message, EVENT_SIZE);
+}
+
+void workTypeEventTx(uint8_t value)
+{
+	eventStructureTx message;
+	message.eventID = WORK_TYPE_EVENT << 8;
+	message.value = value;
+	message.destination = DISPLAY_ID;
+
+	uint16_t arbitration = (myID<<8) + (EVENT<<ACTION_EVENT_BIT) + (REQUEST<<RQ_RS_BIT);
+
+	FDCAN_Send(arbitration, (uint8_t *)&message, EVENT_SIZE);
 }
 
 void recognitionActionRx(uint16_t id)
@@ -240,6 +268,21 @@ void checkHeartBeatStatusSubTask(void)
 		if((ticksNow - canDevices[i].lastHeartBeat) > LAST_HEARTBEAT_TICK)
 		{
 			canDevices[i].deviceAlive = FALSE;
+
+			if(workWithoutBottom.value == FALSE)
+			{
+				addRemoveError(BOTTOM_DEAD, TRUE);
+				openInformationForm();
+			}
+		}
+	}
+
+	if(!devicesNumber)
+	{
+		if(ticksNow > WAIT_FOR_MAPPING_MS)
+		{
+			addRemoveError(BOTTOM_DEAD, TRUE);
+			openInformationForm();
 		}
 	}
 }

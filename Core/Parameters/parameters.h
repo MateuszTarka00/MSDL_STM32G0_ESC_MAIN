@@ -46,6 +46,8 @@ extern Parameter parameterReleasing;
 extern Parameter parameterTrafficDirectionSignals;
 extern Parameter parameterLightning;
 extern Parameter parameterLanguage;
+extern Parameter workWithoutBottom;
+extern Parameter parameterHardFault;
 
 extern Parameter parameterFactoryReset;
 extern Parameter parameteClearLogs;

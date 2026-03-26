@@ -33,6 +33,7 @@ typedef struct
 	uint8_t parameterLightning;
 	uint8_t parameterHandrailControl;
 	uint8_t parameterStepControl;
+	uint8_t parameterHardFault;
 
 }Flash_settingsValues;
 

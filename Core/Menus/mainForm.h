@@ -41,6 +41,8 @@ typedef enum
 	LOOSER_ERROR,
 	SPEED_CHANGE_ERROR,
 	SPEED_ERROR,
+	CPU2_DEAD,
+	BOTTOM_DEAD
 }ErrorsType;
 
 typedef enum
@@ -60,5 +62,7 @@ void updateSensorUp(void);
 void mainMenuSubTask(void);
 void initMainForm(void);
 void addRemoveError(ErrorsType error, bool removeAdd);
+void openInformationForm(void);
+void openHardfaultForm(void);
 
 #endif /* MENUS_MAINFORM_H_ */

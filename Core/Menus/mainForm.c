@@ -43,6 +43,9 @@
 
 MenusTypes activeMenu = MAIN_MENU;
 bool errorStateActive = FALSE;
+static bool informationActive = FALSE;
+static bool informationWasShown = FALSE;
+static bool hardFaultState = FALSE;
 
 volatile uint8_t numberOfErrors = 0;
 static SoftwareTimerHandler errorChangeTimer;
@@ -54,6 +57,8 @@ WorkModeType workMode;
 
 static ErrorsType actualErrors[NUMBER_OF_ERROR_TYPES] =
 		{
+				0,
+				0,
 				0,
 				0,
 				0,
@@ -90,8 +95,8 @@ const char *safetyCircuitStrings[] = {
 const char *safetyCircuitBottomStrings[] = {
     "Stop\nmaszynownia dol",
     "Stop wlot\ndol",
-    "Prawa\nplyta grzebieniowa dol",
-	"Lewa\nplyta grzebieniowa dol",
+    "Prawa\nplyta grzeb. dol",
+	"Lewa plyta\ngrzebieniowa dol",
 	"Lewy\nwlot poreczy dol",
 	"Prawy\nwlot poreczy dol",
 	"Odpad.\nstopnia dol",
@@ -151,6 +156,8 @@ const char *errorsStrings[] = {
 		"Blad\nluzownika",
 		"Blad\nzmiany predkosci",
 		"Bledna\npredkosc",
+		"\nCPU2 OFF",
+		"\nDOL OFFLINE"
 };
 
 typedef struct
@@ -326,25 +333,28 @@ void updateInformationState()
 
 void initMainForm(void)
 {
-	ST7789_Fill_Color(WHITE);
-	for(uint8_t i = 0; i < ITEMS_NUMBER; i++)
+	if(!informationActive && !hardFaultState)
 	{
-		uint16_t stateStringBeggining = ((strlen(menuItems[i].staticString)-1)*Font_11x18.width) + 2;
-		ST7789_WriteString(2, menuItems[i].height, menuItems[i].staticString, Font_11x18, BLACK, WHITE);
-		ST7789_DrawLine(0, 272, ST7789_WIDTH, 272, BLACK);
-		ST7789_DrawLine(0, 230, ST7789_WIDTH, 230, BLACK);
-
-		ST7789_WriteString(centerString(Font_11x18, "OK -> Ustawienia"), 290, "OK -> Ustawienia", Font_11x18, BLACK, WHITE);
-
-		if(menuItems[i].state != UNINITIALIZED_VALUE)
+		ST7789_Fill_Color(WHITE);
+		for(uint8_t i = 0; i < ITEMS_NUMBER; i++)
 		{
-			ST7789_WriteString(stateStringBeggining, menuItems[i].height, menuItems[i].stateString, Font_11x18, menuItems[i].stringColor, WHITE);
+			uint16_t stateStringBeggining = ((strlen(menuItems[i].staticString)-1)*Font_11x18.width) + 2;
+			ST7789_WriteString(2, menuItems[i].height, menuItems[i].staticString, Font_11x18, BLACK, WHITE);
+			ST7789_DrawLine(0, 272, ST7789_WIDTH, 272, BLACK);
+			ST7789_DrawLine(0, 230, ST7789_WIDTH, 230, BLACK);
+
+			ST7789_WriteString(centerString(Font_11x18, "OK -> Ustawienia"), 290, "OK -> Ustawienia", Font_11x18, BLACK, WHITE);
+
+			if(menuItems[i].state != UNINITIALIZED_VALUE)
+			{
+				ST7789_WriteString(stateStringBeggining, menuItems[i].height, menuItems[i].stateString, Font_11x18, menuItems[i].stringColor, WHITE);
+			}
 		}
+
+
+		initSoftwareTimer(&informationTimer, INFORMATION_TIME_MS, InformationTimerCallback, TRUE, 0);
+		startSoftwareTimer(&informationTimer);
 	}
-
-
-	initSoftwareTimer(&informationTimer, INFORMATION_TIME_MS, InformationTimerCallback, TRUE, 0);
-	startSoftwareTimer(&informationTimer);
 
 	upButtonFunction = upButtonFunctionMainMenu;
 	downButtonFunction = downButtonFunctionMainMenu;
@@ -354,35 +364,42 @@ void initMainForm(void)
 
 void updateWorkMode(void)
 {
-	if(serviceMode)
+	if(workWithoutBottom.value == FALSE)
 	{
-		workMode = SERVICE;
-	}
-	else if(getIspectionMode())
-	{
-		workMode = INSPECTION;
-	}
-	else if(parameterAutoStop.value)
-	{
-		if(parameterReleasing.value)
+		if(serviceMode)
 		{
-			workMode = FAST_SLOW_STOP;
+			workMode = SERVICE;
+		}
+		else if(getIspectionMode())
+		{
+			workMode = INSPECTION;
+		}
+		else if(parameterAutoStop.value)
+		{
+			if(parameterReleasing.value)
+			{
+				workMode = FAST_SLOW_STOP;
+			}
+			else
+			{
+				workMode = FAST_STOP;
+			}
 		}
 		else
 		{
-			workMode = FAST_STOP;
+			if(parameterReleasing.value)
+			{
+				workMode = FAST_SLOW;
+			}
+			else
+			{
+				workMode = CONSTANS;
+			}
 		}
 	}
 	else
 	{
-		if(parameterReleasing.value)
-		{
-			workMode = FAST_SLOW;
-		}
-		else
-		{
-			workMode = CONSTANS;
-		}
+		workMode = CONSTANS;
 	}
 
 	if(menuItems[WORK_MODE].state != workMode)
@@ -758,6 +775,7 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 
 			actualErrors[numberOfErrors] = error;
 			addLog(error);
+			errorEventTx(error);
 			numberOfErrors++;
 
 			if(numberOfErrors > 1)
@@ -806,17 +824,20 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 
 void mainMenuSubTask(void)
 {
-	updateSensorUp();
-	updateSensorDown();
-	updateSafetyCircuitState();
-	updateDirection();
-	updateLooserState();
-	updateContactorsState();
-	updateChainMotorState();
-	updateSpeed();
-	updateWorkMode();
-	updateErrorState();
-	updateInformationState();
+	if(informationActive == FALSE && !hardFaultState)
+	{
+		updateSensorUp();
+		updateSensorDown();
+		updateSafetyCircuitState();
+		updateDirection();
+		updateLooserState();
+		updateContactorsState();
+		updateChainMotorState();
+		updateSpeed();
+		updateWorkMode();
+		updateErrorState();
+		updateInformationState();
+	}
 }
 
 void downButtonFunctionMainMenu(void *param)
@@ -831,7 +852,18 @@ void upButtonFunctionMainMenu(void *param)
 
 void okButtonFunctionMainMenu(void *param)
 {
-	enterSettingsMenu();
+	if(!hardFaultState)
+	{
+		if(informationActive)
+		{
+			informationActive = FALSE;
+			initMainForm();
+		}
+		else
+		{
+			enterSettingsMenu();
+		}
+	}
 }
 
 void escButtonFunctionMainMenu(void *param)
@@ -839,6 +871,31 @@ void escButtonFunctionMainMenu(void *param)
 
 }
 
+void openInformationForm(void)
+{
+	if(informationWasShown == FALSE)
+	{
+		if(!informationActive)
+		{
+			activeMenu = MAIN_MENU;
+			ST7789_Fill_Color(WHITE);
+			ST7789_WriteString(2, 5, "Brak polaczenia z\ndolna plytka!\nAby kontynuowac prace\nprzed przyjazdem\nserwisu, wlacz prace\nbez dolu w\nustawieniach", Font_11x18, BLACK, WHITE);
+			ST7789_WriteString(2, 250, "Nacisinij ok aby\nkontynuowac", Font_11x18, BLACK, WHITE);
+			informationActive = TRUE;
+			informationWasShown = TRUE;
+		}
+	}
+}
+
+void openHardfaultForm(void)
+{
+	if(hardFaultState == FALSE)
+	{
+		hardFaultState = TRUE;
+		ST7789_Fill_Color(WHITE);
+		ST7789_WriteString(2, 5, "Sterownik uszkodzony!\nWezwij serwis!", Font_11x18, BLACK, WHITE);
+	}
+}
 
 
 

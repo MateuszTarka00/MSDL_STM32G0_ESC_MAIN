@@ -16,7 +16,8 @@
 #include "suppCpuCommunication.h"
 #include "canCommunication.h"
 
-#define SAVE_SPEED_TIME_MS	1000
+#define SAVE_SPEED_TIME_MS			1000
+#define VOLTAGE_REDUCTION_TIME_MS	3000
 
 volatile uint32_t engineRotationTemporary = 0;
 volatile uint32_t handrailRotationTemporary = 0;
@@ -30,6 +31,7 @@ static SoftwareTimerHandler speedChangeTimer;
 static SoftwareTimerHandler chainMotorErrorTimer;
 static SoftwareTimerHandler stepsErrorTimer;
 static SoftwareTimerHandler speedSave;
+static SoftwareTimerHandler voltageReductionTimer;
 
 static WorkModeType engineWorkMode = CONSTANS;
 static bool speedReached = FALSE;
@@ -54,6 +56,16 @@ EngineErrors engineErrors = {
 		TRUE,
 		TRUE,
 };
+
+static void setVoltageReduction(void)
+{
+	HAL_GPIO_WritePin(VOLTAGE_REDUCTION_GPIO_Port, VOLTAGE_REDUCTION_Pin, TRUE);
+}
+
+static void resetVoltageReduction(void)
+{
+	HAL_GPIO_WritePin(VOLTAGE_REDUCTION_GPIO_Port, VOLTAGE_REDUCTION_Pin, FALSE);
+}
 
 static void stepsErrorTimerCallback(void *Param)
 {
@@ -125,10 +137,12 @@ void setEngineOnOff(bool onOff)
 	if(getDirection() == UP)
 	{
 		HAL_GPIO_WritePin(INVERTER_FWD_GPIO_Port, INVERTER_FWD_Pin, onOff);
+		startSoftwareTimer(&voltageReductionTimer);
 	}
 	else if(getDirection() == DOWN)
 	{
 		HAL_GPIO_WritePin(INVERTER_REV_GPIO_Port, INVERTER_REV_Pin, onOff);
+		startSoftwareTimer(&voltageReductionTimer);
 	}
 }
 
@@ -141,6 +155,7 @@ void softStopEngine(void)
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	setFastSpeed(FALSE);
 	setSlowSpeed(FALSE);
+	resetVoltageReduction();
 
 }
 
@@ -161,15 +176,18 @@ void enableFastSpeed(void)
 
 	deInitSoftwareTimer(&fastSpeedTimer);
 
-	if(engineWorkMode == FAST_SLOW_STOP)
+	if(workWithoutBottom.value == FALSE)
 	{
-		initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
-		startSoftwareTimer(&fastSpeedTimer);
-	}
-	else if(engineWorkMode == FAST_STOP)
-	{
-		initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, softStopEngine, FALSE, 0);
-		startSoftwareTimer(&fastSpeedTimer);
+		if(engineWorkMode == FAST_SLOW_STOP)
+		{
+			initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
+			startSoftwareTimer(&fastSpeedTimer);
+		}
+		else if(engineWorkMode == FAST_STOP)
+		{
+			initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, softStopEngine, FALSE, 0);
+			startSoftwareTimer(&fastSpeedTimer);
+		}
 	}
 }
 
@@ -188,9 +206,12 @@ void enableSlowSpeed(void)
 	initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.step.slowTime, stepsErrorTimerCallback, FALSE, 0);
 	startSoftwareTimer(&speedChangeTimer);
 
-	if(engineWorkMode == FAST_SLOW_STOP)
+	if(workWithoutBottom.value == FALSE)
 	{
-		startSoftwareTimer(&slowSpeedTimer);
+		if(engineWorkMode == FAST_SLOW_STOP)
+		{
+			startSoftwareTimer(&slowSpeedTimer);
+		}
 	}
 }
 
@@ -201,12 +222,14 @@ void initEngineTimers(void)
 	deInitSoftwareTimer(&speedChangeTimer);
 	deInitSoftwareTimer(&chainMotorErrorTimer);
 	deInitSoftwareTimer(&speedSave);
+	deInitSoftwareTimer(&voltageReductionTimer);
 
 	initSoftwareTimer(&slowSpeedTimer, parameterSlowTime.value, softStopEngine, FALSE, 0);
 	initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
 	initSoftwareTimer(&speedChangeTimer, SPEED_CHANGE_TIMEOUT_MS, speedChangeTimeoutCallback, FALSE, 0);
 	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
 	initSoftwareTimer(&speedSave, SAVE_SPEED_TIME_MS, saveMeasuredRotationsValueTimerCallback, TRUE, &rotationsPerMinuteReal);
+	initSoftwareTimer(&voltageReductionTimer, VOLTAGE_REDUCTION_TIME_MS, setVoltageReduction, FALSE, 0);
 }
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
@@ -438,6 +461,11 @@ void engineSubTask(void)
 		{
 			addRemoveError(SPEED_ERROR, TRUE);
 		}
+	}
+
+	if(workWithoutBottom.value)
+	{
+		engineWorkMode = CONSTANS;
 	}
 
 	if(!errorStateActive)

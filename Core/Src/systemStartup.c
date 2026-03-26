@@ -13,6 +13,7 @@
 #include "flash.h"
 #include "suppCpuCommunication.h"
 #include "logs.h"
+#include "mainForm.h"
 
 volatile bool teachOnStartup = FALSE;
 
@@ -45,4 +46,11 @@ void startupFunction(void)
 		paramLoadParameters();
 		rotationsLoadParameters();
 	}
+
+	if(parameterHardFault.value)
+	{
+		openHardfaultForm();
+		addRemoveError(CPU2_DEAD, TRUE);
+	}
+
 }

@@ -238,7 +238,7 @@ void safetyCheck(void *argument)
   initSafetyTimers();
   for(;;)
   {
-//	  HAL_IWDG_Refresh(&hiwdg);
+	  HAL_IWDG_Refresh(&hiwdg);
 	  updateLoosersStates();
 	  updateContactorsStates();
 	  if(!checkSafetyCircuitState())
@@ -280,11 +280,44 @@ void canMenager(void *argument)
   /* Infinite loop */
 	HAL_FDCAN_ActivateNotification(&hfdcan2, FDCAN_IT_RX_FIFO0_NEW_MESSAGE, 0);
 	HAL_FDCAN_Start(&hfdcan2);
+	static bool errorStateTmp = 0xFF;
+	static bool workTypeTmp = 0xFF;
 
   for(;;)
   {
+	  HAL_IWDG_Refresh(&hiwdg);
+	uint8_t workType;
 	heartBitSubTask();
 	checkHeartBeatStatusSubTask();
+
+	if(errorStateActive != errorStateTmp)
+	{
+		errorStateTmp = errorStateActive;
+
+		if(!errorStateTmp)
+		{
+			errorEventTx(NO_ERROR);
+		}
+	}
+
+	if(getIspectionMode())
+	{
+		workType = 3;
+	}
+	else
+	{
+		workType = getDirection();
+		if(workType == DIRECTION_ERROR)
+		{
+			workType = NO_DIRECTION;
+		}
+	}
+
+	if(workType != workTypeTmp)
+	{
+		workTypeTmp = workType;
+		workTypeEventTx(workTypeTmp);
+	}
 
     osDelay(1);
   }
@@ -310,14 +343,13 @@ void displayTask(void *argument)
 
   for(;;)
   {
-//	  HAL_IWDG_Refresh(&hiwdg);
+	  HAL_IWDG_Refresh(&hiwdg);
 	  enterTeachingForm();
 
 	  switch(activeMenu)
 	  {
 		  case MAIN_MENU:
 			  mainMenuSubTask();
-			  checkCpu2Alive();
 			  break;
 
 		  case SETTINGS_MENU:
@@ -331,6 +363,7 @@ void displayTask(void *argument)
 
 //	saveLogs();
 	buttonsSubTask();
+	checkCpu2Alive();
     osDelay(1);
   }
   /* USER CODE END displayTask */
@@ -349,7 +382,7 @@ void engineControl(void *argument)
   /* Infinite loop */
   for(;;)
   {
-//	  HAL_IWDG_Refresh(&hiwdg);
+	  HAL_IWDG_Refresh(&hiwdg);
 	 if(activeMenu != TEACHING_MENU)
 	 {
 		 engineSubTask();
@@ -376,6 +409,7 @@ void canReceiver(void *argument)
   /* Infinite loop */
   for(;;)
   {
+	  HAL_IWDG_Refresh(&hiwdg);
 	CAN_Message_t msg;
 	if(xQueueReceive(canRxQueue, &msg, portMAX_DELAY) == pdTRUE)
 	{

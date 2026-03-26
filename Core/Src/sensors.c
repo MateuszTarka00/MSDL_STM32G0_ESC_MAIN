@@ -88,6 +88,7 @@ bool getIntContactorState(void)
 
 bool getIspectionMode(void)
 {
+	bool state = HAL_GPIO_ReadPin(INSPECTION_MODE_GPIO_Port, INSPECTION_MODE_Pin);
 	return(HAL_GPIO_ReadPin(INSPECTION_MODE_GPIO_Port, INSPECTION_MODE_Pin));
 }
 

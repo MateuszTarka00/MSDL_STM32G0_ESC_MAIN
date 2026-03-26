@@ -7,8 +7,11 @@
 
 
 #include "suppCpuCommunication.h"
+#include "mainForm.h"
+#include "parameters.h"
 
 #define HEARTBIT_MISSING_TIME_MS	2000
+#define WAIT_FOR_STARTUP_MS			5000
 
 bool cpu2Alive = TRUE;
 
@@ -91,9 +94,16 @@ void checkCpu2Alive(void)
 		heartBitState = getSpeedReady();
 	}
 
-	if(xTaskGetTickCount() - tempTicks >= HEARTBIT_MISSING_TIME_MS)
+	if(xTaskGetTickCount() > WAIT_FOR_STARTUP_MS)
 	{
-		cpu2Alive = FALSE;
+		if(xTaskGetTickCount() - tempTicks >= HEARTBIT_MISSING_TIME_MS)
+		{
+			cpu2Alive = FALSE;
+			openHardfaultForm();
+			addRemoveError(CPU2_DEAD, TRUE);
+			parameterHardFault.value = TRUE;
+			paramSaveValue(&parameterHardFault);
+		}
 	}
 
 }

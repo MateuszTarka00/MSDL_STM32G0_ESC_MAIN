@@ -100,17 +100,18 @@ int main(void)
   MX_DMA_Init();
   MX_FDCAN2_Init();
   MX_TIM14_Init();
+  MX_IWDG_Init();
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
+  ST7789_Init();
   startupFunction();
   applyParameters();
   HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
-  ST7789_Init();
 
   HAL_TIM_Base_Start_IT(&htim14);
   initWatchdogTimerInit();
-//  MX_IWDG_Init();
+  MX_IWDG_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */

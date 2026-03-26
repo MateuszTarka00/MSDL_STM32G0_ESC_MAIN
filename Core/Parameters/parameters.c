@@ -147,6 +147,26 @@ Parameter parameterLanguage=
 		LANGUAGE,
 };
 
+Parameter workWithoutBottom =
+{
+		0,
+		0,
+		1,
+		0,
+		1,
+		ON_OFF,
+};
+
+Parameter parameterHardFault =
+{
+		0,
+		0,
+		1,
+		0,
+		1,
+		ON_OFF,
+};
+
 //Fake parameter, only for format purpose
 Parameter parameterFactoryReset=
 {
@@ -250,6 +270,7 @@ void paramSaveValue(Parameter *parameter)
 	flash_parametersToSave.flash_settingsValues.parameterLightning = parameterLightning.value;
 	flash_parametersToSave.flash_settingsValues.parameterHandrailControl = parameterHandrailControl.value;
 	flash_parametersToSave.flash_settingsValues.parameterStepControl = parameterStepControl.value;
+	flash_parametersToSave.flash_settingsValues.parameterHardFault = parameterHardFault.value;
 
 	flash_parametersSave();
 }
@@ -274,6 +295,7 @@ void paramLoadParameters(void)
 	parameterLightning.value = flash_parametersToSave.flash_settingsValues.parameterLightning; //Zrobione
 	parameterHandrailControl.value = flash_parametersToSave.flash_settingsValues.parameterHandrailControl;
 	parameterStepControl.value = flash_parametersToSave.flash_settingsValues.parameterStepControl;
+	parameterHardFault.value = flash_parametersToSave.flash_settingsValues.parameterHardFault;
 
 	parameterLooserTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
 	parameterEngineTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterEngineTime;
@@ -288,6 +310,7 @@ void paramLoadParameters(void)
 	parameterLightning.lastValue = flash_parametersToSave.flash_settingsValues.parameterLightning;
 	parameterHandrailControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterHandrailControl;
 	parameterStepControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterStepControl;
+	parameterHardFault.lastValue = flash_parametersToSave.flash_settingsValues.parameterHardFault;
 }
 
 void applyParameters(void)
