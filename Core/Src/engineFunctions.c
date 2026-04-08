@@ -427,6 +427,8 @@ void stepsNormalExtiCallback(uint16_t GPIO_Pin)
 
 void engineSubTask(void)
 {
+	static Direction previousDirection = NO_DIRECTION;
+
 	if(parameterAutoStop.value)
 	{
 		if(parameterReleasing.value)
@@ -508,6 +510,13 @@ void engineSubTask(void)
 	{
 		softStopEngine();
 	}
+
+	if(previousDirection == NO_DIRECTION && (getDirection() == DOWN || getDirection() == UP))
+	{
+		enableFastSpeed();
+	}
+
+	previousDirection = getDirection();
 }
 
 bool checkSpeedTeached(void)

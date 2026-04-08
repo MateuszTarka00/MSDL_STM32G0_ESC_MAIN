@@ -148,7 +148,7 @@ bool getHumanDown(void);
 bool getSafetyCircuitBottom(void);
 void errorEventTx(uint8_t value);
 void workTypeEventTx(uint8_t value);
-
+void CAN_UpdateLEDs(void);
 
 
 #endif /* INC_CANCOMMUNICATION_H_ */

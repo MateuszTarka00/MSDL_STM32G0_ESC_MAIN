@@ -319,6 +319,8 @@ void canMenager(void *argument)
 		workTypeEventTx(workTypeTmp);
 	}
 
+	CAN_UpdateLEDs();
+
     osDelay(1);
   }
   /* USER CODE END canMenager */

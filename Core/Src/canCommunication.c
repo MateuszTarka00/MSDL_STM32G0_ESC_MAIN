@@ -346,4 +346,81 @@ bool getSafetyCircuitBottom(void)
 	return bottomSafetyCircuit;
 }
 
+static void setCanLedOK(bool onOFF)
+{
+	HAL_GPIO_WritePin(CAN_OK_GPIO_Port, CAN_OK_Pin, onOFF);
+}
+
+static void setCanLedFault(bool onOFF)
+{
+	HAL_GPIO_WritePin(CAN_FAULT_GPIO_Port, CAN_FAULT_Pin, onOFF);
+}
+
+void CAN_UpdateLEDs(void)
+{
+    static uint32_t lastBlink = 0;
+    static uint8_t blinkState = 0;
+
+    uint32_t now = HAL_GetTick();
+
+    FDCAN_ProtocolStatusTypeDef status;
+    HAL_FDCAN_GetProtocolStatus(&hfdcan2, &status);
+
+    /* --- BUS OFF --- */
+    if (status.BusOff)
+    {
+    	setCanLedOK(FALSE);
+    	setCanLedFault(TRUE);
+        return;
+    }
+
+    /* --- ERROR PASSIVE / WARNING --- */
+    if (status.ErrorPassive || status.Warning)
+    {
+        if ((now - lastBlink) > 500)
+        {
+            lastBlink = now;
+            blinkState ^= 1;
+        }
+
+        if (blinkState)
+        {
+        	setCanLedOK(TRUE);
+        	setCanLedFault(TRUE);
+        }
+        else
+        {
+        	setCanLedOK(FALSE);
+        	setCanLedFault(FALSE);
+        }
+        return;
+    }
+
+    /* --- ERROR ACTIVE (NORMAL OPERATION) --- */
+    setCanLedFault(FALSE);
+
+    /* Blink green if traffic present */
+    for(uint8_t i = 0; i < devicesNumber; i++)
+    {
+    	if(canDevices[i].deviceAlive != TRUE)
+    	{
+    	    if ((now - lastBlink) > 200)
+    	    {
+    	        lastBlink = now;
+    	        blinkState ^= 1;
+    	    }
+
+    	    if (blinkState)
+    	    	setCanLedOK(TRUE);
+    	    else
+    	    	setCanLedOK(FALSE);
+    	}
+
+    	return;
+    }
+
+    setCanLedOK(TRUE);
+
+}
+
 
