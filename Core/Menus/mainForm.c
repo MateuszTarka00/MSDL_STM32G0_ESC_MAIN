@@ -822,6 +822,17 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 	}
 }
 
+void resetErrors(void)
+{
+	for(uint8_t i = 0; i < numberOfErrors; i++)
+	{
+		actualErrors[i] = 0;
+	}
+
+	errorStateActive = FALSE;
+	numberOfErrors = 0;
+}
+
 void mainMenuSubTask(void)
 {
 	if(informationActive == FALSE && !hardFaultState)

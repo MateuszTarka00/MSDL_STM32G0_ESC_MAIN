@@ -64,5 +64,6 @@ void initMainForm(void);
 void addRemoveError(ErrorsType error, bool removeAdd);
 void openInformationForm(void);
 void openHardfaultForm(void);
+void resetErrors(void);
 
 #endif /* MENUS_MAINFORM_H_ */

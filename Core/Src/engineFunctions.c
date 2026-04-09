@@ -144,6 +144,12 @@ void setEngineOnOff(bool onOff)
 		HAL_GPIO_WritePin(INVERTER_REV_GPIO_Port, INVERTER_REV_Pin, onOff);
 		startSoftwareTimer(&voltageReductionTimer);
 	}
+
+	if(!onOff)
+	{
+		HAL_GPIO_WritePin(INVERTER_REV_GPIO_Port, INVERTER_REV_Pin, onOff);
+		HAL_GPIO_WritePin(INVERTER_FWD_GPIO_Port, INVERTER_FWD_Pin, onOff);
+	}
 }
 
 void softStopEngine(void)
@@ -470,7 +476,7 @@ void engineSubTask(void)
 		engineWorkMode = CONSTANS;
 	}
 
-	if(!errorStateActive)
+	if(!errorStateActive && (getDirection() == DOWN || getDirection() == UP))
 	{
 		switch(engineWorkMode)
 		{

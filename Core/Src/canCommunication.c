@@ -414,9 +414,10 @@ void CAN_UpdateLEDs(void)
     	    	setCanLedOK(TRUE);
     	    else
     	    	setCanLedOK(FALSE);
+
+    	    return;
     	}
 
-    	return;
     }
 
     setCanLedOK(TRUE);

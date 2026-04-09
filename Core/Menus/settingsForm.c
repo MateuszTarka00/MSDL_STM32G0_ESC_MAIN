@@ -326,6 +326,7 @@ MenuItem settingsMenuItems[] =
     { .name = "Jezyk",       				.menuFunction = enterParameterMenu, .param = &parameterLanguage},
     { .name = "Ustaw. fabr.",      			.menuFunction = enterParameterMenu, .param = &parameterFactoryReset},
 	{ .name = "Praca bez dolu",				.menuFunction = enterParameterMenu, .param = &workWithoutBottom},
+	{ .name = "Reset bledow",				.menuFunction = enterParameterMenu, .param = &parameterResetErrors},
 };
 
 MenuFormat settingsMenu =
@@ -431,12 +432,18 @@ void okButtonFunctionSettingsMenu(void *param)
 					backToParentMenu();
 				}
 			}
-			if(currentParameter == &parameteClearLogs)
+			else if(currentParameter == &parameteClearLogs)
 			{
 				clearLogs();
 				backToParentMenu();
 				currentParameter->value = FALSE;
 
+			}
+			else if(currentParameter == &parameterResetErrors)
+			{
+				resetErrors();
+				currentParameter->value = FALSE;
+				backToParentMenu();
 			}
 			else
 			{

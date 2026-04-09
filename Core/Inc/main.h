@@ -174,8 +174,6 @@ void Error_Handler(void);
 #define HUMAN_UP_GPIO_Port GPIOC
 #define IN_FREQ_Pin GPIO_PIN_9
 #define IN_FREQ_GPIO_Port GPIOC
-#define INSPECTION_MODE_Pin GPIO_PIN_3
-#define INSPECTION_MODE_GPIO_Port GPIOD
 #define IN_THERMAL_Pin GPIO_PIN_4
 #define IN_THERMAL_GPIO_Port GPIOD
 #define BUTTON_UP_Pin GPIO_PIN_5
@@ -194,6 +192,8 @@ void Error_Handler(void);
 #define CHECK_UP_GPIO_Port GPIOF
 #define CHECK_DOWN_Pin GPIO_PIN_11
 #define CHECK_DOWN_GPIO_Port GPIOF
+#define INSPECTION_MODE_Pin GPIO_PIN_12
+#define INSPECTION_MODE_GPIO_Port GPIOF
 #define INVERTER_FWD_Pin GPIO_PIN_13
 #define INVERTER_FWD_GPIO_Port GPIOF
 #define INVERTER_REV_Pin GPIO_PIN_3

@@ -51,6 +51,7 @@ extern Parameter parameterHardFault;
 
 extern Parameter parameterFactoryReset;
 extern Parameter parameteClearLogs;
+extern Parameter parameterResetErrors;
 
 void paramGetValueString(char *buffer, Parameter *parameter);
 void paramChangeValue(Parameter *parameter, bool increaseDecrease);

@@ -129,13 +129,9 @@ void updateContactorsStates(void)
 
 	if((getDirection() == UP || getDirection() == DOWN) && getAckK2() && getIntContactorState())
 	{
-		if(getExtContactorState())
+		if(!getExtContactorState())
 		{
-
-		}
-		else
-		{
-			if(contactorTimer.start == FALSE && !restartClicks)
+			if(contactorTimer.start == FALSE)
 			{
 				startSoftwareTimer(&contactorTimer);
 			}
@@ -143,13 +139,9 @@ void updateContactorsStates(void)
 	}
 	else
 	{
-		if(!getExtContactorState())
+		if(getExtContactorState())
 		{
-
-		}
-		else
-		{
-			if(contactorTimer.start == FALSE && !restartClicks)
+			if(contactorTimer.start == FALSE)
 			{
 				startSoftwareTimer(&contactorTimer);
 			}
