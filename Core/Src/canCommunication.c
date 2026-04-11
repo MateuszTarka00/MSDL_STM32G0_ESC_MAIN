@@ -123,6 +123,18 @@ void workTypeEventTx(uint8_t value)
 	FDCAN_Send(arbitration, (uint8_t *)&message, EVENT_SIZE);
 }
 
+void trafficLigthsEventTx(uint8_t value)
+{
+	eventStructureTx message;
+	message.eventID = TRAFFIC_LIGHTS_EVENT << 8;
+	message.value = value;
+	message.destination = BOTTOM_CONTROL_BOARD_ID;
+
+	uint16_t arbitration = (myID<<8) + (EVENT<<ACTION_EVENT_BIT) + (REQUEST<<RQ_RS_BIT);
+
+	FDCAN_Send(arbitration, (uint8_t *)&message, EVENT_SIZE);
+}
+
 void recognitionActionRx(uint16_t id)
 {
 	for(uint8_t i = 0; i < devicesNumber; i++)

@@ -27,6 +27,5 @@ extern void (*okButtonFunction)(void *);
 extern void (*escButtonFunction)(void *);
 
 void buttonsSubTask(void);
-void rotationSubTask(void);
 
 #endif /* INC_BUTTONSFUNCTIONS_H_ */

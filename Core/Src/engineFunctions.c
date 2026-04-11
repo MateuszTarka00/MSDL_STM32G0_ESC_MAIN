@@ -35,6 +35,7 @@ static SoftwareTimerHandler voltageReductionTimer;
 
 static WorkModeType engineWorkMode = CONSTANS;
 static bool speedReached = FALSE;
+static uint8_t encoderErrorCounter = 0;
 
 RotationsPerMinute rotationsPerMinuteReal =
 {
@@ -161,7 +162,11 @@ void softStopEngine(void)
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	setFastSpeed(FALSE);
 	setSlowSpeed(FALSE);
+	speedReached = FALSE;
 	resetVoltageReduction();
+
+	stopSoftwareTimer(&fastSpeedTimer);
+	stopSoftwareTimer(&slowSpeedTimer);
 
 }
 
@@ -236,6 +241,8 @@ void initEngineTimers(void)
 	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
 	initSoftwareTimer(&speedSave, SAVE_SPEED_TIME_MS, saveMeasuredRotationsValueTimerCallback, TRUE, &rotationsPerMinuteReal);
 	initSoftwareTimer(&voltageReductionTimer, VOLTAGE_REDUCTION_TIME_MS, setVoltageReduction, FALSE, 0);
+
+	startSoftwareTimer(&speedSave);
 }
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
@@ -277,12 +284,31 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 		{
 			rotationsPerMinute->engine.fastTime = engineRotationTemporary;
 			rotationsPerMinute->handrail.fastTime = handrailRotationTemporary;
+
+			if(!rotationsPerMinute->engine.fastTime || !rotationsPerMinute->handrail.fastTime)
+			{
+				encoderErrorCounter++;
+			}
+			else
+			{
+				encoderErrorCounter = 0;
+			}
 		}
 		else if(slowSpeedSet)
 		{
 			rotationsPerMinute->engine.slowTime = engineRotationTemporary;
 			rotationsPerMinute->handrail.slowTime = handrailRotationTemporary;
+
+			if(!rotationsPerMinute->engine.slowTime || !rotationsPerMinute->handrail.slowTime)
+			{
+				encoderErrorCounter++;
+			}
+			else
+			{
+				encoderErrorCounter = 0;
+			}
 		}
+
 	}
 
 	engineRotationTemporary = 0;
@@ -303,18 +329,16 @@ bool checkSetFrequency(void)
 {
 	if(checkTargetFrequencyReached())
 	{
-		engineErrors.engineSpeedState = TRUE;
-		engineErrors.handRailSpeedState = TRUE;
-	}
-	else if(highSpeedSet)
-	{
-		engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.fastTime,  rotationsPerMinuteGiven.engine.fastTime);
-		engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.fastTime, rotationsPerMinuteGiven.handrail.fastTime) | !parameterHandrailControl.value;
-	}
-	else if(slowSpeedSet)
-	{
-		engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.slowTime,  rotationsPerMinuteGiven.engine.slowTime);
-		engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.slowTime, rotationsPerMinuteGiven.handrail.slowTime) | !parameterHandrailControl.value;
+		if(highSpeedSet)
+		{
+			engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.fastTime,  rotationsPerMinuteGiven.engine.fastTime);
+			engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.fastTime, rotationsPerMinuteGiven.handrail.fastTime) | !parameterHandrailControl.value;
+		}
+		else if(slowSpeedSet)
+		{
+			engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.slowTime,  rotationsPerMinuteGiven.engine.slowTime);
+			engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.slowTime, rotationsPerMinuteGiven.handrail.slowTime) | !parameterHandrailControl.value;
+		}
 	}
 	else
 	{
@@ -346,10 +370,16 @@ void stopEngine(void)
 {
 	highSpeedSet = FALSE;
 	slowSpeedSet = FALSE;
+	speedReached = FALSE;
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	setFastSpeed(FALSE);
 	setSlowSpeed(FALSE);
+	speedReached = FALSE;
+	resetVoltageReduction();
+	stopSoftwareTimer(&fastSpeedTimer);
+	stopSoftwareTimer(&slowSpeedTimer);
+
 }
 
 void checkChainMotorOK(void)
@@ -431,6 +461,40 @@ void stepsNormalExtiCallback(uint16_t GPIO_Pin)
 	}
 }
 
+void trafficSignalsFunction(void)
+{
+	if(parameterTrafficDirectionSignals.value)
+	{
+		if(getDirection() == DOWN)
+		{
+			HAL_GPIO_WritePin(SIGNAL_GREEN_GPIO_Port, SIGNAL_GREEN_Pin, TRUE);
+			HAL_GPIO_WritePin(SIGNAL_RED_GPIO_Port, SIGNAL_RED_Pin, FALSE);
+		}
+		else
+		{
+			HAL_GPIO_WritePin(SIGNAL_GREEN_GPIO_Port, SIGNAL_GREEN_Pin, FALSE);
+			HAL_GPIO_WritePin(SIGNAL_RED_GPIO_Port, SIGNAL_RED_Pin, TRUE);
+		}
+	}
+	else
+	{
+		HAL_GPIO_WritePin(SIGNAL_GREEN_GPIO_Port, SIGNAL_GREEN_Pin, FALSE);
+		HAL_GPIO_WritePin(SIGNAL_RED_GPIO_Port, SIGNAL_RED_Pin, FALSE);
+	}
+}
+
+bool checkSpeedTeached(void)
+{
+	if(((rotationsPerMinuteGiven.engine.fastTime == 0 || rotationsPerMinuteGiven.engine.slowTime == 0)) ||
+		((rotationsPerMinuteGiven.handrail.fastTime == 0 || rotationsPerMinuteGiven.handrail.slowTime == 0) && parameterHandrailControl.value) ||
+		((rotationsPerMinuteGiven.step.fastTime == 0 || rotationsPerMinuteGiven.step.slowTime == 0) && parameterStepControl.value) )
+	{
+		return FALSE;
+	}
+
+	return TRUE;
+}
+
 void engineSubTask(void)
 {
 	static Direction previousDirection = NO_DIRECTION;
@@ -476,66 +540,68 @@ void engineSubTask(void)
 		engineWorkMode = CONSTANS;
 	}
 
-	if(!errorStateActive && (getDirection() == DOWN || getDirection() == UP))
+	if(checkSpeedTeached() || getIspectionMode() || serviceMode)
 	{
-		switch(engineWorkMode)
+
+		if(encoderErrorCounter == 3)
 		{
-		case CONSTANS:
-			if(!highSpeedSet)
-			{
-				enableFastSpeed();
-			}
-			break;
-
-		case FAST_STOP:
-			if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
-			   (getDirection() == UP && getHumanDown()))
-			{
-				enableFastSpeed();
-			}
-
-			break;
-		case FAST_SLOW:
-			if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
-			   (getDirection() == UP && getHumanDown()))
-			{
-				enableFastSpeed();
-			}
-			break;
-
-		case FAST_SLOW_STOP:
-			if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
-			   (getDirection() == UP && getHumanDown()))
-			{
-				enableFastSpeed();
-			}
-			break;
+			addRemoveError(ENCODER_ERROR, TRUE);
 		}
-	}
-	else
-	{
-		softStopEngine();
-	}
 
-	if(previousDirection == NO_DIRECTION && (getDirection() == DOWN || getDirection() == UP))
-	{
-		enableFastSpeed();
+		if(!errorStateActive && (getDirection() == DOWN || getDirection() == UP))
+		{
+			switch(engineWorkMode)
+			{
+			case CONSTANS:
+				if(!highSpeedSet)
+				{
+					enableFastSpeed();
+				}
+				break;
+			case FAST_STOP:
+				if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
+				   (getDirection() == UP && getHumanDown()))
+				{
+					enableFastSpeed();
+				}
+
+				break;
+			case FAST_SLOW:
+				if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
+				   (getDirection() == UP && getHumanDown()))
+				{
+					enableFastSpeed();
+				}
+				break;
+
+			case FAST_SLOW_STOP:
+				if((getDirection() == DOWN && checkIsHumanOnStairsUp()) ||
+				   (getDirection() == UP && getHumanDown()))
+				{
+					enableFastSpeed();
+				}
+				break;
+			}
+		}
+		else
+		{
+			softStopEngine();
+		}
+
+		if((previousDirection == NO_DIRECTION ) && (getDirection() == DOWN || getDirection() == UP))
+		{
+			enableFastSpeed();
+		}
+
+		if(previousDirection != NO_DIRECTION && (checkIsHumanOnStairsUp() || getHumanDown()) && !highSpeedSet && !slowSpeedSet)
+		{
+			enableFastSpeed();
+		}
 	}
 
 	previousDirection = getDirection();
 }
 
-bool checkSpeedTeached(void)
-{
-	if(((rotationsPerMinuteGiven.engine.fastTime == 0 || rotationsPerMinuteGiven.engine.slowTime == 0)) ||
-		((rotationsPerMinuteGiven.handrail.fastTime == 0 || rotationsPerMinuteGiven.handrail.slowTime == 0) && parameterHandrailControl.value) ||
-		((rotationsPerMinuteGiven.step.fastTime == 0 || rotationsPerMinuteGiven.step.slowTime == 0) && parameterStepControl.value) )
-	{
-		return FALSE;
-	}
-
-	return TRUE;
-}
 
 
 

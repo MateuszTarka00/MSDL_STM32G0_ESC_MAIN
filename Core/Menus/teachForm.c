@@ -240,7 +240,7 @@ void enterRestartDriverState(void)
 void enterPreparationState(void)
 {
 	ST7789_Fill_Color(WHITE);
-	ST7789_WriteString(2, 5, "Aby rozpoczac nauke\npowolnej predkosci,\nnacisnij OK", Font_11x18, BLACK, WHITE);
+	ST7789_WriteString(2, 5, "Aby rozpoczac nauke\npowolnej predkosci,\nprzerkrec stacyjke\nkierunku i nacisnij\nOK", Font_11x18, BLACK, WHITE);
 }
 
 void enterSlowSpeedTime(void)

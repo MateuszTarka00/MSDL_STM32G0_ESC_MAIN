@@ -49,7 +49,7 @@ void startupFunction(void)
 
 	if(parameterHardFault.value)
 	{
-		openHardfaultForm();
+//		openHardfaultForm();
 		addRemoveError(CPU2_DEAD, TRUE);
 	}
 

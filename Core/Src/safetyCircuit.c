@@ -187,7 +187,7 @@ static void contactorTimerCallback(void *param)
 
 static void looserTimerCallback(void *param)
 {
-	if(getDirection())
+	if(getDirection() && highSpeedSet && slowSpeedSet)
 	{
 		if(getLoosersState())
 		{

@@ -42,7 +42,8 @@ typedef enum
 	SPEED_CHANGE_ERROR,
 	SPEED_ERROR,
 	CPU2_DEAD,
-	BOTTOM_DEAD
+	BOTTOM_DEAD,
+	ENCODER_ERROR
 }ErrorsType;
 
 typedef enum

@@ -157,7 +157,8 @@ const char *errorsStrings[] = {
 		"Blad\nzmiany predkosci",
 		"Bledna\npredkosc",
 		"\nCPU2 OFF",
-		"\nDOL OFFLINE"
+		"\nDOL OFFLINE",
+		"Blad\nenkodera"
 };
 
 typedef struct

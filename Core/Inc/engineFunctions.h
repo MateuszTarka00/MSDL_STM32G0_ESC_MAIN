@@ -61,5 +61,6 @@ void setEngineOnOff(bool onOff);
 void checkLooserStateSubTask(void);
 bool checkSpeedTeached(void);
 void engineSubTask(void);
+void trafficSignalsFunction(void);
 
 #endif /* INC_ENGINEFUNCTIONS_H_ */

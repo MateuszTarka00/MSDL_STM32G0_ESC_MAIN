@@ -26,6 +26,7 @@
 #define BOTTOM_SAFETY_CIRCUIT_EVENT		0x0001
 #define ERROR_EVENT						0x0002
 #define WORK_TYPE_EVENT					0x0003
+#define TRAFFIC_LIGHTS_EVENT			0x0004
 
 #define RECOGNITION_ACTION_SIZE			0x03
 #define EVENT_SIZE						0x04
@@ -148,6 +149,7 @@ bool getHumanDown(void);
 bool getSafetyCircuitBottom(void);
 void errorEventTx(uint8_t value);
 void workTypeEventTx(uint8_t value);
+void trafficLigthsEventTx(uint8_t value);
 void CAN_UpdateLEDs(void);
 
 

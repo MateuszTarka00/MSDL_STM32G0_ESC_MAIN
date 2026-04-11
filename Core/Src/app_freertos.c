@@ -238,7 +238,7 @@ void safetyCheck(void *argument)
   initSafetyTimers();
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	  updateLoosersStates();
 	  updateContactorsStates();
 	  if(!checkSafetyCircuitState())
@@ -282,10 +282,11 @@ void canMenager(void *argument)
 	HAL_FDCAN_Start(&hfdcan2);
 	static bool errorStateTmp = 0xFF;
 	static bool workTypeTmp = 0xFF;
+	static bool trafficSignalTmp = 0xFF;
 
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	uint8_t workType;
 	heartBitSubTask();
 	checkHeartBeatStatusSubTask();
@@ -315,9 +316,23 @@ void canMenager(void *argument)
 
 	if(workType != workTypeTmp)
 	{
-		workTypeTmp = workType;
 		workTypeEventTx(workTypeTmp);
 	}
+
+	if(workType != workTypeTmp || parameterTrafficDirectionSignals.value != trafficSignalTmp)
+	{
+		if(parameterTrafficDirectionSignals.value)
+		{
+			trafficLigthsEventTx(workType);
+		}
+		else
+		{
+			trafficLigthsEventTx(0xFF);
+		}
+	}
+
+	trafficSignalTmp = parameterTrafficDirectionSignals.value;
+	workTypeTmp = workType;
 
 	CAN_UpdateLEDs();
 
@@ -345,7 +360,7 @@ void displayTask(void *argument)
 
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	  enterTeachingForm();
 
 	  switch(activeMenu)
@@ -384,7 +399,7 @@ void engineControl(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	 if(activeMenu != TEACHING_MENU)
 	 {
 		 engineSubTask();
@@ -392,7 +407,6 @@ void engineControl(void *argument)
 
 	toeBoardLightFunction();
 	trafficSignalsFunction();
-	rotationSubTask();
     osDelay(1);
   }
   /* USER CODE END engineControl */
@@ -411,7 +425,7 @@ void canReceiver(void *argument)
   /* Infinite loop */
   for(;;)
   {
-	  HAL_IWDG_Refresh(&hiwdg);
+//	  HAL_IWDG_Refresh(&hiwdg);
 	CAN_Message_t msg;
 	if(xQueueReceive(canRxQueue, &msg, portMAX_DELAY) == pdTRUE)
 	{

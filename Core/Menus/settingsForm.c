@@ -48,7 +48,8 @@ const char *logsStrings[] = {
 		"Blad zmiany predkosci",
 		"Bledna predkosc",
 		"\nCPU2 OFF",
-		"\nDOL OFFLINE"
+		"\nDOL OFFLINE",
+		"Blad\nenkodera"
 };
 
 void downButtonFunctionSettingsMenu(void *param);

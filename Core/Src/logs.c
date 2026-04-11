@@ -57,7 +57,7 @@ void initializeLogs(void)
 	        (uint8_t*)Flash_GetPageAddress(LOGS_FLASH_PAGE);
 
 
-    memcpy(&flash_parametersToSave,
+    memcpy(actualLogs,
     		Flash_actualLogs,
 			MAXIMUM_LOGS_NUMBER);
 }

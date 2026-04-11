@@ -10,8 +10,8 @@
 #include "mainForm.h"
 #include "parameters.h"
 
-#define HEARTBIT_MISSING_TIME_MS	2000
-#define WAIT_FOR_STARTUP_MS			5000
+#define HEARTBIT_MISSING_TIME_MS	5000
+#define WAIT_FOR_STARTUP_MS			10000
 
 bool cpu2Alive = TRUE;
 
@@ -99,9 +99,7 @@ void checkCpu2Alive(void)
 		if(xTaskGetTickCount() - tempTicks >= HEARTBIT_MISSING_TIME_MS)
 		{
 			cpu2Alive = FALSE;
-			openHardfaultForm();
 			addRemoveError(CPU2_DEAD, TRUE);
-			parameterHardFault.value = TRUE;
 			paramSaveValue(&parameterHardFault);
 		}
 	}

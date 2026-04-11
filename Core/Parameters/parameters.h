@@ -61,6 +61,5 @@ void paramFactoryReset(void);
 void paramLoadParameters(void);
 void applyParameters(void);
 void toeBoardLightFunction(void);
-void trafficSignalsFunction(void);
 
 #endif /* PARAMETERS_PARAMETERS_H_ */
