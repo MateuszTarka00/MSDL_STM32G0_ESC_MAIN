@@ -397,6 +397,12 @@ void engineControl(void *argument)
 {
   /* USER CODE BEGIN engineControl */
   /* Infinite loop */
+	initEngineTimers();
+	if(activeMenu != TEACHING_MENU)
+	{
+		startSpeedCheckTimer();
+	}
+
   for(;;)
   {
 //	  HAL_IWDG_Refresh(&hiwdg);

@@ -9,10 +9,10 @@
 #include "flash.h"
 #include "string.h"
 
-#define LOGS_FLASH_PAGE 			255
+#define LOGS_FLASH_PAGE 			254
 #define FLASH_DATA_SIZE 			MAXIMUM_LOGS_NUMBER
 
-volatile uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
+uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
 
 void addLog(uint8_t log)
 {

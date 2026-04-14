@@ -775,7 +775,6 @@ void addRemoveError(ErrorsType error, bool removeAdd)
 			}
 
 			actualErrors[numberOfErrors] = error;
-			addLog(error);
 			errorEventTx(error);
 			numberOfErrors++;
 

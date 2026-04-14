@@ -12,7 +12,7 @@
 
 #define MAXIMUM_LOGS_NUMBER	10
 
-extern volatile uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
+extern uint8_t actualLogs[MAXIMUM_LOGS_NUMBER];
 
 void addLog(uint8_t log);
 void clearLogs(void);

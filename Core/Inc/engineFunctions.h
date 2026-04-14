@@ -62,5 +62,7 @@ void checkLooserStateSubTask(void);
 bool checkSpeedTeached(void);
 void engineSubTask(void);
 void trafficSignalsFunction(void);
+void startSpeedCheckTimer(void);
+void applyTimerValues(void);
 
 #endif /* INC_ENGINEFUNCTIONS_H_ */

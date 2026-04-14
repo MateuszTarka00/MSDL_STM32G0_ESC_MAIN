@@ -40,7 +40,7 @@ Parameter parameterContactorTime = {
 };
 
 Parameter parameterFastTime = {
-		10000,
+		60000,
 		10000,
 		100000,
 		10000,
@@ -284,6 +284,14 @@ void paramSaveValue(Parameter *parameter)
 	flash_parametersToSave.flash_settingsValues.parameterStepControl = parameterStepControl.value;
 	flash_parametersToSave.flash_settingsValues.parameterHardFault = parameterHardFault.value;
 
+	flash_parametersToSave.flash_RotationsPerMinuteFast.engine = rotationsPerMinuteGiven.engine.fastTime;
+	flash_parametersToSave.flash_RotationsPerMinuteFast.handrail = rotationsPerMinuteGiven.handrail.fastTime;
+	flash_parametersToSave.flash_RotationsPerMinuteFast.step = rotationsPerMinuteGiven.step.fastTime;
+
+	flash_parametersToSave.flash_RotationsPerMinuteSlow.engine = rotationsPerMinuteGiven.engine.slowTime;
+	flash_parametersToSave.flash_RotationsPerMinuteSlow.handrail = rotationsPerMinuteGiven.handrail.slowTime;
+	flash_parametersToSave.flash_RotationsPerMinuteSlow.step = rotationsPerMinuteGiven.step.slowTime;
+
 	flash_parametersSave();
 }
 
@@ -327,7 +335,7 @@ void paramLoadParameters(void)
 
 void applyParameters(void)
 {
-	initEngineTimers();
+	applyTimerValues();
 	initSafetyTimers();
 }
 

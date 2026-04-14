@@ -58,6 +58,11 @@ EngineErrors engineErrors = {
 		TRUE,
 };
 
+void startSpeedCheckTimer(void)
+{
+	startSoftwareTimer(&speedSave);
+}
+
 static void setVoltageReduction(void)
 {
 	HAL_GPIO_WritePin(VOLTAGE_REDUCTION_GPIO_Port, VOLTAGE_REDUCTION_Pin, TRUE);
@@ -101,10 +106,6 @@ static void speedChangeTimeoutCallback(void)
 			HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 			addRemoveError(SPEED_CHANGE_ERROR, TRUE);
 		}
-		else
-		{
-			speedReached = TRUE;
-	}
 	}
 }
 
@@ -241,8 +242,17 @@ void initEngineTimers(void)
 	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
 	initSoftwareTimer(&speedSave, SAVE_SPEED_TIME_MS, saveMeasuredRotationsValueTimerCallback, TRUE, &rotationsPerMinuteReal);
 	initSoftwareTimer(&voltageReductionTimer, VOLTAGE_REDUCTION_TIME_MS, setVoltageReduction, FALSE, 0);
+}
 
-	startSoftwareTimer(&speedSave);
+void applyTimerValues(void)
+{
+	deInitSoftwareTimer(&fastSpeedTimer);
+	deInitSoftwareTimer(&slowSpeedTimer);
+	deInitSoftwareTimer(&chainMotorErrorTimer);
+
+	initSoftwareTimer(&slowSpeedTimer, parameterSlowTime.value, softStopEngine, FALSE, 0);
+	initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
+	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
 }
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
@@ -359,7 +369,7 @@ bool checkErrorRange(uint32_t real, uint32_t given)
 		errorRange = 1;
 	}
 
-	if((real <= (given + errorRange)) || (real >= (given - errorRange)))
+	if((real <= (given + errorRange)) && (real >= (given - errorRange)))
 	{
 		return TRUE;
 	}
@@ -421,6 +431,21 @@ void rotationsSaveParameters(void)
 	flash_parametersToSave.flash_RotationsPerMinuteSlow.engine = rotationsPerMinuteGiven.engine.slowTime;
 	flash_parametersToSave.flash_RotationsPerMinuteSlow.handrail = rotationsPerMinuteGiven.handrail.slowTime;
 	flash_parametersToSave.flash_RotationsPerMinuteSlow.step = rotationsPerMinuteGiven.step.slowTime;
+
+	flash_parametersToSave.flash_settingsValues.parameterLooserTime = parameterLooserTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterEngineTime = parameterEngineTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterContactorTime = parameterContactorTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterFastTime = parameterFastTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterSlowTime = parameterSlowTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterStarTriangleTime = parameterStarTriangleTime.value;
+	flash_parametersToSave.flash_settingsValues.parameterEngineControl = parameterEngineControl.value;
+	flash_parametersToSave.flash_settingsValues.parameterAutoStop = parameterAutoStop.value;
+	flash_parametersToSave.flash_settingsValues.parameterReleasing = parameterReleasing.value;
+	flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals = parameterTrafficDirectionSignals.value;
+	flash_parametersToSave.flash_settingsValues.parameterLightning = parameterLightning.value;
+	flash_parametersToSave.flash_settingsValues.parameterHandrailControl = parameterHandrailControl.value;
+	flash_parametersToSave.flash_settingsValues.parameterStepControl = parameterStepControl.value;
+	flash_parametersToSave.flash_settingsValues.parameterHardFault = parameterHardFault.value;
 
 	flash_parametersSave();
 }
@@ -527,7 +552,7 @@ void engineSubTask(void)
 		checkChainMotorOK();
 	}
 
-	if(checkSetFrequency() && !getIspectionMode() && !serviceMode && speedReached)
+	if(!getIspectionMode() && !serviceMode && checkTargetFrequencyReached())
 	{
 		if(!checkSetFrequency() || !getRotationState())
 		{
@@ -582,6 +607,7 @@ void engineSubTask(void)
 				}
 				break;
 			}
+
 		}
 		else
 		{
