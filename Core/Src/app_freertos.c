@@ -37,6 +37,7 @@
 #include "fdcan.h"
 #include "queue.h"
 #include "logs.h"
+#include "systemStartup.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -398,7 +399,7 @@ void engineControl(void *argument)
   /* USER CODE BEGIN engineControl */
   /* Infinite loop */
 	initEngineTimers();
-	if(activeMenu != TEACHING_MENU)
+	if(!teachOnStartup)
 	{
 		startSpeedCheckTimer();
 	}

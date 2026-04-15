@@ -32,6 +32,7 @@ static SoftwareTimerHandler chainMotorErrorTimer;
 static SoftwareTimerHandler stepsErrorTimer;
 static SoftwareTimerHandler speedSave;
 static SoftwareTimerHandler voltageReductionTimer;
+static SoftwareTimerHandler speedErrorTimer;
 
 static WorkModeType engineWorkMode = CONSTANS;
 static bool speedReached = FALSE;
@@ -71,6 +72,11 @@ static void setVoltageReduction(void)
 static void resetVoltageReduction(void)
 {
 	HAL_GPIO_WritePin(VOLTAGE_REDUCTION_GPIO_Port, VOLTAGE_REDUCTION_Pin, FALSE);
+}
+
+static void speedErrorTimerCallback(void *Param)
+{
+	addRemoveError(SPEED_ERROR, TRUE);
 }
 
 static void stepsErrorTimerCallback(void *Param)
@@ -235,6 +241,7 @@ void initEngineTimers(void)
 	deInitSoftwareTimer(&chainMotorErrorTimer);
 	deInitSoftwareTimer(&speedSave);
 	deInitSoftwareTimer(&voltageReductionTimer);
+	deInitSoftwareTimer(&speedErrorTimer);
 
 	initSoftwareTimer(&slowSpeedTimer, parameterSlowTime.value, softStopEngine, FALSE, 0);
 	initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
@@ -242,6 +249,7 @@ void initEngineTimers(void)
 	initSoftwareTimer(&chainMotorErrorTimer, parameterEngineTime.value, chainMotorErrorCallback, FALSE, 0);
 	initSoftwareTimer(&speedSave, SAVE_SPEED_TIME_MS, saveMeasuredRotationsValueTimerCallback, TRUE, &rotationsPerMinuteReal);
 	initSoftwareTimer(&voltageReductionTimer, VOLTAGE_REDUCTION_TIME_MS, setVoltageReduction, FALSE, 0);
+	initSoftwareTimer(&speedErrorTimer, VOLTAGE_REDUCTION_TIME_MS, speedErrorTimerCallback, FALSE, 0);
 }
 
 void applyTimerValues(void)
@@ -556,7 +564,14 @@ void engineSubTask(void)
 	{
 		if(!checkSetFrequency() || !getRotationState())
 		{
-			addRemoveError(SPEED_ERROR, TRUE);
+			if(!speedErrorTimer.start)
+			{
+				startSoftwareTimer(&speedErrorTimer);
+			}
+		}
+		else
+		{
+			stopSoftwareTimer(&speedErrorTimer);
 		}
 	}
 
