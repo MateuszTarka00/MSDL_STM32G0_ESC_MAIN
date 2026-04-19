@@ -100,7 +100,7 @@ void checkCpu2Alive(void)
 		{
 			cpu2Alive = FALSE;
 			addRemoveError(CPU2_DEAD, TRUE);
-			paramSaveValue(&parameterHardFault);
+//			paramSaveValue(&parameterHardFault);
 		}
 	}
 

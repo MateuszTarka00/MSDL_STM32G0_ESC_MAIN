@@ -53,4 +53,6 @@ void startupFunction(void)
 		addRemoveError(CPU2_DEAD, TRUE);
 	}
 
+	setTeachSlow(serviceMode);
+
 }

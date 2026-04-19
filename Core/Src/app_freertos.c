@@ -381,7 +381,10 @@ void displayTask(void *argument)
 
 //	saveLogs();
 	buttonsSubTask();
-	checkCpu2Alive();
+	if(!teachOnStartup)
+	{
+		checkCpu2Alive();
+	}
     osDelay(1);
   }
   /* USER CODE END displayTask */
@@ -407,7 +410,7 @@ void engineControl(void *argument)
   for(;;)
   {
 //	  HAL_IWDG_Refresh(&hiwdg);
-	 if(activeMenu != TEACHING_MENU)
+	 if(activeMenu != TEACHING_MENU && !teachOnStartup)
 	 {
 		 engineSubTask();
 	 }

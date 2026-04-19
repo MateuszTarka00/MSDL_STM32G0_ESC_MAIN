@@ -37,7 +37,7 @@
 
 #define CHARS_PER_LINE 				21
 
-#define NUMBER_OF_ERROR_TYPES 		11
+#define NUMBER_OF_ERROR_TYPES 		16
 #define CHANGE_ERROR_TIME_MS		2000
 #define INFORMATION_TIME_MS			3000
 
@@ -57,6 +57,9 @@ WorkModeType workMode;
 
 static ErrorsType actualErrors[NUMBER_OF_ERROR_TYPES] =
 		{
+				0,
+				0,
+				0,
 				0,
 				0,
 				0,
@@ -147,7 +150,8 @@ const char *errorsStrings[] = {
 		"Brak\nbledu",
 		"\nTermistor",
 		"\nOdpad. lancuch",
-		"Brak\nstopnia",
+		"Brak\nstopnia CPU1",
+		"Brak\nstopnia CPU2",
 		"Gwiazda\ntrojkat",
 		"Blad\nprzekaznika 1",
 		"Blad\nstycznika 2",
@@ -155,7 +159,8 @@ const char *errorsStrings[] = {
 		"Obwod\nbezpieczenstwa",
 		"Blad\nluzownika",
 		"Blad\nzmiany predkosci",
-		"Bledna\npredkosc",
+		"Bledna\npredkosc CPU1",
+		"Bledna\npredkosc CPU2",
 		"\nCPU2 OFF",
 		"\nDOL OFFLINE",
 		"Blad\nenkodera"

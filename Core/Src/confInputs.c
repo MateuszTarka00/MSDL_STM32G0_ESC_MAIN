@@ -15,11 +15,6 @@ bool getTeachInput(void)
 	return teachInput;
 }
 
-bool getStandControl(void)
-{
-	return !HAL_GPIO_ReadPin(STAND_CONTROL_GPIO_Port, STAND_CONTROL_Pin);
-}
-
 bool getHandrailControl(void)
 {
 	return !HAL_GPIO_ReadPin(HANDRAIL_CONTROL_GPIO_Port, HANDRAIL_CONTROL_Pin);

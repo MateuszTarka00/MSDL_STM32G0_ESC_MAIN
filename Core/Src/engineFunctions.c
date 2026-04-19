@@ -76,15 +76,23 @@ static void resetVoltageReduction(void)
 
 static void speedErrorTimerCallback(void *Param)
 {
-	addRemoveError(SPEED_ERROR, TRUE);
+	if(!checkSetFrequency())
+	{
+		addRemoveError(SPEED_ERROR_CPU1, TRUE);
+	}
+
+	if(!getRotationState())
+	{
+		addRemoveError(SPEED_ERROR_CPU2, TRUE);
+	}
 }
 
 static void stepsErrorTimerCallback(void *Param)
 {
-	if((!getStandState() || getStandControl()) && !getIspectionMode())
+	if(!getIspectionMode() && !serviceMode)
 	{
 		engineErrors.stepSpeedState = FALSE;
-		addRemoveError(STEP_FALLING_OFF, TRUE);
+		addRemoveError(STEP_FALLING_OFF_CPU1, TRUE);
 	}
 }
 
@@ -573,7 +581,17 @@ void engineSubTask(void)
 		{
 			stopSoftwareTimer(&speedErrorTimer);
 		}
+
+		if(parameterStepControl.value)
+		{
+			if(!getStandState())
+			{
+				addRemoveError(STEP_FALLING_OFF_CPU2, TRUE);
+			}
+		}
 	}
+
+	setTeachFast(parameterStepControl.value);
 
 	if(workWithoutBottom.value)
 	{

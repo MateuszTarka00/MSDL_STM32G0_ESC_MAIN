@@ -264,7 +264,7 @@ void enterErrorState(void)
 	stopEngine();
 	ST7789_Fill_Color(WHITE);
 
-	if(errorStateActive || getLoosersState())
+	if(errorStateActive)
 	{
 		hasErrorOccured = TRUE;
 		ST7789_WriteString(2, 5, "Pojawil sie blad.\nNapraw blad aby\nkontynuowac.", Font_11x18, BLACK, WHITE);
@@ -358,6 +358,7 @@ void stateMachineSubTask(void)
 			if(checkTargetFrequencyReached() && getSpeedReady())
 			{
 				teachStateMachine = SLOW_SPEED_TIME;
+				setSlowSpeed(TRUE);
 				enterSlowSpeedTime();
 				initSoftwareTimer(&teachTimer, TEACH_TIME, saveMeasuredRotationsValueTimerCallback, FALSE, &rotationsPerMinuteGiven);
 				initSoftwareTimer(&endTeachingTimer, END_TEACH_TIME, endTeachingTimerCallback, FALSE, &rotationsPerMinuteGiven);
@@ -365,19 +366,19 @@ void stateMachineSubTask(void)
 				startSoftwareTimer(&teachTimer);
 				startSoftwareTimer(&endTeachingTimer);
 				stopSoftwareTimer(&waitForSpeedTimer);
+				setTeachFast(FALSE);
+				setTeachSlow(FALSE);
 
 			}
 			break;
 
 		case SLOW_SPEED_TIME:
-			if(endTeachingTimer.start == FALSE)
+			if(endTeachingTimer.start == FALSE && !getSpeedReady())
 			{
 				teachStateMachine = SLOW_SPEED_CONFIRMATION;
 				calculateTeachedSpeeds(FALSE);
 				enterSlowSpeedConfirmation();
 
-				setTeachFast(FALSE);
-				setTeachSlow(FALSE);
 			}
 			break;
 
@@ -387,25 +388,28 @@ void stateMachineSubTask(void)
 
 
 		case WAIT_FOR_FAST_SPEED:
+			setSlowSpeed(FALSE);
 			if(checkTargetFrequencyReached() && getSpeedReady())
 			{
 				teachStateMachine = FAST_SPEED_TIME;
+				setFastSpeed(TRUE);
 				enterFastSpeedTime();
 
 				startSoftwareTimer(&teachTimer);
 				startSoftwareTimer(&endTeachingTimer);
 				stopSoftwareTimer(&waitForSpeedTimer);
+
+				setTeachFast(FALSE);
+				setTeachSlow(FALSE);
 			}
 			break;
 
 		case FAST_SPEED_TIME:
-			if(endTeachingTimer.start == FALSE)
+			if(endTeachingTimer.start == FALSE && !getSpeedReady())
 			{
 				teachStateMachine = FAST_SPEED_CONFIRMATION;
 				calculateTeachedSpeeds(TRUE);
 				enterFastSpeedConfirmation();
-				setTeachFast(FALSE);
-				setTeachSlow(FALSE);
 			}
 			break;
 
@@ -414,7 +418,14 @@ void stateMachineSubTask(void)
 			break;
 
 		case END:
+			setSlowSpeed(FALSE);
+			setFastSpeed(FALSE);
 			rotationsSaveParameters();
+			teachStateMachine = WAIT_FOR_RESET;
+			break;
+
+		case WAIT_FOR_RESET:
+			//wait for reset
 			break;
 
 		case ENTER_ERROR_STATE:

@@ -73,6 +73,9 @@ void MX_FREERTOS_Init(void);
   * @brief  The application entry point.
   * @retval int
   */
+
+//teach slow - service mode
+//teach fast - step check
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -104,8 +107,8 @@ int main(void)
   MX_TIM17_Init();
   MX_SPI2_Init();
   /* USER CODE BEGIN 2 */
-  ST7789_Init();
   startupFunction();
+  ST7789_Init();
   applyParameters();
   HAL_GPIO_WritePin(BLK_PORT, BLK_PIN, 1);
 
