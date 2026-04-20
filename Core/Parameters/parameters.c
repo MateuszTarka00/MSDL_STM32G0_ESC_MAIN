@@ -15,7 +15,7 @@
 Parameter parameterLooserTime = {
 		1000,
 		1000,
-		3000,
+		10000,
 		1000,
 		1000,
 		TIME_MS,
@@ -314,7 +314,7 @@ void paramLoadParameters(void)
 	parameterTrafficDirectionSignals.value = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals; //Zrobione
 	parameterLightning.value = flash_parametersToSave.flash_settingsValues.parameterLightning; //Zrobione
 	parameterHandrailControl.value = flash_parametersToSave.flash_settingsValues.parameterHandrailControl;
-	parameterStepControl.value = flash_parametersToSave.flash_settingsValues.parameterStepControl + (flash_parametersToSave.flash_settingsValues.parameterStepControl/10);
+	parameterStepControl.value = flash_parametersToSave.flash_settingsValues.parameterStepControl;
 	parameterHardFault.value = flash_parametersToSave.flash_settingsValues.parameterHardFault;
 
 	parameterLooserTime.lastValue = flash_parametersToSave.flash_settingsValues.parameterLooserTime;
@@ -329,7 +329,7 @@ void paramLoadParameters(void)
 	parameterTrafficDirectionSignals.lastValue = flash_parametersToSave.flash_settingsValues.parameterTrafficDirectionSignals;
 	parameterLightning.lastValue = flash_parametersToSave.flash_settingsValues.parameterLightning;
 	parameterHandrailControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterHandrailControl;
-	parameterStepControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterStepControl + (flash_parametersToSave.flash_settingsValues.parameterStepControl/10);
+	parameterStepControl.lastValue = flash_parametersToSave.flash_settingsValues.parameterStepControl;
 	parameterHardFault.lastValue = flash_parametersToSave.flash_settingsValues.parameterHardFault;
 }
 

@@ -311,7 +311,7 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 			rotationsPerMinute->engine.fastTime = engineRotationTemporary;
 			rotationsPerMinute->handrail.fastTime = handrailRotationTemporary;
 
-			if(!rotationsPerMinute->engine.fastTime || !rotationsPerMinute->handrail.fastTime)
+			if(!rotationsPerMinute->engine.fastTime || (!rotationsPerMinute->handrail.fastTime && parameterHandrailControl.value))
 			{
 				encoderErrorCounter++;
 			}
@@ -325,7 +325,7 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 			rotationsPerMinute->engine.slowTime = engineRotationTemporary;
 			rotationsPerMinute->handrail.slowTime = handrailRotationTemporary;
 
-			if(!rotationsPerMinute->engine.slowTime || !rotationsPerMinute->handrail.slowTime)
+			if(!rotationsPerMinute->engine.slowTime || (!rotationsPerMinute->handrail.slowTime && parameterHandrailControl.value))
 			{
 				encoderErrorCounter++;
 			}
@@ -334,7 +334,14 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 				encoderErrorCounter = 0;
 			}
 		}
-
+		else
+		{
+			encoderErrorCounter = 0;
+		}
+	}
+	else
+	{
+		encoderErrorCounter = 0;
 	}
 
 	engineRotationTemporary = 0;
@@ -365,6 +372,11 @@ bool checkSetFrequency(void)
 			engineErrors.engineSpeedState = checkErrorRange(rotationsPerMinuteReal.engine.slowTime,  rotationsPerMinuteGiven.engine.slowTime);
 			engineErrors.handRailSpeedState = checkErrorRange(rotationsPerMinuteReal.handrail.slowTime, rotationsPerMinuteGiven.handrail.slowTime) | !parameterHandrailControl.value;
 		}
+		else
+		{
+			engineErrors.engineSpeedState = TRUE;
+			engineErrors.handRailSpeedState = TRUE;
+		}
 	}
 	else
 	{
@@ -379,13 +391,18 @@ bool checkSetFrequency(void)
 bool checkErrorRange(uint32_t real, uint32_t given)
 {
 	uint32_t errorRange = given/FREQUENCY_ERROR_RANGE;
+	uint32_t errorRangeMin;
+	uint32_t errorRangeMax;
 
 	if(errorRange == 0)
 	{
 		errorRange = 1;
 	}
 
-	if((real <= (given + errorRange)) && (real >= (given - errorRange)))
+	errorRangeMin = given - errorRange;
+	errorRangeMax = given + errorRange;
+
+	if((real <= (errorRangeMax)) && (real >= (errorRangeMin)))
 	{
 		return TRUE;
 	}
@@ -431,11 +448,11 @@ void rotationsLoadParameters(void)
 {
 	rotationsPerMinuteGiven.engine.fastTime   = flash_parametersToSave.flash_RotationsPerMinuteFast.engine;
 	rotationsPerMinuteGiven.handrail.fastTime = flash_parametersToSave.flash_RotationsPerMinuteFast.handrail;
-	rotationsPerMinuteGiven.step.fastTime     = flash_parametersToSave.flash_RotationsPerMinuteFast.step;
+	rotationsPerMinuteGiven.step.fastTime     = flash_parametersToSave.flash_RotationsPerMinuteFast.step + (flash_parametersToSave.flash_RotationsPerMinuteFast.step/10);
 
 	rotationsPerMinuteGiven.engine.slowTime   = flash_parametersToSave.flash_RotationsPerMinuteSlow.engine;
 	rotationsPerMinuteGiven.handrail.slowTime = flash_parametersToSave.flash_RotationsPerMinuteSlow.handrail;
-	rotationsPerMinuteGiven.step.slowTime     = flash_parametersToSave.flash_RotationsPerMinuteSlow.step;
+	rotationsPerMinuteGiven.step.slowTime     = flash_parametersToSave.flash_RotationsPerMinuteSlow.step + (flash_parametersToSave.flash_RotationsPerMinuteSlow.step/10);
 }
 
 void rotationsSaveParameters(void)
@@ -567,6 +584,13 @@ void engineSubTask(void)
 	{
 		checkChainMotorOK();
 	}
+
+
+	if(checkTargetFrequencyReached())
+	{
+	    stopSoftwareTimer(&speedChangeTimer);
+	}
+
 
 	if(!getIspectionMode() && !serviceMode && checkTargetFrequencyReached())
 	{
