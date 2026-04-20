@@ -585,13 +585,6 @@ void engineSubTask(void)
 		checkChainMotorOK();
 	}
 
-
-	if(checkTargetFrequencyReached())
-	{
-	    stopSoftwareTimer(&speedChangeTimer);
-	}
-
-
 	if(!getIspectionMode() && !serviceMode && checkTargetFrequencyReached())
 	{
 		if(!checkSetFrequency() || !getRotationState())
