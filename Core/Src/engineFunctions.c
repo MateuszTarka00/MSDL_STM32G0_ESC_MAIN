@@ -24,6 +24,7 @@ volatile uint32_t handrailRotationTemporary = 0;
 
 volatile bool highSpeedSet = FALSE;
 volatile bool slowSpeedSet = FALSE;
+volatile bool checkSpeedDelayFlag = FALSE;
 
 SoftwareTimerHandler fastSpeedTimer;
 SoftwareTimerHandler slowSpeedTimer;
@@ -33,6 +34,7 @@ static SoftwareTimerHandler stepsErrorTimer;
 static SoftwareTimerHandler speedSave;
 static SoftwareTimerHandler voltageReductionTimer;
 static SoftwareTimerHandler speedErrorTimer;
+static SoftwareTimerHandler checkSpeedDelay;
 
 static WorkModeType engineWorkMode = CONSTANS;
 static bool speedReached = FALSE;
@@ -62,6 +64,11 @@ EngineErrors engineErrors = {
 void startSpeedCheckTimer(void)
 {
 	startSoftwareTimer(&speedSave);
+}
+
+void checkSpeedDelayCallback(void)
+{
+	checkSpeedDelayFlag = FALSE;
 }
 
 static void setVoltageReduction(void)
@@ -112,7 +119,7 @@ static void speedChangeTimeoutCallback(void)
 {
 	if(!errorStateActive)
 	{
-		if(!checkTargetFrequencyReached())
+		if(!checkTargetFrequencyReached() && !checkSpeedDelayFlag)
 		{
 			highSpeedSet = FALSE;
 			slowSpeedSet = FALSE;
@@ -173,6 +180,7 @@ void softStopEngine(void)
 	setEngineOnOff(FALSE);
 	highSpeedSet = FALSE;
 	slowSpeedSet = FALSE;
+	checkSpeedDelayFlag = FALSE;
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	setFastSpeed(FALSE);
@@ -187,19 +195,23 @@ void softStopEngine(void)
 
 void enableFastSpeed(void)
 {
+
+	if(!checkSpeedDelayFlag && checkTargetFrequencyReached() && !highSpeedSet)
+	{
+		checkSpeedDelayFlag = TRUE;
+		startSoftwareTimer(&speedChangeTimer);
+		startSoftwareTimer(&checkSpeedDelay);
+		deInitSoftwareTimer(&stepsErrorTimer);
+		initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.step.fastTime, stepsErrorTimerCallback, FALSE, 0);
+	}
+
 	speedReached = FALSE;
 	highSpeedSet = TRUE;
-	slowSpeedSet = FALSE;
 	setEngineOnOff(TRUE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
 	HAL_GPIO_WritePin(HIGH_SPEED_GPIO_Port, HIGH_SPEED_Pin, TRUE);
 	setSlowSpeed(FALSE);
 	setFastSpeed(TRUE);
-
-	deInitSoftwareTimer(&stepsErrorTimer);
-	initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.step.fastTime, stepsErrorTimerCallback, FALSE, 0);
-	startSoftwareTimer(&speedChangeTimer);
-
 	deInitSoftwareTimer(&fastSpeedTimer);
 
 	if(workWithoutBottom.value == FALSE)
@@ -219,6 +231,15 @@ void enableFastSpeed(void)
 
 void enableSlowSpeed(void)
 {
+	if(!checkSpeedDelayFlag && checkTargetFrequencyReached() && !slowSpeedSet)
+	{
+		checkSpeedDelayFlag = TRUE;
+		startSoftwareTimer(&speedChangeTimer);
+		startSoftwareTimer(&checkSpeedDelay);
+		deInitSoftwareTimer(&stepsErrorTimer);
+		initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.step.slowTime, stepsErrorTimerCallback, FALSE, 0);
+	}
+
 	speedReached = FALSE;
 	highSpeedSet = FALSE;
 	slowSpeedSet = TRUE;
@@ -229,7 +250,6 @@ void enableSlowSpeed(void)
 	setSlowSpeed(TRUE);
 
 	deInitSoftwareTimer(&stepsErrorTimer);
-	initSoftwareTimer(&stepsErrorTimer, rotationsPerMinuteGiven.step.slowTime, stepsErrorTimerCallback, FALSE, 0);
 	startSoftwareTimer(&speedChangeTimer);
 
 	if(workWithoutBottom.value == FALSE)
@@ -250,6 +270,7 @@ void initEngineTimers(void)
 	deInitSoftwareTimer(&speedSave);
 	deInitSoftwareTimer(&voltageReductionTimer);
 	deInitSoftwareTimer(&speedErrorTimer);
+	deInitSoftwareTimer(&checkSpeedDelay);
 
 	initSoftwareTimer(&slowSpeedTimer, parameterSlowTime.value, softStopEngine, FALSE, 0);
 	initSoftwareTimer(&fastSpeedTimer, parameterFastTime.value, enableSlowSpeed, FALSE, 0);
@@ -258,6 +279,7 @@ void initEngineTimers(void)
 	initSoftwareTimer(&speedSave, SAVE_SPEED_TIME_MS, saveMeasuredRotationsValueTimerCallback, TRUE, &rotationsPerMinuteReal);
 	initSoftwareTimer(&voltageReductionTimer, VOLTAGE_REDUCTION_TIME_MS, setVoltageReduction, FALSE, 0);
 	initSoftwareTimer(&speedErrorTimer, VOLTAGE_REDUCTION_TIME_MS, speedErrorTimerCallback, FALSE, 0);
+	initSoftwareTimer(&checkSpeedDelay, VOLTAGE_REDUCTION_TIME_MS, checkSpeedDelayCallback, FALSE, 0);
 }
 
 void applyTimerValues(void)
@@ -273,7 +295,7 @@ void applyTimerValues(void)
 
 void incrementRotationsNumber(uint16_t GPIO_Pin)
 {
-	if(checkTargetFrequencyReached())
+	if(checkTargetFrequencyReached() && !checkSpeedDelayFlag)
 	{
 		switch(GPIO_Pin)
 		{
@@ -304,7 +326,7 @@ void saveMeasuredRotationsValueTimerCallback(RotationsPerMinute *rotationsPerMin
 	EXTI->RPR1 = ROTATION_H1_Pin | ROTATION_S1_Pin | MIS_ST1_Pin;
 	EXTI->FPR1 = ROTATION_H1_Pin | ROTATION_S1_Pin | MIS_ST1_Pin;
 
-	if(checkTargetFrequencyReached())
+	if(checkTargetFrequencyReached() && !checkSpeedDelayFlag)
 	{
 		if(highSpeedSet)
 		{
@@ -360,7 +382,7 @@ void restartRotationsTmp(void)
 
 bool checkSetFrequency(void)
 {
-	if(checkTargetFrequencyReached())
+	if(checkTargetFrequencyReached() && !checkSpeedDelayFlag)
 	{
 		if(highSpeedSet)
 		{
@@ -488,7 +510,7 @@ void stepsNormalExtiCallback(uint16_t GPIO_Pin)
 	static bool steps1 = FALSE;
 	static bool steps2 = FALSE;
 
-	if(checkTargetFrequencyReached() && !parameterStepControl.value)
+	if(checkTargetFrequencyReached() && !parameterStepControl.value && !checkSpeedDelayFlag)
 	{
 		if(GPIO_Pin == MIS_ST2_Pin)
 		{
@@ -523,7 +545,7 @@ void trafficSignalsFunction(void)
 {
 	if(parameterTrafficDirectionSignals.value)
 	{
-		if(getDirection() == DOWN)
+		if(getDirection() == DOWN && !serviceMode && !getIspectionMode())
 		{
 			HAL_GPIO_WritePin(SIGNAL_GREEN_GPIO_Port, SIGNAL_GREEN_Pin, TRUE);
 			HAL_GPIO_WritePin(SIGNAL_RED_GPIO_Port, SIGNAL_RED_Pin, FALSE);
@@ -585,7 +607,7 @@ void engineSubTask(void)
 		checkChainMotorOK();
 	}
 
-	if(!getIspectionMode() && !serviceMode && checkTargetFrequencyReached())
+	if(!getIspectionMode() && !serviceMode && checkTargetFrequencyReached() && !checkSpeedDelayFlag)
 	{
 		if(!checkSetFrequency() || !getRotationState())
 		{

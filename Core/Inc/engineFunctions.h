@@ -16,6 +16,7 @@
 
 extern volatile bool highSpeedSet;
 extern volatile bool slowSpeedSet;
+extern volatile bool checkSpeedDelayFlag;
 
 typedef struct
 {

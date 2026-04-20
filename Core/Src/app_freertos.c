@@ -302,7 +302,7 @@ void canMenager(void *argument)
 		}
 	}
 
-	if(getIspectionMode())
+	if(getIspectionMode() || serviceMode)
 	{
 		workType = 3;
 	}

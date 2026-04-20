@@ -620,7 +620,7 @@ void updateSpeed(void)
 {
 	static SpeedType speedState = SPEED_STOP;
 
-	if(checkTargetFrequencyReached())
+	if(checkTargetFrequencyReached() && !checkSpeedDelayFlag)
 	{
 		if(highSpeedSet)
 		{
