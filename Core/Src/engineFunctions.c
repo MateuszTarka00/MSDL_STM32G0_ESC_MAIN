@@ -206,6 +206,7 @@ void enableFastSpeed(void)
 	}
 
 	speedReached = FALSE;
+	slowSpeedSet = FALSE;
 	highSpeedSet = TRUE;
 	setEngineOnOff(TRUE);
 	HAL_GPIO_WritePin(LOW_SPEED_GPIO_Port, LOW_SPEED_Pin, FALSE);
